@@ -1,0 +1,29 @@
+# Phase 1 baseline config (placeholder - fill in once ingestion/chunking/retrieval modules exist)
+run_name: baseline_naive_chunking
+
+top_k: 5
+
+chunking:
+  strategy: fixed_size   # fixed_size | recursive | section_based | semantic | parent_child
+  chunk_size: 512
+  chunk_overlap: 50
+
+embedding:
+  provider: openai       # openai | voyage | bge | e5
+  model: text-embedding-3-large
+
+retrieval:
+  strategy: dense         # dense | bm25 | hybrid
+  top_k: 5
+
+reranker:
+  enabled: false
+  model: null
+
+generation:
+  model: claude-sonnet-4-6
+  max_context_chunks: 5
+
+# pipeline_class: src.pipeline.RagPipeline   # uncomment once implemented
+# pipeline_kwargs:
+#   documents_dir: Dataset/

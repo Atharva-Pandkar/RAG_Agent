@@ -1,0 +1,15 @@
+beautifulsoup4
+lxml
+pandas
+tqdm
+pyyaml
+tiktoken
+
+# Phase 1+ (uncomment as needed)
+# openai
+# voyageai
+# sentence-transformers
+# rank-bm25
+# chromadb
+# cohere
+# ragas
