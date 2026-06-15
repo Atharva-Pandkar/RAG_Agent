@@ -16,8 +16,21 @@
       "question": "What was Apple's total net sales for fiscal year 2025?",
       "gold_answer": "$416,161 million (approximately $416.2 billion)",
       "evidence": "Total net sales FY2025 = $416,161 million, vs $391,035 million FY2024.",
+      "chunk_anchors": [
+        [
+          "416,161",
+          "391,035"
+        ]
+      ],
       "source_section": "Consolidated Statements of Operations",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "aapl-20250927_rec_57",
+        "aapl-20250927_rec_59",
+        "aapl-20250927_rec_68",
+        "aapl-20250927_rec_77",
+        "aapl-20250927_rec_97",
+        "aapl-20250927_rec_98"
+      ]
     },
     {
       "id": "AAPL-02",
@@ -26,8 +39,21 @@
       "question": "What was Apple's operating income and total assets for fiscal year 2025?",
       "gold_answer": "Operating income was $133,050 million; total assets were $359,241 million.",
       "evidence": "Operating income FY2025 = $133,050 million; Total assets = $359,241 million.",
+      "chunk_anchors": [
+        [
+          "133,050"
+        ],
+        [
+          "359,241"
+        ]
+      ],
       "source_section": "Consolidated Financial Statements",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "aapl-20250927_rec_68",
+        "aapl-20250927_rec_69",
+        "aapl-20250927_rec_70",
+        "aapl-20250927_rec_97"
+      ]
     },
     {
       "id": "AAPL-03",
@@ -36,8 +62,21 @@
       "question": "How much did Apple's total net sales grow from fiscal 2024 to fiscal 2025, in both dollar terms and percentage?",
       "gold_answer": "Net sales grew from $391,035 million to $416,161 million, an increase of $25,126 million, or approximately 6.4%.",
       "evidence": "FY2025 $416,161M vs FY2024 $391,035M vs FY2023 $383,285M.",
+      "chunk_anchors": [
+        [
+          "416,161",
+          "391,035"
+        ]
+      ],
       "source_section": "Consolidated Statements of Operations",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "aapl-20250927_rec_57",
+        "aapl-20250927_rec_59",
+        "aapl-20250927_rec_68",
+        "aapl-20250927_rec_77",
+        "aapl-20250927_rec_97",
+        "aapl-20250927_rec_98"
+      ]
     },
     {
       "id": "AAPL-04",
@@ -46,8 +85,17 @@
       "question": "What are some of the key risk factors Apple discloses related to its workforce and macroeconomic environment?",
       "gold_answer": "Apple highlights risks from global macroeconomic conditions affecting demand, and the need to attract and retain highly skilled employees while preserving its company culture as it grows.",
       "evidence": "Risk factors include macroeconomic/global economic conditions risk, and reliance on retaining 'highly skilled employees' and culture.",
+      "chunk_anchors": [
+        [
+          "highly skilled employees",
+          "inclusive culture"
+        ]
+      ],
       "source_section": "Item 1A Risk Factors",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "aapl-20250927_rec_35",
+        "aapl-20250927_rec_36"
+      ]
     },
     {
       "id": "AAPL-05",
@@ -55,9 +103,11 @@
       "type": "mda_interpretive",
       "question": "Why does Apple typically report higher net sales in its fiscal first quarter?",
       "gold_answer": "Because the first quarter includes the holiday season, which drives seasonal demand, and new product/service introductions can significantly affect net sales.",
-      "evidence": "\"...higher net sales in its first quarter...due in part to seasonal holiday demand. Additionally, new product and service introductions can significantly impact net sales...\"",
+      "evidence": "\"The Company has historically experienced higher net sales in its first quarter compared to other quarters in its fiscal year due in part to seasonal holiday demand.\"",
       "source_section": "Item 7 MD&A",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "aapl-20250927_rec_22"
+      ]
     },
     {
       "id": "AAPL-06",
@@ -89,9 +139,11 @@
       "type": "table_numerical",
       "question": "What was Caterpillar's operating profit for 2025?",
       "gold_answer": "$11.151 billion.",
-      "evidence": "Operating profit FY2025 = $11.151 billion.",
+      "evidence": "\"Operating profit was $11.151 billion in 2025, a decrease of $1.921 billion, or 15 percent, compared with $13.072 billion in 2024.\"",
       "source_section": "Consolidated Results of Operations",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "cat-20251231_rec_160"
+      ]
     },
     {
       "id": "CAT-03",
@@ -111,9 +163,13 @@
       "type": "risk_factor_synthesis",
       "question": "What risk does Caterpillar disclose regarding its relationship with its dealer network?",
       "gold_answer": "Caterpillar relies on a network of independent dealers under non-exclusive agreements that are generally terminable at will, creating dependency risk on third parties it does not control.",
-      "evidence": "Dealer network dependency - non-exclusive dealer relationships, terminable at will.",
+      "evidence": "\"Our dealers do not deal exclusively with our products\"; \"These sales and service agreements are terminable at will by either party primarily upon 90 days written notice.\"",
       "source_section": "Item 1A Risk Factors",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "cat-20251231_rec_109",
+        "cat-20251231_rec_110",
+        "cat-20251231_rec_220"
+      ]
     },
     {
       "id": "CAT-05",
@@ -149,8 +205,20 @@
       "question": "What was JPMorgan Chase's total net revenue for 2025?",
       "gold_answer": "$182,447 million (approximately $182.4 billion).",
       "evidence": "Total net revenue FY2025 = $182,447 million, vs $177,556 million FY2024.",
+      "chunk_anchors": [
+        [
+          "182,447",
+          "177,556"
+        ]
+      ],
       "source_section": "Five-Year Selected Financial Data / MD&A",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "jpm-20251231_rec_280",
+        "jpm-20251231_rec_304",
+        "jpm-20251231_rec_509",
+        "jpm-20251231_rec_790",
+        "jpm-20251231_rec_797"
+      ]
     },
     {
       "id": "JPM-02",
@@ -229,8 +297,15 @@
       "question": "What was Coca-Cola's total operating income for 2025?",
       "gold_answer": "$13,426 million.",
       "evidence": "Operating income = $13,426 million.",
+      "chunk_anchors": [
+        [
+          "13,426"
+        ]
+      ],
       "source_section": "Consolidated Statements of Income",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "ko-20251231_rec_255"
+      ]
     },
     {
       "id": "KO-04",
@@ -263,8 +338,19 @@
       "question": "What were Walmart's total net sales for fiscal year 2026 (ended January 31, 2026)?",
       "gold_answer": "$706,413 million.",
       "evidence": "Net sales = $706,413 million vs $674,538 million prior year, +4.7%.",
+      "chunk_anchors": [
+        [
+          "706,413",
+          "674,538"
+        ]
+      ],
       "source_section": "Consolidated Statements of Income",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "wmt-20260131_rec_99",
+        "wmt-20260131_rec_104",
+        "wmt-20260131_rec_134",
+        "wmt-20260131_rec_187"
+      ]
     },
     {
       "id": "WMT-02",
@@ -273,8 +359,32 @@
       "question": "How did Walmart's net sales, operating income, and total assets change from fiscal 2025 to fiscal 2026?",
       "gold_answer": "Net sales grew from $674,538 million to $706,413 million (+4.7%). Operating income grew from $29,348 million to $29,825 million. Total assets grew from $260,823 million to $284,668 million.",
       "evidence": "Net sales $706,413M vs $674,538M (+4.7%); Operating income $29,825M vs $29,348M; Total assets $284,668M vs $260,823M.",
+      "chunk_anchors": [
+        [
+          "706,413",
+          "674,538"
+        ],
+        [
+          "29,825",
+          "29,348"
+        ],
+        [
+          "284,668",
+          "260,823"
+        ]
+      ],
       "source_section": "Consolidated Financial Statements",
-      "gold_chunk_ids": []
+      "gold_chunk_ids": [
+        "wmt-20260131_rec_99",
+        "wmt-20260131_rec_101",
+        "wmt-20260131_rec_104",
+        "wmt-20260131_rec_105",
+        "wmt-20260131_rec_134",
+        "wmt-20260131_rec_135",
+        "wmt-20260131_rec_136",
+        "wmt-20260131_rec_187",
+        "wmt-20260131_rec_188"
+      ]
     },
     {
       "id": "WMT-03",

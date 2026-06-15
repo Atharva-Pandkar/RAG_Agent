@@ -1,0 +1,13 @@
+# Run 09: BM25 retrieval over section-based chunks (structured extraction:
+# table-aware, section-tagged, 512 tok target, 50 overlap).
+# Variation vs run01: chunking strategy (fixed_size -> section_based, structured input).
+run_name: run09_bm25_section512
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/section_based_512_50.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_section_based_512_50.json

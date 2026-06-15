@@ -56,16 +56,25 @@ def main(corpus_path: Path):
         doc_chunks = [c for c in chunks if c["doc"] == doc_id]
 
         quotes = [_normalize(s) for s in extract_quotes(q["evidence"]) if len(s) > 15]
+        anchor_groups = [[_normalize(s) for s in g] for g in q.get("chunk_anchors", [])]
         gold_ids = []
         for c in doc_chunks:
             ctext = _normalize(c["text"])
+            matched_chunk = False
             for quote in quotes:
                 # use a shortened anchor (first ~60 chars) in case of minor
                 # whitespace/formatting differences vs. extracted text
                 anchor = quote[:60]
                 if anchor in ctext:
-                    gold_ids.append(c["id"])
+                    matched_chunk = True
                     break
+            if not matched_chunk:
+                for group in anchor_groups:
+                    if group and all(s in ctext for s in group):
+                        matched_chunk = True
+                        break
+            if matched_chunk:
+                gold_ids.append(c["id"])
 
         q["gold_chunk_ids"] = gold_ids
         if gold_ids:

@@ -18,18 +18,28 @@ from chunking.chunkers import STRATEGIES  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 EXTRACTED_DIR = ROOT / "Documents" / "extracted"
+STRUCTURED_DIR = ROOT / "Documents" / "structured"
 CORPORA_DIR = ROOT / "Experiments" / "corpora"
 
 
 def build(strategy: str, chunk_size: int, overlap: int) -> Path:
     fn = STRATEGIES[strategy]
     all_chunks = []
-    for txt_file in sorted(EXTRACTED_DIR.glob("*.txt")):
-        doc_id = txt_file.stem
-        text = txt_file.read_text(encoding="utf-8")
-        chunks = fn(text, doc_id, chunk_size=chunk_size, overlap=overlap)
-        all_chunks.extend(chunks)
-        print(f"  {doc_id}: {len(chunks)} chunks")
+
+    if strategy == "section_based":
+        for json_file in sorted(STRUCTURED_DIR.glob("*.json")):
+            doc_id = json_file.stem
+            structured_doc = json.loads(json_file.read_text(encoding="utf-8"))
+            chunks = fn(structured_doc, doc_id, chunk_size=chunk_size, overlap=overlap)
+            all_chunks.extend(chunks)
+            print(f"  {doc_id}: {len(chunks)} chunks")
+    else:
+        for txt_file in sorted(EXTRACTED_DIR.glob("*.txt")):
+            doc_id = txt_file.stem
+            text = txt_file.read_text(encoding="utf-8")
+            chunks = fn(text, doc_id, chunk_size=chunk_size, overlap=overlap)
+            all_chunks.extend(chunks)
+            print(f"  {doc_id}: {len(chunks)} chunks")
 
     CORPORA_DIR.mkdir(parents=True, exist_ok=True)
     out_path = CORPORA_DIR / f"{strategy}_{chunk_size}_{overlap}.json"
