@@ -1,0 +1,13 @@
+# Run 03: BM25 retrieval over smaller fixed-size chunks (256 tok, 25 overlap).
+# Variation vs run01: chunk size (512 -> 256), tests whether finer-grained
+# chunks improve context_precision at the cost of recall.
+run_name: run03_bm25_fixed256
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/fixed_size_256_25.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_fixed_size_256_25.json
