@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 class RagPipeline:
     def __init__(self, corpus_path: str, retrieval_strategy: str = "bm25",
+                 embedding_model: str = "BAAI/bge-small-en-v1.5",
                  llm_fn: Optional[Callable[[str, List[Dict]], str]] = None):
         corpus_path = ROOT / corpus_path
         with open(corpus_path, "r", encoding="utf-8") as f:
@@ -32,8 +33,17 @@ class RagPipeline:
         self.retrieval_strategy = retrieval_strategy
         self.llm_fn = llm_fn
 
+        # cache embeddings per (corpus, model) so repeated runs don't re-embed
+        cache_key = f"{Path(corpus_path).stem}__{embedding_model.replace('/', '_')}"
+
         if retrieval_strategy == "bm25":
             self.retriever = BM25Retriever(self.chunks)
+        elif retrieval_strategy == "dense":
+            from retrieval.dense_retriever import DenseRetriever
+            self.retriever = DenseRetriever(self.chunks, model_name=embedding_model, cache_key=cache_key)
+        elif retrieval_strategy == "hybrid":
+            from retrieval.hybrid_retriever import HybridRetriever
+            self.retriever = HybridRetriever(self.chunks, model_name=embedding_model, cache_key=cache_key)
         else:
             raise ValueError(f"Unknown retrieval_strategy: {retrieval_strategy}")
 
