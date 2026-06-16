@@ -83,18 +83,18 @@
 ---
 
 ## FaissRetriever — Index Build and Dual Embedding Stack
-- Concern: First run per corpus builds FAISS index via `HuggingFaceEmbeddings` (LangChain) — separate code path from numpy `DenseRetriever`. Both may load BGE-small, doubling memory if both used in same process.
+- Concern: First run per corpus builds FAISS index via LangChain embeddings. Chatbot defaults to OpenAI (`text-embedding-3-small`); eval runs used HuggingFace BGE-small. Cache miss triggers full-corpus API embed at startup warmup.
 - Location: `src/retrieval/faiss_retriever.py`, `src/retrieval/faiss_hybrid_retriever.py`
 - Priority: Medium
-- Notes: Index persisted to disk avoids rebuild. FAISS hybrid init loads BM25 + LangChain embeddings + FAISS index — heaviest config alongside hybrid+rerank.
+- Notes: Index persisted to disk avoids rebuild. FAISS hybrid init loads BM25 + embedding client + FAISS index. HugFace path still loads PyTorch (~15–20s) if `EMBED_PROVIDER=huggingface`.
 
 ---
 
-## LangChain Agent — LLM Call Per Chat Turn
+## LangChain Agent — LLM Call Per Chat Turn [OUTDATED]
 - Concern: `create_agent` ReAct loop may invoke `search_10k_filings` multiple times per user message, each triggering full retrieval (BM25 + FAISS RRF in best configs).
 - Location: `app/backend/agent.py`, `app/backend/rag_tool.py`
 - Priority: Medium
-- Notes: No caching of retrieval results within a turn. Streaming and tool-call limits not configured.
+- Notes: **[OUTDATED]** Replaced by deep agent. See "Deep Agent — Multi-Tool-Call Per Turn" below.
 
 ---
 
@@ -154,11 +154,11 @@
 
 ---
 
-## Chatbot Pipeline — Merged Corpus Cold Start (~20s)
+## Chatbot Pipeline — Merged Corpus Cold Start (~20s) [OUTDATED]
 - Concern: Lazy init loads 24 MB merged JSON + BM25 index + HuggingFaceEmbeddings + FAISS index (1,893 chunks). Comment in `main.py` notes ~20s first request.
 - Location: `app/backend/rag_tool.py`, `app/backend/main.py`
 - Priority: High (user-facing)
-- Notes: Subsequent requests reuse singleton pipeline. Deep agent may invoke `search_10k_filings` 2–4× per complex question, multiplying retrieval cost.
+- Notes: **[OUTDATED — resolved Iteration 9]** Eager lifespan init at startup. See "Server Startup Blocks Until Pipeline + Agent Ready" below. Deep agent may still invoke `search_10k_filings` 2–4× per complex question.
 
 ---
 
@@ -167,3 +167,91 @@
 - Location: `app/backend/agent.py`
 - Priority: Medium
 - Notes: Each search retrieves k=10 passages from 1,893-chunk index. Monitor token usage and latency for multi-part financial questions.
+
+---
+
+## OpenAI Embedding — First FAISS Cache Miss (~1,893 chunks)
+- Concern: On cache miss, `FAISS.from_documents` sends all merged-corpus chunks to OpenAI embedding API in one batch. Network latency + API rate limits block startup warmup.
+- Location: `src/retrieval/faiss_retriever.py`, `app/backend/main.py` lifespan
+- Priority: High (user-facing at first deploy)
+- Notes: Subsequent runs load cached index from `Experiments/embeddings/faiss_merged_unstr_xbrl__text-embedding-3-small/`. Pre-build index offline or ship pre-built cache for demos. OpenAI cost scales with corpus size × re-embeds on model change.
+
+---
+
+## Server Startup Blocks Until Pipeline + Agent Ready
+- Concern: FastAPI lifespan runs corpus load, BM25 init, FAISS warm-up query, and deep agent compile synchronously before `yield`. Uvicorn does not accept requests until complete.
+- Location: `app/backend/main.py`
+- Priority: Medium
+- Notes: Eliminates per-request cold start but shifts latency to boot. With OpenAI cache hit, startup is faster than old BGE path (~15–20s model load). With cache miss, startup may take minutes. `/health` returns `initialising` during boot.
+
+---
+
+## Rotating Log File at DEBUG Level
+- Concern: File handler logs DEBUG for all `rag.*` modules including full message previews and chunk retrieval details. High chat volume fills 5 MB log quickly (3 rotations).
+- Location: `app/backend/logger.py`
+- Priority: Low
+- Notes: Set file handler to INFO in production; keep DEBUG for troubleshooting sessions only.
+
+---
+
+## SourceRef Regex Parsing on Every Chat Turn
+- Concern: `main.py` iterates all agent messages and regex-parses tool output strings to build `SourceRef[]`. O(messages × chunks) per request; coupled to string format.
+- Location: `app/backend/main.py`
+- Priority: Low
+- Notes: Typical turn has 1–4 tool calls × 10 chunks — negligible. Prefer structured tool return or corpus lookup if format changes frequently.
+
+---
+
+## ReactMarkdown Client-Side Render
+- Concern: Each assistant message re-parsed and rendered as GFM markdown on every React re-render (message list scroll, loading state toggle).
+- Location: `app/frontend/src/App.jsx`
+- Priority: Low
+- Notes: Fine for short financial answers. Memoize `AssistantMessage` or cap message history if conversations grow long.
+
+---
+
+## Live Ingest — Full active_corpus.json Rewrite
+- Concern: `_append_to_corpus()` loads entire active corpus JSON, modifies chunk list, and writes back with `indent=1`. Baseline file is ~24 MB; each upload blocks on serialize + disk I/O.
+- Location: `src/ingestion/ingest_document.py`
+- Priority: Medium
+- Notes: Runs in `run_in_executor` on `/ingest` but still holds GIL during JSON dump. Large uploads or frequent ingests will slow the endpoint and grow startup load time.
+
+---
+
+## Live Ingest — BM25 Full Rebuild
+- Concern: Every upload calls `BM25Retriever.add_chunks()`, which retokenizes all chunks and instantiates a new `BM25Okapi` over the full corpus.
+- Location: `src/retrieval/bm25_retriever.py`, `src/ingestion/ingest_document.py`
+- Priority: Low (demo scale)
+- Notes: ~2k chunks rebuilds in under a second locally. Cost grows linearly with total chunks × upload frequency.
+
+---
+
+## Live Ingest — FAISS Incremental Embed + Cache Save
+- Concern: Each upload embeds new chunks via OpenAI API (`add_documents`) and re-saves the full FAISS index to disk. Network latency + API cost per upload; cache file rewrite on every ingest.
+- Location: `src/retrieval/faiss_retriever.py`, `src/ingestion/ingest_document.py`
+- Priority: Medium
+- Notes: Large PDFs producing hundreds of chunks trigger a sizable embed batch. Re-ingest without vector purge may inflate index size (see open issue).
+
+---
+
+## Unstructured-IO Parse on Upload
+- Concern: `partition()` on PDF/DOCX/HTML is CPU- and memory-heavy compared to plain text chunking. Runs synchronously inside ingest executor.
+- Location: `src/ingestion/ingest_document.py`
+- Priority: Medium
+- Notes: First use may download models depending on Unstructured config. Timeout risk if Vite proxy limit (120s) shared with chat.
+
+---
+
+## Startup — active_corpus Seed Copy
+- Concern: First boot copies `merged_unstr_xbrl.json` → `active_corpus.json` (~24 MB disk copy) before pipeline warm-up.
+- Location: `src/ingestion/ingest_document.py`, `app/backend/main.py` lifespan
+- Priority: Low
+- Notes: One-time per environment unless active file deleted. Subsequent boots load the active file directly.
+
+---
+
+## Citation Resolution — Regex Over All Agent Messages
+- Concern: `_build_sources()` scans every `search_documents` ToolMessage plus final answer for `[SOURCE:id]` markers. Typical cost negligible; grows with multi-tool deep-agent turns.
+- Location: `app/backend/main.py`
+- Priority: Low
+- Notes: Prefer structured tool JSON return if agent turns become very long.

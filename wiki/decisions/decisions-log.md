@@ -273,4 +273,112 @@ Single chronological record of architectural and technical decisions. Append new
 - Context: Frontend needed citation traceability; wildcard CORS was flagged as unsafe.
 - Decision: `POST /chat` returns `{response, sources[]}` — chunk IDs parsed from `search_10k_filings` ToolMessages via regex. CORS restricted to `localhost:5173` and `localhost:3000`. `python-dotenv` loads `app/backend/.env`.
 - Alternatives Considered: Stream SSE with inline citations; keep wildcard CORS for dev simplicity.
-- Impact: Backend ready for source UI; frontend (`App.jsx`) not yet displaying `sources`. CORS issue resolved for local dev.
+- Impact: Superseded by structured `SourceRef[]` (Iteration 10). CORS issue resolved for local dev.
+
+---
+
+## OpenAI Embeddings for Chatbot FAISS (Production Path)
+- Date: 2026-06-16
+- Context: Local BGE-small via HuggingFace added ~15–20s startup (PyTorch + sentence-transformers) and Windows pyarrow import-order fragility. Chatbot shares the same OpenAI key as the LLM.
+- Decision: `FaissRetriever` defaults to `text-embedding-3-small` via `langchain_openai.OpenAIEmbeddings`. Provider switchable via `EMBED_PROVIDER=huggingface` + `EMBED_MODEL`. `rag_tool.py` hardcodes `text-embedding-3-small`; FAISS index cached to `Experiments/embeddings/faiss_{cache_key}/`.
+- Alternatives Considered: Keep BGE-small for parity with eval Runs 32–40; lazy HugFace load only; separate embedding API key service.
+- Impact: Faster embedding client init (no local model). First cache miss embeds all 1,893 merged chunks via OpenAI API (one-time cost). **Retrieval rankings may differ from eval Run 40** (which used BGE-small). Cache key includes model name — BGE and OpenAI indexes coexist on disk.
+
+---
+
+## Eager Startup Warmup via FastAPI Lifespan
+- Date: 2026-06-16
+- Context: First `/chat` request previously triggered ~20s cold start (corpus load + FAISS + agent compile). Poor UX for demo.
+- Decision: `main.py` uses FastAPI `lifespan` to eagerly call `get_pipeline()`, run a dummy `retrieve("warm-up", k=1)` to force FAISS load, then `build_agent()` before accepting requests. `/health` returns `initialising` until agent is ready; `/chat` returns 503 if not ready. Agent invocation runs in `run_in_executor` to avoid blocking the event loop.
+- Alternatives Considered: Lazy init on first request; separate `/warmup` endpoint; background task after startup.
+- Impact: Cold-start latency moved to server boot. Users wait at startup instead of first chat turn. Vite proxy timeout raised to 120s for multi-tool agent turns.
+
+---
+
+## Centralized Rotating Backend Logging
+- Date: 2026-06-16
+- Context: Debugging deep-agent tool calls and retrieval failures required ad-hoc prints; no persistent audit trail.
+- Decision: `app/backend/logger.py` — shared `rag.*` logger hierarchy with console (INFO+) and rotating file handler (`logs/rag_backend.log`, 5 MB × 3). All backend modules use `get_logger(__name__)`. HTTP middleware logs request/response timing; pipeline and retrievers log init and retrieve at DEBUG.
+- Alternatives Considered: stdlib logging per-module; structlog; LangSmith-only tracing.
+- Impact: Full request lifecycle traceable in log file. DEBUG level on file may grow quickly under load — tune for production.
+
+---
+
+## Structured SourceRef with EDGAR Links
+- Date: 2026-06-16
+- Context: Flat chunk-ID `sources[]` (Iteration 8) was insufficient for a usable citation UI. Frontend needed ticker, company name, section label, and SEC EDGAR link.
+- Decision: `SourceRef` Pydantic model on `ChatResponse` — `{id, ticker, company, doc, section, url}`. `_COMPANY_META` maps doc prefix → ticker/name/CIK; `_edgar_url()` builds SEC browse URL. Regex parses tool output lines `[N] Source: <doc> | Section: <section> | ID: <id>`. `_msg_text()` extracts text from list-shaped `AIMessage.content`. Deduped by chunk ID per turn.
+- Alternatives Considered: Keep chunk-ID strings; corpus lookup by chunk ID; agent-generated inline markdown links; SSE streaming citations.
+- Impact: API contract changed from `string[]` to structured objects. Frontend `Citation` component renders collapsible pills with per-ticker colour and EDGAR links. Section often `"—"` until retrievers pass corpus metadata. Parsing coupled to `rag_tool.py` output format.
+
+---
+
+## React Markdown for Assistant Responses
+- Date: 2026-06-16
+- Context: Agent answers include lists, bold figures, and table markdown from iXBRL chunks; plain `<p>` rendering lost structure.
+- Decision: `react-markdown` + `remark-gfm` in `App.jsx` for assistant message bodies. `index.css` styles headings, lists, code blocks, and GFM tables. User messages remain plain text.
+- Alternatives Considered: Raw HTML from agent; custom lightweight formatter; inline citations in markdown body.
+- Impact: Richer financial answers in UI. Adds two frontend deps. Table CSS supports retrieved iXBRL markdown if agent echoes it.
+
+---
+
+## Collapsible Citation Panel in Frontend
+- Date: 2026-06-16
+- Context: k=10 retrieval can produce many sources; showing all inline would clutter the chat.
+- Decision: `AssistantMessage` stores `sources` from API; collapsible "▸ N sources" toggle reveals `Citation` pills — ticker badge (colour per company), section/doc label, external link to EDGAR. Sources persisted in message state but stripped from API payload on resend.
+- Alternatives Considered: Always-visible source list; inline footnote numbers; hover tooltips only.
+- Impact: Source traceability without overwhelming the answer. Section label falls back to `doc` when section is `"—"`. **[OUTDATED — superseded by Iteration 11 inline footnotes; EDGAR pill UI removed.]**
+
+---
+
+## Active Corpus as Mutable Runtime Store
+- Date: 2026-06-16
+- Context: Chatbot was hardwired to static `merged_unstr_xbrl.json`. Users need to add documents at runtime without rebuilding corpora offline or restarting the server.
+- Decision: Introduce `Experiments/corpora/active_corpus.json`. On first boot, `ensure_active_corpus()` copies `merged_unstr_xbrl.json` if the active file is missing. All chatbot retrieval reads/writes this file. Baseline merged corpus remains the eval artifact; active corpus is the live runtime store.
+- Alternatives Considered: Env-switch between static corpora; sqlite chunk store; reload pipeline on each ingest (full restart).
+- Impact: `rag_tool.py` corpus path is now `active_corpus.json`. FAISS cache key becomes `faiss_active_corpus__text-embedding-3-small`. Git may track a large seeded copy of the merged corpus under the active filename.
+
+---
+
+## Live Document Ingestion Without Server Restart
+- Date: 2026-06-16
+- Context: Demo and research workflows require uploading PDF/HTML/DOCX/TXT beyond the five seeded 10-K filings.
+- Decision: `src/ingestion/ingest_document.py` parses uploads via Unstructured-IO (with text fallback), chunks at 4000/200 chars, appends to `active_corpus.json`, updates `docs_registry.json`, and calls `RagPipeline.add_chunks()` for in-memory BM25 + FAISS updates. FastAPI exposes `POST /ingest` (multipart upload) and `GET /documents` (registry for UI). Startup lifespan calls `ensure_active_corpus()` and bootstraps registry if missing.
+- Alternatives Considered: CLI-only ingestion; full pipeline rebuild from disk on each upload; separate vector DB per document.
+- Impact: Upload latency includes parse + chunk + JSON rewrite + BM25 rebuild + OpenAI embed for new chunks + FAISS cache save. Re-ingest of same `doc_id` replaces corpus chunks but FAISS may retain stale vectors until index rebuild (see open issue).
+
+---
+
+## Document-Agnostic Deep Agent
+- Date: 2026-06-16
+- Context: Agent system prompt and tool names referenced five fixed 10-K companies (`search_10k_filings`, on-topic-only list). Uploaded documents would be out of scope.
+- Decision: Rename tool to `search_documents`; add `list_available_documents` reading `docs_registry.json`. System prompt requires search-before-answer for any loaded document, no fixed company list. Agent discovers scope via registry when queries are ambiguous.
+- Alternatives Considered: Keep 10-K-specific naming; route uploads to a second agent; metadata filter by doc at retrieval time.
+- Impact: Chatbot generalizes beyond SEC filings. Eval golden set still targets five 10-Ks; new benchmark needed for upload scenarios.
+
+---
+
+## Inline [SOURCE:id] Citation Protocol
+- Date: 2026-06-16
+- Context: Iteration 10 showed all k=10 retrieved sources or parsed tool output heuristically. Users need citations tied to claims actually used in the answer, not full retrieval dumps.
+- Decision: Agent system prompt requires inline `[SOURCE:chunk_id]` markers after each sourced claim. `main.py` `_build_sources()` maps markers to `SourceRef`, replaces markers with numbered footnotes `[1]`, `[2]`, and returns only cited sources. Fallback: top-3 by retrieval order if agent omits markers.
+- Alternatives Considered: Keep collapsible source panel; LLM-generated markdown footnotes only; structured JSON tool return (deferred).
+- Impact: Cleaner answers with precise citations. Quality depends on agent compliance with marker format. Frontend renders superscript `[N]` in markdown and a footnote list below each answer.
+
+---
+
+## SourceRef Simplified for Generic Documents
+- Date: 2026-06-16
+- Context: Iteration 10 `SourceRef` included ticker, company, and SEC EDGAR URLs — 10-K-specific. Uploaded PDFs have no CIK or EDGAR link.
+- Decision: `SourceRef` fields reduced to `{id, doc, section, display}` where `display` is `"Company / Section"` from `_doc_display()`. Known 10-K prefixes still map to friendly names (Apple, Walmart, etc.); unknown docs fall back to doc id. EDGAR URLs and ticker badges removed from API and UI.
+- Alternatives Considered: Optional EDGAR URL when CIK known; dual citation components for 10-K vs upload.
+- Impact: **[OUTDATED partial regression]** SEC deep links no longer in UI. Generic uploads display cleanly. `_doc_display()` hardcodes five ticker→name mappings.
+
+---
+
+## Frontend Document Sidebar and Upload Flow
+- Date: 2026-06-16
+- Context: Users could not see loaded documents or add new ones from the chat UI.
+- Decision: `App.jsx` adds collapsible sidebar: document list from `GET /api/documents`, `+ Add` file picker (`.pdf,.html,.htm,.txt,.md,.docx`), ingest status toast, expandable section lists per doc. Vite proxy routes `/api/*` → backend. App title changed to "Document Research Assistant".
+- Alternatives Considered: Separate admin page; drag-and-drop only; ingest via CLI only.
+- Impact: `python-multipart` added to backend requirements. Upload uses same 120s proxy timeout as chat (large PDFs may need tuning).

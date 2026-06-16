@@ -169,3 +169,78 @@ Project-level record of what was added, changed, or removed each iteration.
 
 ### Removed
 - LangChain basic `create_agent` ReAct loop (replaced by deep agent)
+
+---
+
+## Iteration 9 — 2026-06-16
+
+### Added
+- `app/backend/logger.py` — centralized rotating file + console logging (`rag.*` hierarchy)
+- FastAPI `lifespan` startup warmup — pipeline + dummy retrieve + deep agent compiled before first request
+- HTTP request/response logging middleware in `main.py`
+- OpenAI embedding path in `src/retrieval/faiss_retriever.py` — `EMBED_PROVIDER` env (`openai` | `huggingface`)
+- `app/frontend/package-lock.json` — locked dependency tree after first `npm install`
+- Vite dev proxy 120s timeout for long deep-agent turns (`vite.config.js`)
+
+### Changed
+- `app/backend/rag_tool.py` — embedding model switched to `text-embedding-3-small` (OpenAI); tool and pipeline init logging
+- `app/backend/main.py` — eager startup init, async agent via `run_in_executor`, `/health` reports `initialising` vs `ok`, 503 if agent not ready
+- `src/retrieval/faiss_retriever.py` — OpenAI default; lazy FAISS load on cache hit; module-level embedding client singleton
+- `src/pipeline.py`, `faiss_hybrid_retriever.py` — structured init/retrieve logging
+- Frontend build workflow — requires `npm install` before `npm run build` (Vite not globally installed)
+
+### Removed
+- Per-request lazy agent/pipeline init on first `/chat` (moved to startup lifespan)
+
+---
+
+## Iteration 10 — 2026-06-16
+
+### Added
+- `SourceRef` Pydantic model — structured citations with ticker, company, doc, section, EDGAR URL
+- `_COMPANY_META` / `_edgar_url()` / `_doc_to_meta()` in `main.py` — company → SEC link mapping
+- `_msg_text()` helper — extracts text blocks from list-shaped `AIMessage.content` (tool-use responses)
+- Frontend `Citation` and `AssistantMessage` components — collapsible source panel with per-ticker colour badges
+- `react-markdown` + `remark-gfm` — GFM markdown rendering for assistant answers (tables, lists, bold)
+- Expanded `index.css` — markdown body styles, citation pills, loading dots, subtitle
+
+### Changed
+- `POST /chat` response — `sources` upgraded from `string[]` to `SourceRef[]`; regex parses tool output for doc/section/id
+- `app/frontend/src/App.jsx` — stores `sources` per assistant message; sends only `{role, content}` to API
+- `app/frontend/package.json` — added `react-markdown`, `remark-gfm`
+
+### Removed
+- Flat chunk-ID-only source extraction regex (`ID:\s*([\w\-_]+)`)
+
+---
+
+## Iteration 11 — 2026-06-16
+
+### Added
+- `src/ingestion/ingest_document.py` — universal ingest (PDF/HTML/DOCX/TXT/MD via Unstructured-IO); CLI + programmatic `ingest_file()`
+- `Experiments/corpora/active_corpus.json` — mutable runtime corpus (seeded from `merged_unstr_xbrl.json` on first boot)
+- `Experiments/corpora/docs_registry.json` — document metadata registry (display name, chunk count, sections, ingest timestamp)
+- `Experiments/embeddings/faiss_active_corpus__text-embedding-3-small/` — FAISS cache for active corpus + OpenAI embeddings
+- `POST /ingest` — multipart document upload; live corpus + index update
+- `GET /documents` — registry JSON for frontend sidebar
+- `list_available_documents` agent tool — scope discovery from registry
+- `RagPipeline.add_chunks()` — in-memory retriever extension without restart
+- `BM25Retriever.add_chunks()`, `FaissRetriever.add_chunks()`, `FaissHybridRetriever.add_chunks()` — incremental index updates
+- Frontend document sidebar — upload button, doc list, section expanders, ingest status toasts
+- Inline citation protocol — agent emits `[SOURCE:chunk_id]`; API returns footnote-numbered response + cited `SourceRef[]`
+- `python-multipart` in `app/backend/requirements.txt`
+
+### Changed
+- `app/backend/rag_tool.py` — corpus → `active_corpus.json`; tool renamed `search_10k_filings` → `search_documents`
+- `app/backend/agent.py` — document-agnostic system prompt; tools `[search_documents, list_available_documents]`
+- `app/backend/main.py` — lifespan seeds active corpus + registry; `_build_sources()` footnote resolution; `SourceRef` → `{id, doc, section, display}` (no ticker/EDGAR)
+- `app/frontend/src/App.jsx` — sidebar layout, footnote UI, superscript citation marks in markdown; removed EDGAR pill citations
+- `app/frontend/src/index.css` — sidebar, upload, footnote, app-shell styles
+- `app/backend/.env.example` — documents `EMBED_PROVIDER=openai`
+- Retrievers — `section` still not returned in retrieve payloads (unchanged gap)
+
+### Removed
+- Hardcoded five-company scope in agent prompt
+- `SourceRef.ticker`, `SourceRef.company`, `SourceRef.url` and EDGAR link UI from Iteration 10
+- Chatbot dependency on static `merged_unstr_xbrl.json` path at runtime (eval artifact retained; active corpus is runtime source)
+- Local BGE FAISS index files from working tree (replaced by OpenAI embedding caches for active/merged corpora)

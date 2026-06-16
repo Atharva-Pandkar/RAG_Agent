@@ -79,23 +79,44 @@ High-level milestone tracker across project phases. Updated at the end of each i
 | Milestone | Status | Notes |
 |-----------|--------|-------|
 | FastAPI + deep agent | Done | `deepagents.create_deep_agent` |
-| RAG tool | Done | Run 40: faiss_hybrid merged k=10 |
-| Source IDs in API | Done | Backend returns `sources[]` |
-| Source citations in UI | Not started | Frontend ignores `sources` |
-| React frontend | Done (skeleton) | Vite dev server + API proxy |
+| RAG tool | Done | `active_corpus.json`; faiss_hybrid k=10; OpenAI embeddings |
+| Source IDs in API | Done | `SourceRef[]` with footnote resolution; `{id, doc, section, display}` |
+| Source citations in UI | Done | Inline `[N]` superscripts + footnote list (EDGAR links removed in Iter 11) |
+| Live document ingest | Done | `POST /ingest`, `ingest_document.py`, incremental BM25/FAISS |
+| Document registry + sidebar | Done | `docs_registry.json`, `GET /documents`, upload UI |
+| Document-agnostic agent | Done | `search_documents` + `list_available_documents` |
+| Markdown rendering | Done | `react-markdown` + GFM tables for assistant answers |
+| React frontend | Done | Vite dev server + API proxy; `npm install` required |
+| Production frontend build | Done | `npm run build` → `dist/` |
+| Startup warmup | Done | Lifespan loads pipeline + agent before requests |
+| Backend logging | Done | `logger.py` + `logs/rag_backend.log` |
 | Streaming responses | Not started | — |
 | CORS restricted | Done | localhost:5173/3000 only |
 
 ---
 
 ## Phase 5 — Cost / Latency Optimization
-**Status: Not Started**
+**Status: Partially Started**
+
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| Eager startup warmup | Done | FastAPI lifespan; no per-request cold start |
+| OpenAI embeddings (no local model) | Done | `text-embedding-3-small`; faster client init |
+| FAISS index disk cache | Done | Rebuild only on cache miss or model change |
+| Backend request logging | Done | Rotating file + HTTP middleware |
+| Pre-built embedding cache for deploy | Not started | First boot still embeds ~1,893 chunks via API |
+| Retrieval result caching per turn | Not started | — |
 
 ---
 
-## Next Up (Iteration 9 candidates)
-1. Display `sources` in React frontend
-2. Pass `section` metadata through retrievers (currently always "—" in tool output)
-3. Update `app/README.md` to reflect deep agent + Run 40 config
-4. Env-configurable retrieval config in `rag_tool.py`
-5. Rerank on Run 36 baseline; document-level filtering
+## Next Up (Iteration 12 candidates)
+1. Pass `section` metadata through retrievers (citations often show `"—"` or doc fallback)
+2. Restore optional EDGAR URLs for seeded 10-K docs in `SourceRef`
+3. Fix FAISS vector purge on re-ingest; add document delete API
+4. Commit stratified eval test suite JSON (`eval/test_suite/`) — single-fact, cross-company, out-of-corpus
+5. Update `app/README.md` — active corpus, ingest endpoints, footnote citations, sidebar
+6. Frontend `/health` polling during server boot (disable chat until pipeline warm)
+7. Pin `unstructured` + full RAG deps in `app/backend/requirements.txt`
+8. Re-eval chatbot embedding config (OpenAI vs BGE-small) for benchmark parity
+9. Env-configurable retrieval config in `rag_tool.py` (corpus, k, embed model)
+10. Rerank on Run 36 baseline; document-level filtering

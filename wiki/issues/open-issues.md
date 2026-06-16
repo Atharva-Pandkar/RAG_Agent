@@ -114,11 +114,11 @@
 
 ---
 
-## Chatbot Uses Suboptimal Retrieval Config [RESOLVED]
+## Chatbot Uses Suboptimal Retrieval Config [RESOLVED — Iteration 11 evolution]
 - Severity: High → resolved (with tradeoff)
 - Location: `app/backend/rag_tool.py`
-- Description: Was hardcoded to hybrid fixed 1024 k=5. Now uses Run 40: faiss_hybrid + merged_unstr_xbrl k=10. Chose merged over Run 36 (best recall 0.677) for 26/26 gold coverage and iXBRL tables. Eval recall for chatbot config: 0.575.
-- Suggested Fix: Consider env toggle between Run 36 (max recall) and Run 40 (max coverage).
+- Description: Was hardcoded to hybrid fixed 1024 k=5. Iteration 10 used Run 40 merged faiss_hybrid k=10. Iteration 11 uses `active_corpus.json` (seeded from merged baseline) with same faiss_hybrid + OpenAI embeddings + live ingest. Eval recall for static merged config remains ~0.575; active corpus may diverge after uploads.
+- Suggested Fix: Env toggle between static eval corpus and active corpus; re-run eval after uploads.
 
 ---
 
@@ -130,11 +130,19 @@
 
 ---
 
-## Frontend Ignores Source Citations from API
-- Severity: Low
+## Frontend Ignores Source Citations from API [RESOLVED]
+- Severity: Low → resolved
 - Location: `app/frontend/src/App.jsx`, `app/backend/main.py`
-- Description: Backend returns `sources: string[]` (chunk IDs) in `ChatResponse`, but frontend only displays `data.response`. Retrieved chunk IDs are discarded in the UI.
-- Suggested Fix: Render sources list or inline citations below assistant messages.
+- Description: Was discarding `sources` from API response. Iteration 10: `AssistantMessage` renders collapsible citation panel; `Citation` links to SEC EDGAR with ticker badge and section/doc label.
+- Suggested Fix: Pass `section` through retrievers so citations show real section names instead of `"—"` / doc fallback.
+
+---
+
+## Source Metadata Parsed from Tool String (Fragile Coupling)
+- Severity: Low
+- Location: `app/backend/main.py`, `app/backend/rag_tool.py`
+- Description: `SourceRef` fields are built by regex-parsing `search_documents` tool output (`Source: … | Section: … | ID: …`) and matching agent `[SOURCE:id]` markers in the final answer — not by joining retriever result dicts or corpus `by_id`. Any change to tool output format or marker convention breaks citation parsing silently.
+- Suggested Fix: Return structured retrieval results from the tool (JSON) or build `SourceRef` from pipeline retrieve() metadata in `main.py` via chunk-ID lookup.
 
 ---
 
@@ -154,11 +162,35 @@
 
 ---
 
-## Deep Agent Cold-Start Latency
-- Severity: Medium
+## Deep Agent Cold-Start Latency [RESOLVED]
+- Severity: Medium → resolved
 - Location: `app/backend/main.py`, `app/backend/rag_tool.py`
-- Description: First `/chat` request triggers lazy init of deep agent + FAISS-hybrid pipeline over 1,893-chunk merged corpus (~20s noted in code comment). No warmup endpoint.
-- Suggested Fix: Eager-init on startup or `/health` warmup; show loading state in frontend.
+- Description: Was lazy init on first `/chat` (~20s). Now eager-init via FastAPI `lifespan`: pipeline warm-up query + agent compile at server start. `/health` exposes readiness; `/chat` returns 503 until ready.
+- Suggested Fix: Show startup/loading state in frontend if server boot is slow; poll `/health` before enabling chat input. **[Partial — loading dots during chat turn only; no server-boot polling yet]**
+
+---
+
+## Chatbot Embedding Model Diverges from Eval Run 40
+- Severity: Medium
+- Location: `app/backend/rag_tool.py`, `src/retrieval/faiss_retriever.py`
+- Description: Eval Run 40 used `BAAI/bge-small-en-v1.5` (local). Chatbot now uses `text-embedding-3-small` (OpenAI). Same corpus and faiss_hybrid strategy but different dense leg rankings — chatbot retrieval quality may not match benchmarked 0.575 recall@10.
+- Suggested Fix: Document tradeoff; add env toggle for `EMBED_PROVIDER`/`EMBED_MODEL`; re-run eval with OpenAI embeddings for apples-to-apples comparison; or revert chatbot to HuggingFace for eval parity.
+
+---
+
+## app/backend/requirements.txt Missing RAG Pipeline Deps
+- Severity: Medium
+- Location: `app/backend/requirements.txt`, `src/retrieval/faiss_retriever.py`
+- Description: Backend imports `RagPipeline` which needs `langchain_community`, `faiss-cpu`, `rank_bm25`, and (for HugFace path) `sentence-transformers`. Only LangChain/OpenAI packages listed in app requirements. Works only if root experiment deps installed globally.
+- Suggested Fix: Add `faiss-cpu`, `langchain-community`, `rank-bm25` to `app/backend/requirements.txt`; document two-step install or unify requirements.
+
+---
+
+## EMBED_PROVIDER Not Documented in .env.example
+- Severity: Low
+- Location: `app/backend/.env.example`
+- Description: `FaissRetriever` reads `EMBED_PROVIDER` (default `openai`) and `EMBED_MODEL` but `.env.example` only lists `OPENAI_API_KEY` and `CHAT_MODEL`.
+- Suggested Fix: Add commented `EMBED_PROVIDER=openai` and `EMBED_MODEL=text-embedding-3-small` to `.env.example`.
 
 ---
 
@@ -239,3 +271,67 @@
 - Location: `Documents/unstructured_explore/jpm_unstructured_chunks.json`
 - Description: JPM filing produces 890 chunks (486 table chunks, 2853 elements). Full JSON includes all chunk text — file is very large and slow to load in editors.
 - Suggested Fix: Add `--max-chunks` preview flag (like semantic explore); store text externally or truncate previews for inspection-only runs.
+
+---
+
+## Frontend Ignores Source Citations from API [RESOLVED — Iteration 11]
+- Severity: Low → resolved (different UX)
+- Location: `app/frontend/src/App.jsx`
+- Description: Iteration 10 collapsible EDGAR citation panel replaced by inline footnote superscripts `[N]` and a footnote list per assistant message. Sources still come from API `SourceRef[]`.
+- Suggested Fix: Re-add optional EDGAR external links for known 10-K doc ids when `display` maps to a seeded filing.
+
+---
+
+## EDGAR Links Removed from Citation UI [NEW — Iteration 11 regression]
+- Severity: Low
+- Location: `app/backend/main.py`, `app/frontend/src/App.jsx`
+- Description: Iteration 11 simplified `SourceRef` to `{id, doc, section, display}` for generic uploads. SEC browse URLs and ticker-colour badges from Iteration 10 were removed. 10-K answers no longer link to EDGAR.
+- Suggested Fix: Restore optional `url` field when doc id matches known CIK in `_COMPANY_META`; render link in footnote row for seeded filings only.
+
+---
+
+## FAISS Index Not Purged on Re-Ingest
+- Severity: Medium
+- Location: `src/ingestion/ingest_document.py`, `src/retrieval/faiss_retriever.py`
+- Description: Re-ingesting a document removes its chunks from `active_corpus.json` and replaces in-memory `pipeline.chunks`, but `FaissRetriever.add_chunks()` only appends embeddings. Old vectors for the same `doc_id` may remain searchable until full index rebuild.
+- Suggested Fix: Delete FAISS vectors by doc metadata filter, or rebuild index from corpus on re-ingest; track doc→vector ids.
+
+---
+
+## unstructured Not in app/backend/requirements.txt
+- Severity: Medium
+- Location: `app/backend/requirements.txt`, `src/ingestion/ingest_document.py`
+- Description: `POST /ingest` for PDF/DOCX/HTML depends on `unstructured.partition.auto`. App requirements list only FastAPI/LangChain stack. Plain `.txt`/`.md` uploads work without it; other formats fail or fall back to raw bytes decode.
+- Suggested Fix: Add `unstructured[all-docs]` or pinned extras to `app/backend/requirements.txt`; document optional vs required formats in `app/README.md`.
+
+---
+
+## active_corpus.json Grows Unbounded
+- Severity: Medium
+- Location: `Experiments/corpora/active_corpus.json`, `src/ingestion/ingest_document.py`
+- Description: Every upload appends chunks and rewrites the full JSON (~24 MB baseline from merged seed). No delete-document API. File size and startup load time increase with each upload.
+- Suggested Fix: Add `DELETE /documents/{id}`; shard corpus by doc; compact JSON; exclude from git or use LFS.
+
+---
+
+## Agent Citation Markers Optional — Fallback Shows Top-3
+- Severity: Low
+- Location: `app/backend/main.py`, `app/backend/agent.py`
+- Description: If the agent omits `[SOURCE:id]` markers, `_build_sources()` returns top-3 retrieval results regardless of whether they supported the answer. May mislead users about which passages were used.
+- Suggested Fix: Log fallback rate; tighten prompt; return empty sources when no markers; or require markers in post-processing validation.
+
+---
+
+## Incremental Ingest Rebuilds Full BM25 Index
+- Severity: Low
+- Location: `src/retrieval/bm25_retriever.py`
+- Description: `add_chunks()` retokenizes all chunks and rebuilds `BM25Okapi` on every upload. Acceptable at ~2k chunks; scales O(n) with total corpus size per ingest.
+- Suggested Fix: Acceptable for demo scale; consider incremental BM25 or doc-scoped indexes if uploads become frequent.
+
+---
+
+## Test Suite JSON Not Yet Created
+- Severity: Low
+- Location: `eval/` (missing `test_suite/` or benchmark questions file)
+- Description: Requested stratified question set (single-fact, cross-company, out-of-corpus) for experiments was explored against `Dataset/` and structured filings but no committed JSON artifact exists yet.
+- Suggested Fix: Add `eval/test_suite/rag_benchmark_questions.json` with category tags, gold answers, and evaluation metadata aligned to five seeded 10-Ks.
