@@ -1,0 +1,616 @@
+{
+  "_meta": {
+    "total_chunks": 1893,
+    "total_table_chunks": 1099,
+    "sources": {
+      "unstructured": "D:\\Research\\Agents\\RAG_Agent\\Experiments\\corpora\\unstructured_4000_200.json",
+      "xbrl": "D:\\Research\\Agents\\RAG_Agent\\Experiments\\corpora\\xbrl_merged.json"
+    },
+    "strategy": "merged_unstr_xbrl",
+    "chunks_per_company": {
+      "aapl-20250927": {
+        "total": 120,
+        "unstructured": 89,
+        "xbrl": 31,
+        "sections": 24
+      },
+      "cat-20251231": {
+        "total": 226,
+        "unstructured": 145,
+        "xbrl": 81,
+        "sections": 13
+      },
+      "jpm-20251231": {
+        "total": 1061,
+        "unstructured": 890,
+        "xbrl": 171,
+        "sections": 50
+      },
+      "ko-20251231": {
+        "total": 259,
+        "unstructured": 183,
+        "xbrl": 76,
+        "sections": 30
+      },
+      "wmt-20260131": {
+        "total": 227,
+        "unstructured": 185,
+        "xbrl": 42,
+        "sections": 38
+      }
+    }
+  },
+  "companies": {
+    "aapl-20250927": {
+      "chunk_counts": {
+        "total": 120,
+        "unstructured_narrative": 60,
+        "unstructured_table": 29,
+        "xbrl_table": 31
+      },
+      "sections": [
+        "Item 16. Form 10-K Summary",
+        "Item 1A. Risk Factors",
+        "Item 1B. Unresolved Staff Comments",
+        "Item 4. Mine Safety Disclosures",
+        "Item 6. [Reserved]",
+        "Item 7A. Quantitative and Qualitative Disclosures About Market Risk",
+        "Item 8. Financial Statements and Supplementary Data",
+        "Item 8.    Financial Statements and Supplementary Data",
+        "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
+        "Item 9B. Other Information",
+        "Note 1 –",
+        "Note 10 –",
+        "Note 11 –",
+        "Note 12 –",
+        "Note 13 –",
+        "Note 2 –",
+        "Note 3 –",
+        "Note 4 –",
+        "Note 5 –",
+        "Note 6 –",
+        "Note 7 –",
+        "Note 8 –",
+        "Note 9 –",
+        "PART I"
+      ],
+      "sample_chunks": [
+        {
+          "id": "aapl-20250927_unstr_0",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "UNITED STATES\n\nSECURITIES AND EXCHANGE COMMISSION\n\nWashington, D.C. 20549\n\nFORM\n\n(Mark One)\n\nANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934\n\nFor the fiscal year ended\n\nor\n\nTRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934\n\n"
+        },
+        {
+          "id": "aapl-20250927_unstr_1",
+          "source": "unstructured",
+          "section": null,
+          "has_table": true,
+          "text_preview": "| California | 94-2404110 |\n| --- | --- |\n| (State or other jurisdiction of incorporation or organization) | (I.R.S. Employer Identification No.) |\n| One Apple Park Way |  |\n| Cupertino , California | 95014 |\n| (Address of principal executive offices) | (Zip Code) |"
+        },
+        {
+          "id": "aapl-20250927_unstr_2",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "()\n\n(Registrant’s telephone number, including area code)\n\nSecurities registered pursuant to Section 12(b) of the Act:"
+        },
+        {
+          "id": "aapl-20250927_xbrl_0",
+          "source": "xbrl",
+          "section": "Item 8.    Financial Statements and Supplementary Data",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+            "us-gaap:CostOfGoodsAndServicesSold",
+            "us-gaap:GrossProfit",
+            "us-gaap:ResearchAndDevelopmentExpense"
+          ],
+          "xbrl_periods": [
+            "2024-09-29 -> 2025-09-27",
+            "2023-10-01 -> 2024-09-28"
+          ],
+          "text_preview": "Financial data: Revenue, Cost Of Goods And Services Sold, Gross Profit, R&D Expense, SG&A Expense, Operating Expenses. Period: 2023 / 2024 / 2025. Segment: ProductMember.\n\n|  | Years ended |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"
+        },
+        {
+          "id": "aapl-20250927_xbrl_1",
+          "source": "xbrl",
+          "section": "Item 8.    Financial Statements and Supplementary Data",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:NetIncomeLoss",
+            "us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+            "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossBeforeReclassificationAfterTax",
+            "aapl:OtherComprehensiveIncomeLossDerivativeInstrumentGainLossbeforeReclassificationafterTax"
+          ],
+          "xbrl_periods": [
+            "2024-09-29 -> 2025-09-27",
+            "2023-10-01 -> 2024-09-28"
+          ],
+          "text_preview": "Financial data: Net Income (Loss), Other Comprehensive Income Loss Foreign Currency Transaction And Translation Adjustment Net Of Tax, Other Comprehensive Income Loss Cash Flow Hedge Gain Loss Before Reclassification After Tax, Other Comprehensive Income Loss Derivative Instrument Gain Lossbefore Re"
+        },
+        {
+          "id": "aapl-20250927_xbrl_2",
+          "source": "xbrl",
+          "section": "Item 8.    Financial Statements and Supplementary Data",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+            "us-gaap:MarketableSecuritiesCurrent",
+            "us-gaap:AccountsReceivableNetCurrent",
+            "us-gaap:NontradeReceivablesCurrent"
+          ],
+          "xbrl_periods": [
+            "2025-09-27",
+            "2024-09-28"
+          ],
+          "text_preview": "Financial data: Cash and Cash Equivalents, Marketable Securities Current, Accounts Receivable Net Current, Nontrade Receivables Current, Inventory Net, Other Assets Current. Period: 2024 / 2025.\n\n|  | September 27, 2025 |  | September 28, 2024 |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- "
+        }
+      ]
+    },
+    "cat-20251231": {
+      "chunk_counts": {
+        "total": 226,
+        "unstructured_narrative": 90,
+        "unstructured_table": 55,
+        "xbrl_table": 81
+      },
+      "sections": [
+        "Item 13. Certain Relationships and Related Transactions, and Director Independen",
+        "Item 16. Form 10-K Summary.",
+        "Item 1A.Risk Factors.",
+        "Item 1B.Unresolved Staff Comments.",
+        "Item 2.Properties.",
+        "Item 3.Legal Proceedings.",
+        "Item 6.[Reserved]",
+        "Item 7A.Quantitative and Qualitative Disclosures About Market Risk.",
+        "Item 8.",
+        "Item 9.Changes in and Disagreements with Accountants on Accounting and Financial",
+        "Item 9C. Disclosure Regarding Foreign Jurisdictions that Prevent Inspections.",
+        "Note 14",
+        "PART I"
+      ],
+      "sample_chunks": [
+        {
+          "id": "cat-20251231_unstr_0",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "Table of Contents\n\nUNITED STATES\n\nSECURITIES AND EXCHANGE COMMISSION\n\nWashington, D.C. 20549\n\ncatlogo201910k.jpg\n\nFORM\n\n(Mark One)"
+        },
+        {
+          "id": "cat-20251231_unstr_1",
+          "source": "unstructured",
+          "section": null,
+          "has_table": true,
+          "text_preview": "| ☒ | ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 |\n| --- | --- |"
+        },
+        {
+          "id": "cat-20251231_unstr_2",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "For the fiscal year ended\n\nOR"
+        },
+        {
+          "id": "cat-20251231_xbrl_0",
+          "source": "xbrl",
+          "section": "Item 8.",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:Revenues",
+            "us-gaap:CostOfRevenue",
+            "us-gaap:SellingGeneralAndAdministrativeExpense",
+            "us-gaap:ResearchAndDevelopmentExpense"
+          ],
+          "xbrl_periods": [
+            "2025-01-01 -> 2025-12-31",
+            "2024-01-01 -> 2024-12-31"
+          ],
+          "text_preview": "Financial data: Net Revenues, Cost of Revenue, SG&A Expense, R&D Expense, Financing Interest Expense, Other Operating Income Expense Net. Period: 2023 / 2024 / 2025. Segment: MachineryPowerEnergyMember.\n\n| STATEMENT 1 | Caterpillar Inc. |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"
+        },
+        {
+          "id": "cat-20251231_xbrl_1",
+          "source": "xbrl",
+          "section": "Item 8.",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:ProfitLoss",
+            "us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+            "us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax",
+            "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax"
+          ],
+          "xbrl_periods": [
+            "2025-01-01 -> 2025-12-31",
+            "2024-01-01 -> 2024-12-31"
+          ],
+          "text_preview": "Financial data: Profit Loss, Other Comprehensive Income Loss Foreign Currency Transaction And Translation Adjustment Net Of Tax, Other Comprehensive Income Loss Pension And Other Postretirement Benefit Plans Adjustment Net Of Tax, Other Comprehensive Income Loss Cash Flow Hedge Gain Loss After Recla"
+        },
+        {
+          "id": "cat-20251231_xbrl_2",
+          "source": "xbrl",
+          "section": "Item 8.",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+            "us-gaap:AccountsReceivableNetCurrent",
+            "us-gaap:NotesAndLoansReceivableNetCurrent",
+            "us-gaap:PrepaidExpenseAndOtherAssetsCurrent"
+          ],
+          "xbrl_periods": [
+            "2025-12-31",
+            "2024-12-31"
+          ],
+          "text_preview": "Financial data: Cash and Cash Equivalents, Accounts Receivable Net Current, Notes And Loans Receivable Net Current, Prepaid Expense And Other Assets Current, Inventory Net, Assets Current. Period: 2024 / 2025. Segment: FinancialProductsMember.\n\n| STATEMENT 3 | Caterpillar Inc. |\n| --- | --- | --- | "
+        }
+      ]
+    },
+    "jpm-20251231": {
+      "chunk_counts": {
+        "total": 1061,
+        "unstructured_narrative": 404,
+        "unstructured_table": 486,
+        "xbrl_table": 171
+      },
+      "sections": [
+        "Item 10. Directors, Executive Officers and Corporate Governance.",
+        "Item 11. Executive Compensation.",
+        "Item 13. Certain Relationships and Related Transactions, and Director Independen",
+        "Item 15. Exhibits, Financial Statement Schedules.",
+        "Item 1A. Risk Factors.",
+        "Item 1B. Unresolved Staff Comments.",
+        "Item 3. Legal Proceedings.",
+        "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
+        "Item 6. Reserved",
+        "Item 8. Financial Statements and Supplementary Data.",
+        "Item 9B. Other Information.",
+        "Item 9C. Disclosure regarding Foreign Jurisdictions that Prevent Inspections.",
+        "Note 1 –",
+        "Note 10 –",
+        "Note 11 –",
+        "Note 12 –",
+        "Note 13 –",
+        "Note 14 –",
+        "Note 15 –",
+        "Note 16 –",
+        "Note 17 –",
+        "Note 18 -",
+        "Note 19 –",
+        "Note 2 –",
+        "Note 20 –",
+        "Note 21 –",
+        "Note 22 –",
+        "Note 23 –",
+        "Note 24 –",
+        "Note 25 –",
+        "Note 26 –",
+        "Note 27 –",
+        "Note 28 –",
+        "Note 29 –",
+        "Note 3 –",
+        "Note 30 –",
+        "Note 31 –",
+        "Note 32 –",
+        "Note 33 –",
+        "Note 34 –",
+        "Note 34 – Business combinations",
+        "Note 4 –",
+        "Note 5 –",
+        "Note 6 –",
+        "Note 7 –",
+        "Note 8 –",
+        "Note 9 –",
+        "Part I",
+        "Part I Page Item 1. Business . 1 Overview 1 Business segments & Corporate 1 Comp",
+        "Part IV"
+      ],
+      "sample_chunks": [
+        {
+          "id": "jpm-20251231_unstr_0",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "UNITED STATES\n\nSECURITIES AND EXCHANGE COMMISSION\n\nWASHINGTON, D.C. 20549\n\nFORM\n\nAnnual report pursuant to Section 13 or 15(d) of\n\nthe Securities Exchange Act of 1934"
+        },
+        {
+          "id": "jpm-20251231_unstr_1",
+          "source": "unstructured",
+          "section": null,
+          "has_table": true,
+          "text_preview": "| For the fiscal year ended | Commission file |  |\n| --- | --- | --- |\n| December 31 , 2025 | number | 1-5805 |"
+        },
+        {
+          "id": "jpm-20251231_unstr_2",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "(Exact name of registrant as specified in its charter)"
+        },
+        {
+          "id": "jpm-20251231_xbrl_0",
+          "source": "xbrl",
+          "section": "Item 9B. Other Information.",
+          "has_table": true,
+          "xbrl_concepts": [
+            "ecd:TrdArrSecuritiesAggAvailAmt"
+          ],
+          "xbrl_periods": [
+            "2025-12-31"
+          ],
+          "text_preview": "Financial data: Trd Arr Securities Agg Avail Amt. Period: 2025. Segment: JamesDimonMember.\n\n| Name | Title | Adoption date | Duration (c) | Aggregate number of shares to be sold (d) |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| Ashley Bacon | Chief R"
+        },
+        {
+          "id": "jpm-20251231_xbrl_1",
+          "source": "xbrl",
+          "section": "Note 34 – Business combinations",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:InvestmentBankingRevenue",
+            "us-gaap:PrincipalTransactionsRevenue",
+            "jpm:LendingAndDepositRelatedFees",
+            "jpm:AssetManagementFees"
+          ],
+          "xbrl_periods": [
+            "2025-01-01 -> 2025-12-31",
+            "2024-01-01 -> 2024-12-31"
+          ],
+          "text_preview": "Financial data: Investment Banking Revenue, Principal Transactions Revenue, Lending And Deposit Related Fees, Asset Management Fees, Fees And Commissions1, Debt Securities Available For Sale Realized Gain Loss. Period: 2023 / 2024 / 2025.\n\n| Year ended December 31, (in millions, except per share dat"
+        },
+        {
+          "id": "jpm-20251231_xbrl_2",
+          "source": "xbrl",
+          "section": "Note 34 – Business combinations",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:NetIncomeLoss",
+            "us-gaap:OtherComprehensiveIncomeAvailableforsaleSecuritiesAdjustmentNetOfTaxPortionAttributableToParent",
+            "us-gaap:OtherComprehensiveIncomeForeignCurrencyTransactionAndTranslationAdjustmentNetOfTaxPortionAttributableToParent",
+            "us-gaap:OtherComprehensiveIncomeLossDerivativeExcludedComponentIncreaseDecreaseAfterAdjustmentsAndTaxParent"
+          ],
+          "xbrl_periods": [
+            "2025-01-01 -> 2025-12-31",
+            "2024-01-01 -> 2024-12-31"
+          ],
+          "text_preview": "Financial data: Net Income (Loss), Other Comprehensive Income Availableforsale Securities Adjustment Net Of Tax Portion Attributable To Parent, Other Comprehensive Income Foreign Currency Transaction And Translation Adjustment Net Of Tax Portion Attributable To Parent, Other Comprehensive Income Los"
+        }
+      ]
+    },
+    "ko-20251231": {
+      "chunk_counts": {
+        "total": 259,
+        "unstructured_narrative": 126,
+        "unstructured_table": 57,
+        "xbrl_table": 76
+      },
+      "sections": [
+        "ITEM 16. FORM 10-K SUMMARY",
+        "ITEM 1A. RISK FACTORS",
+        "ITEM 1B. UNRESOLVED STAFF COMMENTS",
+        "ITEM 3. LEGAL PROCEEDINGS",
+        "ITEM 4. MINE SAFETY DISCLOSURES",
+        "ITEM 6. RESERVED",
+        "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK",
+        "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA",
+        "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
+        "NOTE 10:",
+        "NOTE 11:",
+        "NOTE 13:",
+        "NOTE 14:",
+        "NOTE 15:",
+        "NOTE 16:",
+        "NOTE 17:",
+        "NOTE 1:",
+        "NOTE 20:",
+        "NOTE 21:",
+        "NOTE 2:",
+        "NOTE 3:",
+        "NOTE 4:",
+        "NOTE 5:",
+        "NOTE 6:",
+        "NOTE 7:",
+        "NOTE 8:",
+        "NOTE 9:",
+        "Note 21",
+        "Part I",
+        "Part II"
+      ],
+      "sample_chunks": [
+        {
+          "id": "ko-20251231_unstr_0",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "UNITED STATES\n\nSECURITIES AND EXCHANGE COMMISSION\n\nWASHINGTON, D.C. 20549\n\nFORM\n\n(Mark One)"
+        },
+        {
+          "id": "ko-20251231_unstr_1",
+          "source": "unstructured",
+          "section": null,
+          "has_table": true,
+          "text_preview": "| ☒ | ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 |\n| --- | --- |"
+        },
+        {
+          "id": "ko-20251231_unstr_2",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "For the fiscal year ended\n\nOR"
+        },
+        {
+          "id": "ko-20251231_xbrl_0",
+          "source": "xbrl",
+          "section": "Note 21",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:Revenues",
+            "us-gaap:CostOfGoodsAndServicesSold",
+            "us-gaap:GrossProfit",
+            "us-gaap:SellingGeneralAndAdministrativeExpense"
+          ],
+          "xbrl_periods": [
+            "2025-01-01 -> 2025-12-31",
+            "2024-01-01 -> 2024-12-31"
+          ],
+          "text_preview": "Financial data: Net Revenues, Cost Of Goods And Services Sold, Gross Profit, SG&A Expense, Other Selling General And Administrative Expense, Operating Income (Loss). Period: 2023 / 2024 / 2025.\n\n| Year Ended December 31, | 2025 | 2024 | 2023 |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | "
+        },
+        {
+          "id": "ko-20251231_xbrl_1",
+          "source": "xbrl",
+          "section": "Note 21",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:ProfitLoss",
+            "us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+            "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+            "us-gaap:OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax"
+          ],
+          "xbrl_periods": [
+            "2025-01-01 -> 2025-12-31",
+            "2024-01-01 -> 2024-12-31"
+          ],
+          "text_preview": "Financial data: Profit Loss, Other Comprehensive Income Loss Foreign Currency Transaction And Translation Adjustment Net Of Tax, Other Comprehensive Income Loss Cash Flow Hedge Gain Loss After Reclassification And Tax, Other Comprehensive Income Loss Available For Sale Securities Adjustment Net Of T"
+        },
+        {
+          "id": "ko-20251231_xbrl_2",
+          "source": "xbrl",
+          "section": "Note 21",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+            "us-gaap:OtherShortTermInvestments",
+            "us-gaap:CashCashEquivalentsAndShortTermInvestments",
+            "us-gaap:MarketableSecurities"
+          ],
+          "xbrl_periods": [
+            "2025-12-31",
+            "2024-12-31"
+          ],
+          "text_preview": "Financial data: Cash and Cash Equivalents, Other Short Term Investments, Cash Cash Equivalents And Short Term Investments, Marketable Securities, Allowance For Doubtful Accounts Receivable Current, Accounts Receivable Net Current. Period: 2024 / 2025.\n\n| December 31, | 2025 | 2024 |\n| --- | --- | --"
+        }
+      ]
+    },
+    "wmt-20260131": {
+      "chunk_counts": {
+        "total": 227,
+        "unstructured_narrative": 114,
+        "unstructured_table": 71,
+        "xbrl_table": 42
+      },
+      "sections": [
+        "ITEM 1. BUSINESS",
+        "ITEM 10. DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE",
+        "ITEM 11. EXECUTIVE COMPENSATION",
+        "ITEM 12. SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND RELA",
+        "ITEM 13. CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDEN",
+        "ITEM 14. PRINCIPAL ACCOUNTING FEES AND SERVICES",
+        "ITEM 15. EXHIBITS, FINANCIAL STATEMENT SCHEDULES",
+        "ITEM 16. FORM 10-K SUMMARY",
+        "ITEM 1A. RISK FACTORS",
+        "ITEM 1B. UNRESOLVED STAFF COMMENTS",
+        "ITEM 1C. CYBERSECURITY",
+        "ITEM 2. PROPERTIES",
+        "ITEM 3. LEGAL PROCEEDINGS",
+        "ITEM 4. MINE SAFETY DISCLOSURES",
+        "ITEM 5. MARKET FOR REGISTRANT'S COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND I",
+        "ITEM 6. RESERVED",
+        "ITEM 7. MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
+        "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK",
+        "ITEM 8.",
+        "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA",
+        "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
+        "ITEM 9A. CONTROLS AND PROCEDURES",
+        "ITEM 9B. OTHER INFORMATION",
+        "ITEM 9C. DISCLOSURE REGARDING FOREIGN JURISDICTIONS THAT PREVENT INSPECTIONS",
+        "Note 1",
+        "Note 1.",
+        "Note 10.",
+        "Note 2.",
+        "Note 3.",
+        "Note 4.",
+        "Note 5.",
+        "Note 6.",
+        "Note 7",
+        "Note 8.",
+        "PART I",
+        "PART II",
+        "PART III",
+        "PART IV"
+      ],
+      "sample_chunks": [
+        {
+          "id": "wmt-20260131_unstr_0",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "UNITED STATES\n\nSECURITIES AND EXCHANGE COMMISSION\n\nWashington, D.C. 20549\n\n___________________________________________\n\nFORM\n\n___________________________________________"
+        },
+        {
+          "id": "wmt-20260131_unstr_1",
+          "source": "unstructured",
+          "section": null,
+          "has_table": true,
+          "text_preview": "| ☒ | Annual report pursuant to section 13 or 15(d) of the Securities Exchange Act of 1934 |\n| --- | --- |"
+        },
+        {
+          "id": "wmt-20260131_unstr_2",
+          "source": "unstructured",
+          "section": null,
+          "has_table": false,
+          "text_preview": "For the fiscal year ended , or"
+        },
+        {
+          "id": "wmt-20260131_xbrl_0",
+          "source": "xbrl",
+          "section": "ITEM 8.",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+            "us-gaap:OtherIncome",
+            "us-gaap:Revenues",
+            "us-gaap:CostOfRevenue"
+          ],
+          "xbrl_periods": [
+            "2025-02-01 -> 2026-01-31",
+            "2024-02-01 -> 2025-01-31"
+          ],
+          "text_preview": "Financial data: Revenue, Other Income, Net Revenues, Cost of Revenue, SG&A Expense, Operating Income (Loss). Period: 2024 / 2025 / 2026.\n\n|  | Fiscal Years Ended January 31, |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| (Amounts in "
+        },
+        {
+          "id": "wmt-20260131_xbrl_1",
+          "source": "xbrl",
+          "section": "ITEM 8.",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:ProfitLoss",
+            "us-gaap:NetIncomeLossAttributableToNoncontrollingInterest",
+            "us-gaap:NetIncomeLoss",
+            "us-gaap:OtherComprehensiveIncomeLossNetOfTax"
+          ],
+          "xbrl_periods": [
+            "2025-02-01 -> 2026-01-31",
+            "2024-02-01 -> 2025-01-31"
+          ],
+          "text_preview": "Financial data: Profit Loss, Net Income — Noncontrolling Interests, Net Income (Loss), Other Comprehensive Income Loss Net Of Tax, Other Comprehensive Income Loss Net Of Tax Portion Attributable To Noncontrolling Interest, Other Comprehensive Income Loss Net Of Tax Portion Attributable To Parent. Pe"
+        },
+        {
+          "id": "wmt-20260131_xbrl_2",
+          "source": "xbrl",
+          "section": "ITEM 8.",
+          "has_table": true,
+          "xbrl_concepts": [
+            "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+            "us-gaap:ReceivablesNetCurrent",
+            "us-gaap:InventoryNet",
+            "us-gaap:PrepaidExpenseAndOtherAssetsCurrent"
+          ],
+          "xbrl_periods": [
+            "2026-01-31",
+            "2025-01-31"
+          ],
+          "text_preview": "Financial data: Cash and Cash Equivalents, Receivables Net Current, Inventory Net, Prepaid Expense And Other Assets Current, Assets Current, Property Plant And Equipment Net. Period: 2025 / 2026.\n\n|  | As of January 31, |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| (A"
+        }
+      ]
+    }
+  }
+}

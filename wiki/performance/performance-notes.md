@@ -114,8 +114,32 @@
 
 ---
 
-## Chunking Exploration — No Eval Benchmark Yet
-- Concern: Three HTML→chunk paths exist (structured, semantic, unstructured) but only structured-derived strategies are in the eval grid (Runs 01–31). Cannot yet compare retrieval quality of semantic/unstructured chunking.
-- Location: `Documents/semantic_explore/`, `Documents/unstructured_explore/`, `src/ingestion/build_corpus.py`
+## Chunking Exploration — No Eval Benchmark Yet [PARTIALLY RESOLVED]
+- Concern: Three HTML→chunk paths existed but only structured-derived strategies were in eval grid.
+- Location: `Documents/semantic_explore/`, `build_unstructured_corpus.py`
+- Priority: Medium → Low for unstructured (now benchmarked Runs 32–36)
+- Notes: Semantic HTML path still not in eval. Unstructured is now production winner.
+
+---
+
+## Unstructured Corpus — Large Index (1,492 chunks)
+- Concern: Production unstructured corpus is ~90% larger than fixed 1024 corpus (~1,658 chunks across 5 docs but different granularity). FAISS index + BM25 tokenization at init; JPM dominates chunk count.
+- Location: `Experiments/corpora/unstructured_4000_200.json`, `faiss_hybrid` retriever
 - Priority: Medium
-- Notes: Blocking decision on production chunking strategy. Unstructured path has richest section/table cross-refs but highest chunk count on JPM.
+- Notes: Run 36 init loads BM25 + HuggingFaceEmbeddings + FAISS over 1,492 chunks. Acceptable for research; monitor latency in chatbot.
+
+---
+
+## build_xbrl_corpus — Full iXBRL DOM Parse
+- Concern: Parses all `ix:nonFraction` facts and walks HTML table ancestry per filing. JPM filing is largest; runs once offline.
+- Location: `src/ingestion/build_xbrl_corpus.py`
+- Priority: Low
+- Notes: Produces 401 table-only chunks merged into 1,893-chunk index.
+
+---
+
+## build_merged_corpus — O(n×m) Fingerprint Dedup
+- Concern: For each of 401 xbrl chunks, checks 120-char normalized prefix against set of 1,492 unstructured fingerprints. Linear but small at current scale.
+- Location: `src/ingestion/build_merged_corpus.py`
+- Priority: Low
+- Notes: Dedup may collapse distinct tables with similar headers — could explain merged underperformance vs unstructured-only.

@@ -17,35 +17,25 @@ High-level milestone tracker across project phases. Updated at the end of each i
 ---
 
 ## Phase 1 — Chunking × Retrieval Baselines
-**Status: Complete (extended with LangChain + FAISS variants)**
+**Status: Complete**
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| Fixed-size chunking | Done | 256/512/1024 token variants |
-| Recursive chunking | Done | Hand-rolled + LangChain variants |
-| Section-based chunking | Done | Custom + LangChain section variants |
-| LangChain chunking comparison | Done | Runs 21–31 |
-| Corpus builder CLI | Done | Plain text + structured JSON; `table_index` |
-| Gold chunk population | Done | 26/27 answerable matched |
-| BM25 retriever | Done | Runs 01–06, 09, 13, 17, 21, 24, 28, 30 |
-| Dense (numpy BGE-small) | Done | Runs 07, 11, 15 |
-| Hybrid (numpy RRF) | Done | Runs 08, 10, 12, 14, 16, 18 |
-| FAISS dense (LangChain) | Done | Runs 22, 25 |
-| FAISS hybrid (LangChain RRF) | Done | Runs 23, 26, 27, 29, 31 |
-| Top-k sweep | Done | k=3, 5, 10 across multiple configs |
-| HTML semantic exploration | Done (explore) | LangChain HTMLSemanticPreservingSplitter; all 5 filings |
-| Unstructured-IO exploration | Done (explore) | partition_html + chunk_by_title; all 5 filings |
-| Consolidate chunking path for eval | Not started | 3 explore paths, 1 eval path |
-| Parent-child chunking | Not started | — |
+| Fixed/recursive/section/LangChain chunkers | Done | Runs 01–31 |
+| Unstructured-IO corpus in eval | Done | Runs 32–36 |
+| iXBRL + merged corpora | Done | Runs 37–40 |
+| BM25 / dense / hybrid / FAISS hybrid | Done | All strategies benchmarked |
+| Gold chunk population | Done | **26/26** on merged corpus; 25/26 unstructured |
 | Document-level retrieval filtering | Not started | Cross-doc pollution still present |
 
-**Best configs so far (n=26, latest runs):**
-| Run | Strategy | Chunking | k | Recall@k | MRR |
-|-----|----------|----------|---|----------|-----|
-| run16 | hybrid (numpy) | fixed 1024/100 | 10 | **0.598** | 0.379 |
-| run31 | faiss_hybrid | langchain section 1024/100 | 10 | 0.589 | 0.365 |
-| run27 | faiss_hybrid | langchain recursive 1024/100 | 10 | 0.587 | 0.374 |
-| run29 | faiss_hybrid | langchain section 512/50 | 5 | 0.416 | **0.474** |
+**Best configs (n=26, latest runs):**
+| Run | Strategy | Corpus | k | Recall@k | MRR |
+|-----|----------|--------|---|----------|-----|
+| **36** | faiss_hybrid | unstructured 4000/200 | 10 | **0.677** | 0.396 |
+| 34 | hybrid (numpy) | unstructured 4000/200 | 10 | 0.677 | 0.396 |
+| 32 | bm25 | unstructured 4000/200 | 5 | 0.557 | 0.376 |
+| 16 | hybrid (numpy) | fixed 1024/100 | 10 | 0.598 | 0.379 |
+| 40 | faiss_hybrid | merged unstr+xbrl | 10 | 0.575 | 0.398 |
 
 ---
 
@@ -55,9 +45,8 @@ High-level milestone tracker across project phases. Updated at the end of each i
 | Milestone | Status | Notes |
 |-----------|--------|-------|
 | Cross-encoder reranker (ms-marco MiniLM) | Done | Runs 19–20; hurts recall |
-| Rerank on Run 16 / Run 31 baselines | Not started | — |
+| Rerank on Run 36 baseline | Not started | — |
 | BGE / domain cross-encoder | Not started | — |
-| Cohere reranker | Not started | — |
 
 ---
 
@@ -66,11 +55,10 @@ High-level milestone tracker across project phases. Updated at the end of each i
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
+| iXBRL table recovery | Done | `build_xbrl_corpus.py` |
+| Section/table cross-refs in chunks | Done | unstructured + merged corpora |
 | Structured cross-reference graph | Done (extracted) | Not used at retrieval time |
-| Table chunk metadata + reverse index | Done | In corpora; not used by retrievers |
-| Multi-query retrieval | Not started | — |
-| Query expansion | Not started | — |
-| Parent-document retrieval | Not started | — |
+| Multi-query / query expansion | Not started | — |
 
 ---
 
@@ -79,24 +67,20 @@ High-level milestone tracker across project phases. Updated at the end of each i
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| Top-k sweep | Done | Multiple k values benchmarked |
+| Top-k sweep | Done | k=3, 5, 10 benchmarked |
 | Context compression | Not started | — |
-| Long-context baseline | Not started | — |
 
 ---
 
 ## App / Demo Layer
-**Status: Skeleton Complete**
+**Status: Skeleton Complete (config outdated)**
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| FastAPI backend + `/chat` | Done | LangChain ReAct agent |
-| RAG tool wrapping RagPipeline | Done | Hardcoded hybrid fixed 1024 (not Run 31) |
-| React frontend | Done (skeleton) | Vite dev server + API proxy |
-| Streaming responses | Not started | — |
-| Source citations in UI | Not started | — |
-| Session memory | Not started | Frontend resends full history |
-| Eval harness LLM generation | Not started | Placeholder only in eval runs |
+| FastAPI + LangChain agent | Done | — |
+| RAG tool | Done | **Still on hybrid fixed 1024 k=5** — should be Run 36 |
+| React frontend | Done (skeleton) | — |
+| Streaming / citations | Not started | — |
 
 ---
 
@@ -105,9 +89,9 @@ High-level milestone tracker across project phases. Updated at the end of each i
 
 ---
 
-## Next Up (Iteration 6 candidates)
-1. Build eval corpus from unstructured chunks; benchmark vs Run 16/31
-2. Build eval corpus from semantic HTML chunks; compare table detection
-3. Update `app/backend/rag_tool.py` to Run 31 config
-4. Pin `unstructured`, langchain, faiss, sentence-transformers, rank-bm25 in requirements
-5. Rerank on Run 16/31 baselines with BGE reranker
+## Next Up (Iteration 7 candidates)
+1. Update `rag_tool.py` to Run 36 (faiss_hybrid unstructured k=10)
+2. Rerank on Run 36 baseline
+3. Investigate why merged corpus underperforms unstructured-only despite 26/26 gold match
+4. Semantic HTML corpus → eval (Runs 41+)
+5. Document-level filtering by company

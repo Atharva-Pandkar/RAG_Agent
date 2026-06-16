@@ -53,8 +53,8 @@
 ## Gold Chunk Matching Failed for 12 Answerable Questions [RESOLVED]
 - Severity: High → resolved
 - Location: `eval/golden_set/populate_gold_chunks.py`
-- Description: Iteration 1 had only 15/27 answerable questions matched. Re-population against updated corpora now matches 26/27 on latest sidecars.
-- Suggested Fix: Investigate the 1 remaining unmatched question; consider fuzzy matching for edge cases.
+- Description: Iteration 1 had only 15/27 answerable questions matched. Merged corpus sidecar now matches **26/26** answerable questions. Unstructured sidecar: 25/26.
+- Suggested Fix: Identify the 1 remaining unmatched question on unstructured corpus.
 
 ---
 
@@ -98,11 +98,35 @@
 
 ---
 
-## Chatbot Uses Suboptimal Retrieval Config
-- Severity: Medium
+## Chatbot Uses Suboptimal Retrieval Config [OUTDATED — severity raised]
+- Severity: **High** (was Medium)
 - Location: `app/backend/rag_tool.py`
-- Description: Demo app hardcodes hybrid (numpy) over `fixed_size_1024_100` at k=5. Best eval configs are Run 16 (hybrid k=10, recall 0.598) or Run 31 (faiss_hybrid + langchain section 1024 k=10, recall 0.589).
-- Suggested Fix: Point `rag_tool.py` at Run 31 pipeline kwargs; expose config via env or YAML.
+- Description: Demo app hardcodes hybrid (numpy) over `fixed_size_1024_100` at k=5 (recall ~0.440). Current best is Run 36: faiss_hybrid + unstructured 4000/200 at k=10 (recall **0.677**). Gap of ~0.24 recall vs production baseline.
+- Suggested Fix: Update to Run 36 pipeline kwargs; expose via env/YAML; set k=10 for retrieval tool.
+
+---
+
+## Merged Corpus Underperforms Unstructured-Only Despite Full Gold Coverage
+- Severity: Medium
+- Location: `build_merged_corpus.py`, Runs 37–40 vs 32–36
+- Description: Merged corpus has 26/26 gold-chunk matches (vs 25/26 unstructured) and 1,893 chunks vs 1,492, but recall@10 is 0.575 (Run 40) vs 0.677 (Run 36). Added iXBRL chunks may dilute BM25/FAISS ranking or dedup fingerprint may drop useful variants.
+- Suggested Fix: Analyze which questions improve/regress on merged vs unstructured; tune dedup threshold; try iXBRL-only chunks for table_numerical question types.
+
+---
+
+## iXBRL / unstructured / merge deps Missing from requirements.txt
+- Severity: Medium
+- Location: `requirements.txt`
+- Description: `build_unstructured_corpus.py` needs `unstructured[html]`; xbrl parser uses bs4/lxml (present) but no explicit ixbrl deps documented. Still no sentence-transformers, rank-bm25, faiss, langchain pinned.
+- Suggested Fix: Pin full experiment stack in root requirements.
+
+---
+
+## Large Unstructured JSON Artifacts (JPM) [OUTDATED — production corpus built]
+- Severity: Low
+- Location: `Documents/unstructured_explore/jpm_unstructured_chunks.json`
+- Description: JPM filing produces 890 chunks in explore output. Production corpus `unstructured_4000_200.json` consolidates all filings (1,492 chunks total).
+- Suggested Fix: Explore artifacts optional; production corpus is the eval source of truth.
 
 ---
 

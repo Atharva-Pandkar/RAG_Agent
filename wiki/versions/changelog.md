@@ -110,3 +110,26 @@ Project-level record of what was added, changed, or removed each iteration.
 
 ### Removed
 - (none)
+
+---
+
+## Iteration 6 — 2026-06-16
+
+### Added
+- `src/ingestion/build_unstructured_corpus.py` — production Unstructured-IO corpus builder
+- `src/ingestion/build_xbrl_corpus.py` — iXBRL fact-level table corpus from `ix:nonFraction` tags
+- `src/ingestion/build_merged_corpus.py` — unstructured + iXBRL merge with 120-char fingerprint dedup
+- `Experiments/corpora/unstructured_4000_200.json` — 1,492 chunks (698 table)
+- `Experiments/corpora/xbrl_merged.json` — 401 iXBRL table chunks
+- `Experiments/corpora/merged_unstr_xbrl.json` — 1,893 merged chunks (1,099 table)
+- Golden sidecars for unstructured (25/26) and merged (26/26 answerable matched)
+- `Experiments/configs/run32`–`run40` — unstructured + merged corpus eval grid
+- `Experiments/runs/` — results for runs 32–40
+
+### Changed
+- **New best recall:** Run 34/36 → **0.677** (faiss_hybrid/hybrid unstructured k=10), up from Run 16 → 0.598
+- Merged corpus achieves first **26/26** gold-chunk match rate but recall (0.575 at k=10) trails unstructured-only
+- Unstructured path promoted from exploration to primary eval corpus
+
+### Removed
+- (none)

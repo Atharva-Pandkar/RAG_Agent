@@ -193,7 +193,7 @@ Single chronological record of architectural and technical decisions. Append new
 
 ---
 
-## Three-Way Chunking Exploration (Not Yet Consolidated)
+## Three-Way Chunking Exploration (Not Yet Consolidated) [OUTDATED — unstructured promoted Iteration 6]
 - Date: 2026-06-15
 - Context: Project now has three parallel HTML→chunk exploration paths with no production winner selected.
 - Decision: Keep all three as research artifacts until eval-backed comparison:
@@ -202,3 +202,39 @@ Single chronological record of architectural and technical decisions. Append new
   3. `explore_unstructured.py` → Unstructured partition + chunk_by_title (`Documents/unstructured_explore/`)
 - Alternatives Considered: Pick one path now; merge outputs into single corpus format.
 - Impact: Next step is build eval corpora from unstructured/semantic paths and benchmark against Runs 16/31 baselines.
+
+---
+
+## Unstructured-IO Promoted to Eval Corpus
+- Date: 2026-06-16
+- Context: Iteration 5 exploration showed strong table/section coverage; needed eval-backed comparison against fixed-token and LangChain chunkers.
+- Decision: `build_unstructured_corpus.py` produces `Experiments/corpora/unstructured_4000_200.json` (1,492 chunks, 698 table chunks). Table chunks use markdown text; section cross-refs preserved. Golden sidecar: 25/26 answerable matched.
+- Alternatives Considered: Adopt semantic HTML path; stay with fixed 1024 only.
+- Impact: Runs 32–36. **New best recall:** Run 34/36 (hybrid/faiss_hybrid unstructured k=10) → **0.677**, surpassing Run 16 (0.598).
+
+---
+
+## iXBRL Fact-Level Corpus for ix:continuation Tables
+- Date: 2026-06-16
+- Context: Unstructured-IO misses financial tables wrapped in `<ix:continuation>` blocks — SEC inline-XBRL mechanism for spanning tagged text across sections.
+- Decision: `build_xbrl_corpus.py` parses `ix:nonFraction` facts, groups by HTML `<table>` ancestor, renders Markdown table chunks with GAAP concept labels. Output: per-filing `xbrl_{doc}.json` + `xbrl_merged.json` (401 table chunks).
+- Alternatives Considered: Extend Unstructured custom handlers; manual table annotation; SEC API structured data.
+- Impact: Recovers numeric financial tables invisible to Unstructured partition. Input to merged corpus.
+
+---
+
+## Merged Corpus: Unstructured + iXBRL with Fingerprint Dedup
+- Date: 2026-06-16
+- Context: Unstructured excels at narrative; iXBRL excels at continuation-wrapped tables. Need single retrieval index without duplicate table content.
+- Decision: `build_merged_corpus.py` concatenates unstructured chunks + non-duplicate xbrl chunks. Dedup: skip xbrl chunk if first 120 chars of normalized text appear in any unstructured chunk. Output: `merged_unstr_xbrl.json` (1,893 chunks, 1,099 table chunks).
+- Alternatives Considered: Union without dedup; iXBRL-only for tables; separate indexes per source.
+- Impact: Runs 37–40. Gold sidecar achieves **26/26 answerable matched** (first full golden-set coverage). Recall at k=10 (0.575) below unstructured-only (0.677) — deduped xbrl adds coverage but may add noise or dilute ranking.
+
+---
+
+## Production Chunking Winner: Unstructured + FAISS Hybrid k=10
+- Date: 2026-06-16
+- Context: After Runs 01–40, unstructured corpus with faiss_hybrid at k=10 is the clear retrieval leader.
+- Decision: Treat Run 36 (`faiss_hybrid` + `unstructured_4000_200` + k=10) as the production retrieval baseline until superseded. Run 40 (merged corpus) preferred when full gold-chunk coverage (26/26) is required for eval completeness.
+- Alternatives Considered: Run 16 fixed 1024 hybrid; Run 31 langchain section; merged corpus as default.
+- Impact: Chatbot `rag_tool.py` still on old hybrid fixed 1024 k=5 — needs update to Run 36 config.
