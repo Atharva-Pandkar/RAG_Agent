@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import importlib
+import sys
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -26,9 +27,12 @@ from metrics import recall_at_k, mrr, context_precision
 ROOT = Path(__file__).resolve().parents[2]
 GOLDEN_SET_PATH = ROOT / "eval" / "golden_set" / "golden_set.json"
 
+sys.path.insert(0, str(ROOT))
 
-def load_golden_set() -> dict:
-    with open(GOLDEN_SET_PATH, "r", encoding="utf-8") as f:
+
+def load_golden_set(override: str | None = None) -> dict:
+    path = (ROOT / override) if override else GOLDEN_SET_PATH
+    with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -41,7 +45,7 @@ def load_pipeline(config: dict):
 
 
 def run(config: dict, dry_run: bool = False):
-    golden = load_golden_set()
+    golden = load_golden_set(config.get("golden_set_override"))
     questions = golden["questions"]
     k = config.get("top_k", 5)
 
@@ -83,10 +87,15 @@ def run(config: dict, dry_run: bool = False):
             "generated_answer": answer,
             "retrieved_ids": retrieved_ids,
         }
+        entry["gold_chunk_ids"] = gold_ids
         if gold_ids:
             entry["recall_at_k"] = recall_at_k(retrieved_ids, gold_ids, k)
             entry["mrr"] = mrr(retrieved_ids, gold_ids)
             entry["context_precision"] = context_precision(retrieved_ids, gold_ids, k)
+        else:
+            entry["recall_at_k"] = None
+            entry["mrr"] = None
+            entry["context_precision"] = None
 
         results["per_question"].append(entry)
 

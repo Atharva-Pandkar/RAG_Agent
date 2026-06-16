@@ -1,0 +1,12 @@
+# Run 02: BM25 retrieval over recursive (paragraph-packed, ~512 tok target, 50 overlap) chunks.
+# Variation vs run01: chunking strategy (fixed_size -> recursive), same chunk size target.
+run_name: run02_bm25_recursive512
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/recursive_512_50.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_recursive_512_50.json

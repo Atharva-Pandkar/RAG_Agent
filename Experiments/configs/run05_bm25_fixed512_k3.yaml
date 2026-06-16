@@ -1,0 +1,13 @@
+# Run 05: same corpus/retriever as run01 (fixed_size 512/50, BM25),
+# but top_k=3 instead of 5.
+# Variation vs run01: context window size (top_k), tests recall/precision tradeoff.
+run_name: run05_bm25_fixed512_k3
+
+top_k: 3
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/fixed_size_512_50.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_fixed_size_512_50.json

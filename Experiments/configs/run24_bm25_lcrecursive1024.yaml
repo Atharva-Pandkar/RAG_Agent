@@ -1,0 +1,13 @@
+# Run 24: BM25 retrieval over LangChain RecursiveCharacterTextSplitter chunks
+# (1024/100, token-length function). Variation vs run04: chunking via
+# LangChain's built-in splitter instead of custom fixed_size chunker.
+run_name: run24_bm25_lcrecursive1024
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/langchain_recursive_1024_100.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_langchain_recursive_1024_100.json

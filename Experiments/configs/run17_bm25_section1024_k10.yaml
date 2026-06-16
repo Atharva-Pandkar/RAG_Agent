@@ -1,0 +1,12 @@
+# Run 17: BM25 retrieval over section-based chunks (1024/100), k=10.
+# Variation vs run13: top_k (5 -> 10).
+run_name: run17_bm25_section1024_k10
+
+top_k: 10
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/section_based_1024_100.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_section_based_1024_100.json

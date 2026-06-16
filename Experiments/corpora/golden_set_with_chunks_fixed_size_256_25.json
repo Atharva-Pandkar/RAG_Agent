@@ -1,0 +1,441 @@
+{
+  "version": "0.1",
+  "description": "Phase 0 golden evaluation set for 10-K RAG experiments. Each item has a question, gold answer, supporting evidence (quote + source doc), and a type tag for stratified analysis.",
+  "source_documents": {
+    "AAPL": "Dataset/aapl-20250927.html",
+    "CAT": "Dataset/cat-20251231.html",
+    "JPM": "Dataset/jpm-20251231.html",
+    "KO": "Dataset/ko-20251231.html",
+    "WMT": "Dataset/wmt-20260131.html"
+  },
+  "questions": [
+    {
+      "id": "AAPL-01",
+      "company": "AAPL",
+      "type": "factual_lookup",
+      "question": "What was Apple's total net sales for fiscal year 2025?",
+      "gold_answer": "$416,161 million (approximately $416.2 billion)",
+      "evidence": "Total net sales FY2025 = $416,161 million, vs $391,035 million FY2024.",
+      "chunk_anchors": [
+        [
+          "416,161",
+          "391,035"
+        ]
+      ],
+      "source_section": "Consolidated Statements of Operations",
+      "gold_chunk_ids": [
+        "aapl-20250927_fixed_111",
+        "aapl-20250927_fixed_113",
+        "aapl-20250927_fixed_129",
+        "aapl-20250927_fixed_146",
+        "aapl-20250927_fixed_185"
+      ]
+    },
+    {
+      "id": "AAPL-02",
+      "company": "AAPL",
+      "type": "table_numerical",
+      "question": "What was Apple's operating income and total assets for fiscal year 2025?",
+      "gold_answer": "Operating income was $133,050 million; total assets were $359,241 million.",
+      "evidence": "Operating income FY2025 = $133,050 million; Total assets = $359,241 million.",
+      "chunk_anchors": [
+        [
+          "133,050"
+        ],
+        [
+          "359,241"
+        ]
+      ],
+      "source_section": "Consolidated Financial Statements",
+      "gold_chunk_ids": [
+        "aapl-20250927_fixed_129",
+        "aapl-20250927_fixed_130",
+        "aapl-20250927_fixed_133",
+        "aapl-20250927_fixed_134",
+        "aapl-20250927_fixed_183"
+      ]
+    },
+    {
+      "id": "AAPL-03",
+      "company": "AAPL",
+      "type": "multi_hop_comparative",
+      "question": "How much did Apple's total net sales grow from fiscal 2024 to fiscal 2025, in both dollar terms and percentage?",
+      "gold_answer": "Net sales grew from $391,035 million to $416,161 million, an increase of $25,126 million, or approximately 6.4%.",
+      "evidence": "FY2025 $416,161M vs FY2024 $391,035M vs FY2023 $383,285M.",
+      "chunk_anchors": [
+        [
+          "416,161",
+          "391,035"
+        ]
+      ],
+      "source_section": "Consolidated Statements of Operations",
+      "gold_chunk_ids": [
+        "aapl-20250927_fixed_111",
+        "aapl-20250927_fixed_113",
+        "aapl-20250927_fixed_129",
+        "aapl-20250927_fixed_146",
+        "aapl-20250927_fixed_185"
+      ]
+    },
+    {
+      "id": "AAPL-04",
+      "company": "AAPL",
+      "type": "risk_factor_synthesis",
+      "question": "What are some of the key risk factors Apple discloses related to its workforce and macroeconomic environment?",
+      "gold_answer": "Apple highlights risks from global macroeconomic conditions affecting demand, and the need to attract and retain highly skilled employees while preserving its company culture as it grows.",
+      "evidence": "Risk factors include macroeconomic/global economic conditions risk, and reliance on retaining 'highly skilled employees' and culture.",
+      "chunk_anchors": [
+        [
+          "highly skilled employees",
+          "inclusive culture"
+        ]
+      ],
+      "source_section": "Item 1A Risk Factors",
+      "gold_chunk_ids": [
+        "aapl-20250927_fixed_68",
+        "aapl-20250927_fixed_69"
+      ]
+    },
+    {
+      "id": "AAPL-05",
+      "company": "AAPL",
+      "type": "mda_interpretive",
+      "question": "Why does Apple typically report higher net sales in its fiscal first quarter?",
+      "gold_answer": "Because the first quarter includes the holiday season, which drives seasonal demand, and new product/service introductions can significantly affect net sales.",
+      "evidence": "\"The Company has historically experienced higher net sales in its first quarter compared to other quarters in its fiscal year due in part to seasonal holiday demand.\"",
+      "source_section": "Item 7 MD&A",
+      "gold_chunk_ids": [
+        "aapl-20250927_fixed_42"
+      ]
+    },
+    {
+      "id": "AAPL-06",
+      "company": "AAPL",
+      "type": "cross_section_fact",
+      "question": "How many full-time equivalent employees did Apple have as of the end of fiscal 2025?",
+      "gold_answer": "Approximately 166,000 full-time equivalent employees as of September 27, 2025.",
+      "evidence": "\"approximately 166,000 full-time equivalent employees\" as of Sept 27, 2025.",
+      "source_section": "Item 1 Business",
+      "gold_chunk_ids": [
+        "aapl-20250927_fixed_43"
+      ]
+    },
+    {
+      "id": "CAT-01",
+      "company": "CAT",
+      "type": "factual_lookup",
+      "question": "What were Caterpillar's total sales and revenues for 2025?",
+      "gold_answer": "$67.589 billion.",
+      "evidence": "\"2025 sales and revenues of $67.589 billion\".",
+      "source_section": "Item 7 MD&A / Overview",
+      "gold_chunk_ids": [
+        "cat-20251231_fixed_194"
+      ]
+    },
+    {
+      "id": "CAT-02",
+      "company": "CAT",
+      "type": "table_numerical",
+      "question": "What was Caterpillar's operating profit for 2025?",
+      "gold_answer": "$11.151 billion.",
+      "evidence": "\"Operating profit was $11.151 billion in 2025, a decrease of $1.921 billion, or 15 percent, compared with $13.072 billion in 2024.\"",
+      "source_section": "Consolidated Results of Operations",
+      "gold_chunk_ids": [
+        "cat-20251231_fixed_301"
+      ]
+    },
+    {
+      "id": "CAT-03",
+      "company": "CAT",
+      "type": "multi_hop_comparative",
+      "question": "How did Caterpillar's operating profit change from 2024 to 2025, and what were the main drivers?",
+      "gold_answer": "Operating profit decreased from $13.072 billion in 2024 to $11.151 billion in 2025, a decrease of $1.921 billion (15%). The decrease was primarily due to unfavorable manufacturing costs of $2.148 billion (largely from higher tariffs) and unfavorable price realization of $817 million, partially offset by higher sales volume contributing $1.218 billion.",
+      "evidence": "\"Operating profit was $11.151 billion in 2025, a decrease of $1.921 billion, or 15 percent, compared with $13.072 billion in 2024... The decrease was primarily due to unfavorable manufacturing costs of $2.148 billion and unfavorable price realization of $817 million, partially offset by the profit impact of higher sales volume of $1.218 billion. Unfavorable manufacturing costs largely reflected the impact of higher tariffs.\"",
+      "source_section": "Item 7 MD&A",
+      "gold_chunk_ids": [
+        "cat-20251231_fixed_301"
+      ]
+    },
+    {
+      "id": "CAT-04",
+      "company": "CAT",
+      "type": "risk_factor_synthesis",
+      "question": "What risk does Caterpillar disclose regarding its relationship with its dealer network?",
+      "gold_answer": "Caterpillar relies on a network of independent dealers under non-exclusive agreements that are generally terminable at will, creating dependency risk on third parties it does not control.",
+      "evidence": "\"Our dealers do not deal exclusively with our products\"; \"These sales and service agreements are terminable at will by either party primarily upon 90 days written notice.\"",
+      "source_section": "Item 1A Risk Factors",
+      "gold_chunk_ids": [
+        "cat-20251231_fixed_215",
+        "cat-20251231_fixed_217",
+        "cat-20251231_fixed_410"
+      ]
+    },
+    {
+      "id": "CAT-05",
+      "company": "CAT",
+      "type": "mda_interpretive",
+      "question": "What role did tariffs play in Caterpillar's 2025 financial performance?",
+      "gold_answer": "Higher tariffs were a major contributor to unfavorable manufacturing costs ($2.148 billion increase), which was the primary driver of the decline in operating profit in 2025.",
+      "evidence": "\"Unfavorable manufacturing costs largely reflected the impact of higher tariffs.\"",
+      "source_section": "Item 7 MD&A",
+      "gold_chunk_ids": [
+        "cat-20251231_fixed_286",
+        "cat-20251231_fixed_302",
+        "cat-20251231_fixed_306",
+        "cat-20251231_fixed_307"
+      ]
+    },
+    {
+      "id": "CAT-06",
+      "company": "CAT",
+      "type": "cross_section_fact",
+      "question": "How many people did Caterpillar employ as of December 31, 2025, and what are its reportable segments?",
+      "gold_answer": "Approximately 118,000 full-time employees (51,600 in the U.S. and 66,400 outside the U.S.). Reportable segments: Construction Industries, Resource Industries, Energy & Transportation (Power & Energy), and Financial Products.",
+      "evidence": "\"As of December 31, 2025, we employed about 118,000 full-time persons\" - 51,600 in U.S., 66,400 outside; segments listed.",
+      "source_section": "Item 1 Business",
+      "gold_chunk_ids": [
+        "cat-20251231_fixed_220"
+      ]
+    },
+    {
+      "id": "JPM-01",
+      "company": "JPM",
+      "type": "factual_lookup",
+      "question": "What was JPMorgan Chase's total net revenue for 2025?",
+      "gold_answer": "$182,447 million (approximately $182.4 billion).",
+      "evidence": "Total net revenue FY2025 = $182,447 million, vs $177,556 million FY2024.",
+      "chunk_anchors": [
+        [
+          "182,447",
+          "177,556"
+        ]
+      ],
+      "source_section": "Five-Year Selected Financial Data / MD&A",
+      "gold_chunk_ids": [
+        "jpm-20251231_fixed_533",
+        "jpm-20251231_fixed_545",
+        "jpm-20251231_fixed_558",
+        "jpm-20251231_fixed_584",
+        "jpm-20251231_fixed_933",
+        "jpm-20251231_fixed_1450"
+      ]
+    },
+    {
+      "id": "JPM-02",
+      "company": "JPM",
+      "type": "multi_hop_comparative",
+      "question": "How did JPMorgan's total net revenue change from 2024 to 2025, and what factor affects the comparability of these two years?",
+      "gold_answer": "Total net revenue increased from $177,556 million in 2024 to $182,447 million in 2025, an increase of about $4,891 million (~2.75%). Comparability is affected because 2024 included a one-time $7.9 billion net gain related to Visa shares (with an offsetting $1.0 billion Visa share contribution to the JPMorgan Chase Foundation, both recorded in Q2 2024).",
+      "evidence": "Total net revenue $182,447M (2025) vs $177,556M (2024); \"Total net revenue included a $7.9 billion net gain related to Visa shares, and total noninterest expense included a $1.0 billion contribution of Visa shares to the JPMorgan Chase Foundation, both recorded in the second quarter of 2024.\"",
+      "source_section": "Item 7 MD&A",
+      "gold_chunk_ids": [
+        "jpm-20251231_fixed_538"
+      ]
+    },
+    {
+      "id": "JPM-03",
+      "company": "JPM",
+      "type": "risk_factor_synthesis",
+      "question": "What are some risk factors JPMorgan discloses related to data, legal proceedings, and climate?",
+      "gold_answer": "JPMorgan discloses risks from data privacy, cybersecurity, and AI-related regulation; significant legal risk from civil and governmental proceedings, investigations, and enforcement actions; and risks from climate change affecting its business and clients.",
+      "evidence": "Data/privacy/cybersecurity/AI regulation risk; climate change impact on business/clients; significant legal risk from \"civil and governmental proceedings, including litigation, investigations and enforcement actions\".",
+      "source_section": "Item 1A Risk Factors",
+      "gold_chunk_ids": [
+        "jpm-20251231_fixed_414"
+      ]
+    },
+    {
+      "id": "JPM-04",
+      "company": "JPM",
+      "type": "cross_section_fact",
+      "question": "How many employees did JPMorgan Chase have globally as of December 31, 2025, and where are they located?",
+      "gold_answer": "318,512 employees globally, located in 66 countries, with 58% of employees located in the U.S.",
+      "evidence": "\"As of December 31, 2025, JPMorganChase had 318,512 employees globally...located in 66 countries, with 58% of the Firm's employees located in the U.S.\"",
+      "source_section": "Item 1 Business / Human Capital",
+      "gold_chunk_ids": [
+        "jpm-20251231_fixed_399"
+      ]
+    },
+    {
+      "id": "JPM-05",
+      "company": "JPM",
+      "type": "unanswerable",
+      "question": "What was JPMorgan Chase's total net revenue for fiscal year 2030?",
+      "gold_answer": "The filing does not contain this information (it covers fiscal year 2025 and prior years only); this question cannot be answered from the document.",
+      "evidence": "N/A - tests hallucination resistance.",
+      "source_section": "N/A",
+      "gold_chunk_ids": []
+    },
+    {
+      "id": "KO-01",
+      "company": "KO",
+      "type": "factual_lookup",
+      "question": "What were Coca-Cola's net operating revenues for 2025?",
+      "gold_answer": "$47,941 million.",
+      "evidence": "\"Net operating revenues were $47,941 million in 2025, compared to $47,061 million in 2024, an increase of $880 million, or 2%.\"",
+      "source_section": "Item 7 MD&A",
+      "gold_chunk_ids": [
+        "ko-20251231_fixed_301"
+      ]
+    },
+    {
+      "id": "KO-02",
+      "company": "KO",
+      "type": "multi_hop_comparative",
+      "question": "How did Coca-Cola's net operating revenues change from 2024 to 2025?",
+      "gold_answer": "Net operating revenues increased from $47,061 million in 2024 to $47,941 million in 2025, an increase of $880 million, or approximately 2%.",
+      "evidence": "\"Net operating revenues were $47,941 million in 2025, compared to $47,061 million in 2024, an increase of $880 million, or 2%.\"",
+      "source_section": "Item 7 MD&A",
+      "gold_chunk_ids": [
+        "ko-20251231_fixed_301"
+      ]
+    },
+    {
+      "id": "KO-03",
+      "company": "KO",
+      "type": "table_numerical",
+      "question": "What was Coca-Cola's total operating income for 2025?",
+      "gold_answer": "$13,426 million.",
+      "evidence": "Operating income = $13,426 million.",
+      "chunk_anchors": [
+        [
+          "13,426"
+        ]
+      ],
+      "source_section": "Consolidated Statements of Income",
+      "gold_chunk_ids": [
+        "ko-20251231_fixed_445"
+      ]
+    },
+    {
+      "id": "KO-04",
+      "company": "KO",
+      "type": "risk_factor_synthesis",
+      "question": "What supply-related risk does Coca-Cola disclose regarding packaging materials?",
+      "gold_answer": "Coca-Cola notes that certain packaging materials, such as aluminum cans, are available from only a limited number of suppliers, creating a supply concentration risk.",
+      "evidence": "\"certain packaging materials, such as aluminum cans, are available from a limited number of suppliers\".",
+      "source_section": "Item 1A Risk Factors",
+      "gold_chunk_ids": [
+        "ko-20251231_fixed_139"
+      ]
+    },
+    {
+      "id": "KO-05",
+      "company": "KO",
+      "type": "mda_interpretive",
+      "question": "What drove the change in Coca-Cola's North America segment operating income from 2024 to 2025?",
+      "gold_answer": "North America operating income increased from $4,556 million in 2024 to $5,070 million in 2025, primarily driven by favorable pricing initiatives, partially offset by a 1% decrease in concentrate sales volume, higher commodity costs, increased marketing spending, higher other operating charges, and a 1% unfavorable foreign currency impact.",
+      "evidence": "\"The increase in operating income was primarily driven by favorable pricing initiatives, partially offset by a decrease in concentrate sales volume of 1%, higher commodity costs, increased marketing spending, higher other operating charges and an unfavorable foreign currency exchange rate impact of 1%.\" North America op income $5,070M (2025) vs $4,556M (2024).",
+      "source_section": "Item 7 MD&A - Segment Operating Results",
+      "gold_chunk_ids": [
+        "ko-20251231_fixed_314"
+      ]
+    },
+    {
+      "id": "WMT-01",
+      "company": "WMT",
+      "type": "factual_lookup",
+      "question": "What were Walmart's total net sales for fiscal year 2026 (ended January 31, 2026)?",
+      "gold_answer": "$706,413 million.",
+      "evidence": "Net sales = $706,413 million vs $674,538 million prior year, +4.7%.",
+      "chunk_anchors": [
+        [
+          "706,413",
+          "674,538"
+        ]
+      ],
+      "source_section": "Consolidated Statements of Income",
+      "gold_chunk_ids": [
+        "wmt-20260131_fixed_184",
+        "wmt-20260131_fixed_185",
+        "wmt-20260131_fixed_195",
+        "wmt-20260131_fixed_244",
+        "wmt-20260131_fixed_336"
+      ]
+    },
+    {
+      "id": "WMT-02",
+      "company": "WMT",
+      "type": "multi_hop_comparative",
+      "question": "How did Walmart's net sales, operating income, and total assets change from fiscal 2025 to fiscal 2026?",
+      "gold_answer": "Net sales grew from $674,538 million to $706,413 million (+4.7%). Operating income grew from $29,348 million to $29,825 million. Total assets grew from $260,823 million to $284,668 million.",
+      "evidence": "Net sales $706,413M vs $674,538M (+4.7%); Operating income $29,825M vs $29,348M; Total assets $284,668M vs $260,823M.",
+      "chunk_anchors": [
+        [
+          "706,413",
+          "674,538"
+        ],
+        [
+          "29,825",
+          "29,348"
+        ],
+        [
+          "284,668",
+          "260,823"
+        ]
+      ],
+      "source_section": "Consolidated Financial Statements",
+      "gold_chunk_ids": [
+        "wmt-20260131_fixed_184",
+        "wmt-20260131_fixed_185",
+        "wmt-20260131_fixed_189",
+        "wmt-20260131_fixed_190",
+        "wmt-20260131_fixed_195",
+        "wmt-20260131_fixed_244",
+        "wmt-20260131_fixed_248",
+        "wmt-20260131_fixed_249",
+        "wmt-20260131_fixed_336",
+        "wmt-20260131_fixed_338"
+      ]
+    },
+    {
+      "id": "WMT-03",
+      "company": "WMT",
+      "type": "mda_interpretive",
+      "question": "What were the primary drivers of the increase in Walmart's operating expenses for fiscal 2026?",
+      "gold_answer": "The increase was primarily due to higher self-insured general liability claims expense in the U.S. of approximately $0.9 billion, a $0.7 billion charge related to modification of share-based compensation arrangements for the PhonePe subsidiary, and increased depreciation related to capital investments.",
+      "evidence": "\"The increase for fiscal 2026 was primarily due to higher self-insured general liability claims expense in the U.S. of approximately $0.9 billion...a charge of $0.7 billion related to modification of certain share-based compensation arrangements for our PhonePe subsidiary and increased depreciation related to our capital investments.\"",
+      "source_section": "Item 7 MD&A",
+      "gold_chunk_ids": [
+        "wmt-20260131_fixed_186",
+        "wmt-20260131_fixed_198",
+        "wmt-20260131_fixed_204"
+      ]
+    },
+    {
+      "id": "WMT-04",
+      "company": "WMT",
+      "type": "risk_factor_synthesis",
+      "question": "What workforce-related risk does Walmart disclose in its risk factors?",
+      "gold_answer": "Walmart discloses risk related to its workforce strategy, including the availability of necessary personnel to staff its stores, clubs, and other facilities, and the potential impact of changes in labor costs.",
+      "evidence": "\"our workforce strategy, including the availability of necessary personnel to staff our stores, clubs and other facilities and the potential impact of changes to the costs of labor\".",
+      "source_section": "Item 1A Risk Factors",
+      "gold_chunk_ids": [
+        "wmt-20260131_fixed_53",
+        "wmt-20260131_fixed_54"
+      ]
+    },
+    {
+      "id": "WMT-05",
+      "company": "WMT",
+      "type": "cross_section_fact",
+      "question": "How many stores does Walmart International operate and in how many countries?",
+      "gold_answer": "Walmart International, the company's second-largest segment, operates 5,743 stores across 18 countries outside the U.S.",
+      "evidence": "\"Walmart International is our second largest segment and operates 5,743 stores across 18 countries outside of the U.S.\"",
+      "source_section": "Item 1 Business",
+      "gold_chunk_ids": [
+        "wmt-20260131_fixed_66"
+      ]
+    },
+    {
+      "id": "WMT-06",
+      "company": "WMT",
+      "type": "unanswerable",
+      "question": "What was Walmart's net sales figure for its operations in Antarctica?",
+      "gold_answer": "The filing does not mention any Walmart operations in Antarctica; this question cannot be answered from the document.",
+      "evidence": "N/A - tests hallucination resistance.",
+      "source_section": "N/A",
+      "gold_chunk_ids": []
+    }
+  ]
+}

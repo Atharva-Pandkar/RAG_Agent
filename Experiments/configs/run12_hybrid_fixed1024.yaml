@@ -1,0 +1,13 @@
+# Run 12: Hybrid retrieval (BM25 + dense via RRF) over fixed-size (1024/100) chunks.
+# Variation vs run08: chunk size (512 -> 1024).
+run_name: run12_hybrid_fixed1024
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/fixed_size_1024_100.json
+  retrieval_strategy: hybrid
+  embedding_model: BAAI/bge-small-en-v1.5
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_fixed_size_1024_100.json

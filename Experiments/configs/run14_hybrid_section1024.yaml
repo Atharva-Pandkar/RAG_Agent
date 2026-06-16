@@ -1,0 +1,14 @@
+# Run 14: Hybrid retrieval (BM25 + dense via RRF) over section-based chunks
+# (structured extraction: table-aware, section-tagged, 1024 tok target, 100 overlap).
+# Variation vs run10: chunk size (512 -> 1024).
+run_name: run14_hybrid_section1024
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/section_based_1024_100.json
+  retrieval_strategy: hybrid
+  embedding_model: BAAI/bge-small-en-v1.5
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_section_based_1024_100.json

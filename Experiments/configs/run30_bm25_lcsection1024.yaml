@@ -1,0 +1,13 @@
+# Run 30: BM25 retrieval over LangChain-segmented section chunks (1024/100).
+# Variation vs run13 (section_based_1024 + BM25): segmentation via LangChain
+# MarkdownHeaderTextSplitter instead of manual block-walking.
+run_name: run30_bm25_lcsection1024
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/langchain_section_1024_100.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_langchain_section_1024_100.json

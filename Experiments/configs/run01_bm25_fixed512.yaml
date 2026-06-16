@@ -1,0 +1,13 @@
+# Run 01: BM25 retrieval over fixed-size (512 tok, 50 overlap) chunks.
+# No LLM configured yet -> generation step is a placeholder; this run
+# evaluates retrieval quality only (recall@k, MRR, context precision).
+run_name: run01_bm25_fixed512
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/fixed_size_512_50.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_fixed_size_512_50.json
