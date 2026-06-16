@@ -95,3 +95,67 @@
 - Location: `Experiments/runs/`
 - Description: Multiple timestamped JSON files per run name (early + re-run batches). `summarize_runs.py` processes all files, producing duplicate rows.
 - Suggested Fix: Deduplicate by run_name (keep latest) in summarize script, or archive old runs.
+
+---
+
+## Chatbot Uses Suboptimal Retrieval Config
+- Severity: Medium
+- Location: `app/backend/rag_tool.py`
+- Description: Demo app hardcodes hybrid (numpy) over `fixed_size_1024_100` at k=5. Best eval configs are Run 16 (hybrid k=10, recall 0.598) or Run 31 (faiss_hybrid + langchain section 1024 k=10, recall 0.589).
+- Suggested Fix: Point `rag_tool.py` at Run 31 pipeline kwargs; expose config via env or YAML.
+
+---
+
+## Split Requirements Files and Missing Root Deps
+- Severity: Medium
+- Location: `requirements.txt`, `app/backend/requirements.txt`
+- Description: Root `requirements.txt` still has Phase 1+ deps commented out. LangChain, FAISS, sentence-transformers, rank-bm25 needed for runs 21–31 but not pinned at root. App has separate deps (fastapi, langchain, langgraph) with no link to experiment stack.
+- Suggested Fix: Consolidate or cross-reference; uncomment and pin experiment deps at root.
+
+---
+
+## FAISS Deserialization Flag
+- Severity: Low
+- Location: `src/retrieval/faiss_retriever.py`
+- Description: `FAISS.load_local(..., allow_dangerous_deserialization=True)` required for cached indexes. Acceptable for local research artifacts; risky if index files are untrusted.
+- Suggested Fix: Document trust boundary; consider safer serialization for production.
+
+---
+
+## CORS Wildcard on Chatbot API
+- Severity: Low
+- Location: `app/backend/main.py`
+- Description: `allow_origins=["*"]` on FastAPI CORS middleware. Fine for local dev; should be restricted before deployment.
+- Suggested Fix: Restrict to frontend origin in production.
+
+---
+
+## unstructured Package Missing from requirements.txt
+- Severity: Medium
+- Location: `requirements.txt`, `src/ingestion/explore_unstructured.py`
+- Description: `explore_unstructured.py` imports `unstructured.partition.html` and `unstructured.chunking.title` but `unstructured` is not listed in root or app requirements. Script fails on fresh install.
+- Suggested Fix: Add `unstructured[html]` (or equivalent extra) to `requirements.txt` with pinned version.
+
+---
+
+## Semantic Explore Table Detection Returns Zero
+- Severity: Low
+- Location: `src/ingestion/explore_html_semantic.py`, `Documents/semantic_explore/aapl_semantic_chunks.json`
+- Description: AAPL semantic explore output reports `chunks_with_table: 0` despite custom table handler. Table markdown rows may not match the `|...|` regex detector, or handler output format differs from expectation.
+- Suggested Fix: Inspect handler output; relax table detection regex; compare against unstructured explore (29 table chunks for same filing).
+
+---
+
+## Unstructured Explore Section Detection Is Heading-Heuristic Only
+- Severity: Low
+- Location: `src/ingestion/explore_unstructured.py`
+- Description: Section labels derived from `SECTION_PATTERN` / Note-heading regex on chunk text lines. AAPL detects 12 sections; JPM detects 49. Granularity varies by filing structure; many chunks may share coarse labels or land in `__preamble__`.
+- Suggested Fix: Compare section labels against `extract_structured.py` section tags; align patterns or import structured section map.
+
+---
+
+## Large Unstructured JSON Artifacts (JPM)
+- Severity: Low
+- Location: `Documents/unstructured_explore/jpm_unstructured_chunks.json`
+- Description: JPM filing produces 890 chunks (486 table chunks, 2853 elements). Full JSON includes all chunk text — file is very large and slow to load in editors.
+- Suggested Fix: Add `--max-chunks` preview flag (like semantic explore); store text externally or truncate previews for inspection-only runs.

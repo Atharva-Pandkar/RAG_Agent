@@ -283,9 +283,83 @@ Largest recall regression in Phase 2 so far. Hybrid+rerank at k=5 underperforms 
 | BM25 (Run 04) | 19 + ms-marco | 0.394 | −0.022 |
 | Hybrid (Run 12) | 20 + ms-marco | 0.348 | −0.092 |
 
-**Overall best:** Run 16 — hybrid fixed 1024/100, k=10, no rerank → recall **0.598**.
+**Overall best:** Run 16 — hybrid fixed 1024/100, k=10 → recall **0.598**. Run 31 (FAISS hybrid + langchain section 1024, k=10) → **0.589** (close second).
 
-**Generation (Phase 1+):** wire LLM after retrieval tuning; add correctness/faithfulness via LLM-judge.
+**Generation (Phase 1+):** eval harness still placeholder; chatbot app has LLM via LangChain agent.
+
+---
+
+## LangChain + FAISS Grid Summary (Runs 21–31, n=26)
+
+| Run | Retrieval | Chunking | k | Recall@k | MRR | Ctx Prec |
+|-----|-----------|----------|---|----------|-----|----------|
+| 21 | bm25 | lc recursive 512 | 5 | 0.331 | 0.311 | 0.092 |
+| 22 | faiss | lc recursive 512 | 5 | 0.308 | 0.299 | 0.146 |
+| 23 | faiss_hybrid | lc recursive 512 | 5 | 0.415 | 0.279 | 0.138 |
+| 24 | bm25 | lc recursive 1024 | 5 | 0.407 | 0.376 | 0.131 |
+| 25 | faiss | lc recursive 1024 | 5 | 0.337 | 0.314 | 0.146 |
+| 26 | faiss_hybrid | lc recursive 1024 | 5 | 0.436 | 0.346 | 0.146 |
+| 27 | faiss_hybrid | lc recursive 1024 | 10 | 0.587 | 0.374 | 0.112 |
+| 28 | bm25 | lc section 512 | 5 | 0.404 | 0.292 | 0.115 |
+| 29 | faiss_hybrid | lc section 512 | 5 | 0.416 | **0.474** | 0.123 |
+| 30 | bm25 | lc section 1024 | 5 | 0.418 | 0.385 | 0.138 |
+| 31 | faiss_hybrid | lc section 1024 | 10 | **0.589** | 0.365 | 0.119 |
+
+**Key findings:**
+- FAISS hybrid + langchain section 1024 k=10 (Run 31) nearly matches Run 16 on recall
+- Run 29 (faiss_hybrid lc section 512 k=5) achieves best MRR overall (0.474)
+- LangChain recursive underperforms hand-rolled recursive at same token budget
+- FAISS and numpy hybrid paths produce comparable top configs when chunking matches
+
+---
+
+## Experiment Matrix (Updated)
+
+| Chunking ↓ / Retrieval → | BM25 | Dense/FAISS | Hybrid (numpy) | FAISS Hybrid |
+|--------------------------|------|---------------|----------------|--------------|
+| fixed 1024/100 | ✅ 04 | ✅ 11 (dense) | ✅ 12, **16** | — |
+| hand recursive 512 | ✅ 02 | — | — | — |
+| lc recursive 512 | ✅ 21 | ✅ 22 (faiss) | — | ✅ 23 |
+| lc recursive 1024 | ✅ 24 | ✅ 25 (faiss) | — | ✅ 26, 27 |
+| lc section 512 | ✅ 28 | — | — | ✅ 29 |
+| lc section 1024 | ✅ 30 | — | — | ✅ **31** |
+| section_based (custom) | ✅ 09, 13, 17 | — | ✅ 10, 14, 18 | — |
+
+**Reranking overlay (Phase 2):** Runs 19–20 on fixed 1024; negative recall impact.
+
+**App demo:** `app/backend/rag_tool.py` — hybrid fixed 1024 k=5 (suboptimal vs Run 31).
+
+**Generation:** Chatbot uses LangChain agent + OpenAI; eval harness still retrieval-only.
+
+---
+
+## Chunking Exploration Comparison (Pre-Eval)
+
+Side-by-side inspection outputs for AAPL (`aapl-20250927.html`). Not yet benchmarked on golden set.
+
+| Path | Script | Chunks | Table Chunks | Sections | Avg Tokens | In Eval? |
+|------|--------|--------|--------------|----------|------------|----------|
+| Structured → fixed 1024 | `build_corpus.py` | ~110 (fixed_size) | — | — | 1024 window | ✅ Runs 04, 16 |
+| LangChain semantic | `explore_html_semantic.py` | 112 (50 shown) | 0 detected | — | ~497 | ❌ |
+| Unstructured-IO | `explore_unstructured.py` | 89 | 29 | 12 | ~453 | ❌ |
+
+**All-filings unstructured stats:**
+
+| Filing | Elements | Chunks | Table Chunks | Sections |
+|--------|----------|--------|--------------|----------|
+| AAPL | 540 | 89 | 29 | 12 |
+| CAT | 955 | 145 | 55 | 12 |
+| JPM | 2,853 | 890 | 486 | 49 |
+| KO | 916 | 183 | 57 | 13 |
+| WMT | 682 | 185 | 71 | 29 |
+
+**Observations:**
+- Unstructured produces fewer, larger chunks than fixed-token windows for AAPL (89 vs ~110)
+- Unstructured explicitly links table chunks to narrative siblings within same section
+- Semantic explore table detection appears broken (0 table chunks for AAPL)
+- JPM unstructured granularity (890 chunks) may inflate retrieval index size vs fixed 1024 corpus
+
+**Next:** Convert unstructured/semantic outputs to `Experiments/corpora/` format and run BM25/FAISS-hybrid eval (proposed Runs 32+).
 
 ---
 

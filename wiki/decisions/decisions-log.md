@@ -127,3 +127,78 @@ Single chronological record of architectural and technical decisions. Append new
 - Decision: Default `rerank_model` is `cross-encoder/ms-marco-MiniLM-L-6-v2` via `sentence_transformers.CrossEncoder`.
 - Alternatives Considered: Cohere rerank v3; BGE reranker (`BAAI/bge-reranker-base`); larger ms-marco models.
 - Impact: Runs 19–20. Initial results show reranking **reduces** recall@k on 10-K text vs non-reranked baselines (Run 19: 0.394 vs Run 04: 0.416; Run 20: 0.348 vs Run 12: 0.440). Model is web-search tuned, not financial-domain.
+
+---
+
+## LangChain Chunking Strategies for Comparison
+- Date: 2026-06-15
+- Context: Need to benchmark LangChain's standard splitters against hand-rolled chunkers on the same token budgets and corpora.
+- Decision: Add `langchain_recursive` (RecursiveCharacterTextSplitter + tiktoken length fn) and `langchain_section` (MarkdownHeaderTextSplitter on structured doc → fixed_size token windows per section). Chunk IDs prefixed `_lc_` and `_lcsec_`.
+- Alternatives Considered: Replace all custom chunkers with LangChain; use HTMLSemanticPreservingSplitter in production pipeline (deferred — explore script only).
+- Impact: Runs 21–31. LangChain recursive underperforms hand-rolled recursive (Run 21: 0.331 vs Run 02: 0.411). LangChain section competitive at 1024 (Run 30: 0.418 recall).
+
+---
+
+## FAISS Vector Store via LangChain
+- Date: 2026-06-15
+- Context: NumPy dot-product dense retrieval doesn't scale; want persisted indexes and LangChain ecosystem compatibility.
+- Decision: `FaissRetriever` uses `langchain_community.vectorstores.FAISS` + `HuggingFaceEmbeddings` (BGE-small). Indexes persisted to `Experiments/embeddings/faiss_{cache_key}/`. New pipeline strategies: `faiss` and `faiss_hybrid` (BM25 + FAISS RRF).
+- Alternatives Considered: Keep numpy-only dense; ChromaDB; raw faiss without LangChain wrapper.
+- Impact: Runs 22–27, 29, 31. FAISS hybrid matches best recall configs (Run 31: 0.589 vs Run 16: 0.598). Run 29 achieves best MRR (0.474).
+
+---
+
+## Chatbot App Skeleton (FastAPI + LangChain Agent)
+- Date: 2026-06-15
+- Context: Experiment retrieval stack needs a user-facing demo before production hardening.
+- Decision: `app/backend/` — FastAPI with `POST /chat`, LangChain `create_agent` ReAct loop, single tool `search_10k_filings` wrapping `RagPipeline.retrieve()`. `app/frontend/` — React (Vite) with API proxy. Separate `app/backend/requirements.txt`.
+- Alternatives Considered: Streamlit-only UI; wire generation through eval harness first; Gradio.
+- Impact: End-to-end Q&A with LLM (gpt-4o-mini default via `CHAT_MODEL` env). Retrieval config hardcoded in `rag_tool.py` (hybrid fixed 1024 — not yet updated to Run 31 best config).
+
+---
+
+## HTML Semantic Splitter Exploration (Non-Production)
+- Date: 2026-06-15
+- Context: Evaluate LangChain's `HTMLSemanticPreservingSplitter` for direct HTML→chunk pipeline vs structured JSON approach.
+- Decision: `explore_html_semantic.py` writes inspection JSON to `Documents/semantic_explore/`. Reuses `_table_to_markdown` from `extract_structured.py` as custom table handler. Not wired into `build_corpus.py` or eval runs.
+- Alternatives Considered: Adopt as primary chunking path; merge with section_based chunker.
+- Impact: Exploratory artifacts only (`aapl_semantic_chunks.json`, etc.). Informs future semantic/HTML chunking decision.
+
+---
+
+## Table Metadata and Reverse Index in Corpora
+- Date: 2026-06-15
+- Context: Table-heavy 10-K questions need traceability from table blocks to chunks.
+- Decision: `section_based_chunks` and `langchain_section_chunks` attach `table_ids`, `has_table`, `section_has_tables` per chunk. `build_corpus.py` builds post-hoc `table_index` mapping table block_id → chunk ids.
+- Alternatives Considered: Separate table-only corpus; no metadata (status quo in Phase 1 fixed chunks).
+- Impact: Enables future table-targeted retrieval. Not yet used by retrievers or eval metrics.
+
+---
+
+## Unstructured-IO Exploration Pipeline
+- Date: 2026-06-15
+- Context: Evaluate Unstructured-IO's native HTML partitioning and title-based chunking as a third ingestion path alongside custom structured extraction and LangChain semantic splitting.
+- Decision: `explore_unstructured.py` runs `partition_html` → section stamping → `chunk_by_title` (4000 chars, 200 overlap default). Output to `Documents/unstructured_explore/`. Reuses `SECTION_PATTERN` and `_table_to_markdown` from `extract_structured.py` for heading detection and table markdown.
+- Alternatives Considered: Adopt as primary corpus builder immediately; merge with `extract_structured.py` block graph; use Unstructured hi_res PDF pipeline.
+- Impact: Exploration artifacts for all 5 filings. Not wired into `build_corpus.py` or eval runs. Informs chunking strategy decision for Phase 1.5+.
+
+---
+
+## Section Assignment on Chunk Stream (Unstructured)
+- Date: 2026-06-15
+- Context: `chunk_by_title` copies Table elements, making `id()`-based matching against the original element list unreliable for section tagging.
+- Decision: Detect section headings from each chunk's own text in document order and forward-propagate `current_section` — do not walk `orig_elements` for section assignment.
+- Alternatives Considered: Fix upstream in Unstructured; map via element IDs; use only `orig_elements` metadata.
+- Impact: Every unstructured chunk gets `section`, plus cross-refs: `section_chunk_ids`, `section_table_ids`, `section_narrative_ids`. Top-level `section_index` and `table_index` built post-hoc.
+
+---
+
+## Three-Way Chunking Exploration (Not Yet Consolidated)
+- Date: 2026-06-15
+- Context: Project now has three parallel HTML→chunk exploration paths with no production winner selected.
+- Decision: Keep all three as research artifacts until eval-backed comparison:
+  1. `extract_structured.py` → custom/section_based/langchain_section (in eval pipeline)
+  2. `explore_html_semantic.py` → LangChain HTMLSemanticPreservingSplitter (`Documents/semantic_explore/`)
+  3. `explore_unstructured.py` → Unstructured partition + chunk_by_title (`Documents/unstructured_explore/`)
+- Alternatives Considered: Pick one path now; merge outputs into single corpus format.
+- Impact: Next step is build eval corpora from unstructured/semantic paths and benchmark against Runs 16/31 baselines.

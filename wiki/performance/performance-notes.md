@@ -79,3 +79,43 @@
 - Location: `src/retrieval/reranker.py`, `src/pipeline.py`
 - Priority: Medium
 - Notes: Acceptable for 28-question eval set. Latency scales with fetch_k × corpus complexity. Hybrid+rerank (Run 20) is the heaviest pipeline init (BM25 + bi-encoder + cross-encoder).
+
+---
+
+## FaissRetriever — Index Build and Dual Embedding Stack
+- Concern: First run per corpus builds FAISS index via `HuggingFaceEmbeddings` (LangChain) — separate code path from numpy `DenseRetriever`. Both may load BGE-small, doubling memory if both used in same process.
+- Location: `src/retrieval/faiss_retriever.py`, `src/retrieval/faiss_hybrid_retriever.py`
+- Priority: Medium
+- Notes: Index persisted to disk avoids rebuild. FAISS hybrid init loads BM25 + LangChain embeddings + FAISS index — heaviest config alongside hybrid+rerank.
+
+---
+
+## LangChain Agent — LLM Call Per Chat Turn
+- Concern: `create_agent` ReAct loop may invoke `search_10k_filings` multiple times per user message, each triggering full retrieval (BM25 + FAISS RRF in best configs).
+- Location: `app/backend/agent.py`, `app/backend/rag_tool.py`
+- Priority: Medium
+- Notes: No caching of retrieval results within a turn. Streaming and tool-call limits not configured.
+
+---
+
+## explore_html_semantic — Full HTML Split Per Filing
+- Concern: `HTMLSemanticPreservingSplitter` processes entire HTML files; default output capped at 50 chunks per file in JSON but full split runs regardless.
+- Location: `src/ingestion/explore_html_semantic.py`
+- Priority: Low
+- Notes: Exploration-only script. JPM filing produces largest chunk counts.
+
+---
+
+## explore_unstructured — partition_html on Full 10-K HTML
+- Concern: `partition_html` parses entire HTML DOM per filing. JPM: 2,853 elements → 890 chunks (486 table chunks). Single-threaded, memory-heavy.
+- Location: `src/ingestion/explore_unstructured.py`
+- Priority: Medium (JPM scale)
+- Notes: One-time exploration step. Output JSON for JPM is very large (full chunk text retained). Consider preview/truncation flags.
+
+---
+
+## Chunking Exploration — No Eval Benchmark Yet
+- Concern: Three HTML→chunk paths exist (structured, semantic, unstructured) but only structured-derived strategies are in the eval grid (Runs 01–31). Cannot yet compare retrieval quality of semantic/unstructured chunking.
+- Location: `Documents/semantic_explore/`, `Documents/unstructured_explore/`, `src/ingestion/build_corpus.py`
+- Priority: Medium
+- Notes: Blocking decision on production chunking strategy. Unstructured path has richest section/table cross-refs but highest chunk count on JPM.

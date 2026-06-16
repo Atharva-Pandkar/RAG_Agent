@@ -67,3 +67,46 @@ Project-level record of what was added, changed, or removed each iteration.
 
 ### Removed
 - (none)
+
+---
+
+## Iteration 4 — 2026-06-15
+
+### Added
+- `src/retrieval/faiss_retriever.py` — LangChain FAISS + HuggingFaceEmbeddings dense retrieval with disk cache
+- `src/retrieval/faiss_hybrid_retriever.py` — BM25 + FAISS RRF hybrid
+- `langchain_recursive` and `langchain_section` chunking strategies in `src/chunking/chunkers.py`
+- `src/ingestion/explore_html_semantic.py` — HTMLSemanticPreservingSplitter exploration script
+- `Documents/semantic_explore/` — per-filing semantic chunk inspection JSON
+- `Experiments/corpora/langchain_*.json` — LangChain chunker corpora (512/1024 variants)
+- `Experiments/embeddings/faiss_*/` — persisted FAISS indexes per corpus × model
+- `Experiments/configs/run21`–`run31` — LangChain chunking × BM25/FAISS/FAISS-hybrid grid
+- `Experiments/runs/` — results for runs 21–31
+- `app/backend/` — FastAPI chat API, LangChain ReAct agent, `search_10k_filings` RAG tool
+- `app/frontend/` — React (Vite) chat UI skeleton
+- `app/README.md` — full-stack setup instructions
+
+### Changed
+- `src/pipeline.py` — `faiss` and `faiss_hybrid` retrieval strategies
+- `src/ingestion/build_corpus.py` — supports `langchain_section`; emits `table_index` in corpus JSON
+- `section_based_chunks` — table metadata fields (`table_ids`, `has_table`, `section_has_tables`)
+- Best recall nearly matched: Run 31 (FAISS hybrid + langchain section 1024, k=10) → **0.589** vs Run 16 → 0.598
+
+### Removed
+- (none)
+
+---
+
+## Iteration 5 — 2026-06-15
+
+### Added
+- `src/ingestion/explore_unstructured.py` — Unstructured-IO `partition_html` + `chunk_by_title` exploration with section cross-refs
+- `Documents/unstructured_explore/` — inspection JSON for all 5 filings (aapl, cat, jpm, ko, wmt)
+- Section-level indexes in unstructured output: `section_index`, `table_index`, per-chunk `section_*_ids` cross-refs
+
+### Changed
+- `Documents/semantic_explore/` — all 5 company semantic chunk files present (complete set)
+- Chunking research now spans three exploration paths (structured, semantic, unstructured); eval pipeline unchanged
+
+### Removed
+- (none)
