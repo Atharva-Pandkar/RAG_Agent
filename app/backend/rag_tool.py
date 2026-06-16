@@ -20,17 +20,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from langchain_core.tools import tool   # noqa: E402
-from src.pipeline import RagPipeline    # noqa: E402
-from .logger import get_logger          # noqa: E402
+from langchain_core.tools import tool       # noqa: E402
+from src.pipeline import RagPipeline        # noqa: E402
+from src.retrieval.llm_reranker import llm_rerank  # noqa: E402
+from .logger import get_logger              # noqa: E402
 
 log = get_logger(__name__)
 
 _PIPELINE: RagPipeline | None = None
 
-CORPUS_PATH = "Experiments/corpora/active_corpus.json"
-EMBED_MODEL = "text-embedding-3-small"
-RETRIEVAL_K = 10
+CORPUS_PATH  = "Experiments/corpora/active_corpus.json"
+EMBED_MODEL  = "text-embedding-3-small"
+RETRIEVAL_K  = 10   # candidates fetched from FAISS + BM25
+RERANK_K     = 5    # chunks actually passed to the agent
+RERANK_MODEL = "gpt-4o-mini"
 
 REGISTRY_PATH = ROOT / "Experiments" / "corpora" / "docs_registry.json"
 
@@ -70,8 +73,8 @@ def search_documents(query: str) -> str:
                - Vague input → rephrase into a specific question first.
 
     Returns:
-        Up to 10 ranked passages, each labelled with source document,
-        section, and chunk ID.
+        Up to 3 reranked passages (selected from 10 candidates), each
+        labelled with source document, section, and chunk ID.
     """
     log.info("TOOL CALL search_documents — query: %r", query)
     t0 = time.perf_counter()
@@ -83,12 +86,52 @@ def search_documents(query: str) -> str:
         log.exception("RAG pipeline retrieval failed for query: %r", query)
         return "Retrieval failed — please try again."
 
-    elapsed = time.perf_counter() - t0
-    log.info("TOOL RESULT — %d chunks retrieved in %.2fs", len(results), elapsed)
+    log.info("TOOL RESULT — %d candidates retrieved in %.2fs", len(results),
+             time.perf_counter() - t0)
+
+    # ── LLM rerank: select top RERANK_K most relevant chunks ─────────────────
+    results = llm_rerank(query, results, return_k=RERANK_K, model=RERANK_MODEL)
+    log.info("After reranking: %d chunks | total tool time %.2fs",
+             len(results), time.perf_counter() - t0)
 
     if not results:
         log.warning("No chunks matched query: %r", query)
         return "No relevant passages found for this query."
+
+    # ── Source-mismatch guard ─────────────────────────────────────────────────
+    # Extract the distinct source documents returned and surface them to the
+    # agent. If every result comes from a single document that seems unrelated
+    # to what was asked (e.g. asking about Tesla but getting Walmart chunks),
+    # prepend an explicit warning so the agent does not fabricate an answer.
+    returned_docs = list(dict.fromkeys(r.get("doc", "") for r in results))
+    known_doc_ids = set(returned_docs)
+
+    # Detect obvious mismatch: query names a known-company keyword but no
+    # result prefix matches it.
+    _COMPANY_KEYWORDS = {
+        "tesla": "tsla", "microsoft": "msft", "nvidia": "nvda",
+        "amazon": "amzn", "google": "googl", "alphabet": "googl",
+        "meta": "meta", "netflix": "nflx", "uber": "uber",
+        "ford": "ford", "gm": "gm", "boeing": "ba",
+    }
+    query_lower = query.lower()
+    mismatch_warning = ""
+    for keyword, _ in _COMPANY_KEYWORDS.items():
+        if keyword in query_lower:
+            # Check whether any returned doc belongs to this company
+            if not any(keyword in doc.lower() for doc in returned_docs):
+                mismatch_warning = (
+                    f"\n\n⚠ RETRIEVAL WARNING: The query mentions '{keyword}' but "
+                    f"none of the returned passages are from a '{keyword}' document. "
+                    f"Returned sources: {returned_docs}. "
+                    f"If '{keyword}' is not in the loaded documents, do NOT use these "
+                    f"passages to answer — refuse instead."
+                )
+                log.warning(
+                    "Source mismatch — query mentions %r but results are from: %s",
+                    keyword, returned_docs,
+                )
+            break
 
     parts: list[str] = []
     for i, r in enumerate(results, 1):
@@ -99,7 +142,8 @@ def search_documents(query: str) -> str:
         log.debug("  [%d] %s | %s | %d chars", i, doc, sec, len(text))
         parts.append(f"[{i}] Source: {doc} | Section: {sec} | ID: {cid}\n{text}")
 
-    return "\n\n---\n\n".join(parts)
+    body = "\n\n---\n\n".join(parts)
+    return body + mismatch_warning
 
 
 # ── Tool 2: list documents ───────────────────────────────────────────────────

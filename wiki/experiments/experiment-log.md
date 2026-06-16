@@ -411,6 +411,79 @@ Side-by-side inspection outputs for AAPL (`aapl-20250927.html`). Not yet benchma
 
 **Generation:** Deep agent + OpenAI via chatbot; eval harness retrieval-only.
 
+**Agent E2E eval:** `Experiments/eval_suite_runner.py` — full `/chat` + LLM judge (Iteration 12).
+
+---
+
+## Run Eval Suite — Agent E2E (2026-06-16)
+
+**Setup:**
+- Suite: `10K_RAG_Eval_Suite_v1` (47 questions, external JSON)
+- Endpoint: `http://localhost:8000/chat` via `eval_suite_runner.py`
+- Judge: gpt-4o-mini, category rubrics 0–2
+- Workers: 3 (parallel)
+- Corpus: `active_corpus.json` (includes ad-hoc uploads — see open issues)
+
+**Results (`eval_suite_20260616_213013.json`):**
+
+| Category | N | Score | % | Accuracy |
+|----------|---|-------|---|----------|
+| single_fact_prose | 14 | 26/28 | 92.9% | 92.9% |
+| single_fact_table | 10 | 14/20 | 70.0% | 70.0% |
+| cross_company_comparison | 8 | 2/16 | 12.5% | 0.0% |
+| out_of_corpus | 10 | 6/20 | 30.0% | 30.0% |
+| adversarial | 5 | 6/10 | 60.0% | 40.0% |
+| **Overall** | **47** | **54/94** | **57.4%** | **53.2%** |
+
+**Observations:**
+- Prose single-fact strong; table questions weaker (column/year confusion).
+- Cross-company failures partly from OpenAI 429 rate limits during parallel run, partly from single-doc retrieval / synthesis gaps.
+- Out-of-corpus refusal needs prompt and retrieval-guard improvements.
+- Uploaded test doc `tmpedd_eodk` appeared in citations — reset active corpus before benchmark runs.
+- CCC-006 (highest EPS across companies) succeeded with multi-doc retrieval.
+
+---
+
+## Run Eval Suite — Agent E2E Run 2 (2026-06-16, post-guards)
+
+**Setup:** Same suite and endpoint as Run 1. After Iteration 13 changes: LLM rerank (10→5), entity verification prompt, source-mismatch warnings.
+
+**Results (`eval_suite_20260616_220605.json`):**
+
+| Category | N | Score | % | Accuracy |
+|----------|---|-------|---|----------|
+| single_fact_prose | 14 | 14/28 | 50.0% | 50.0% |
+| single_fact_table | 10 | 12/20 | 60.0% | 60.0% |
+| cross_company_comparison | 8 | 11/16 | 68.8% | 37.5% |
+| out_of_corpus | 10 | 14/20 | 70.0% | 70.0% |
+| adversarial | 5 | 5/10 | 50.0% | 60.0% |
+| **Overall** | **47** | **56/94** | **59.6%** | **55.3%** |
+
+**Observations:**
+- Hallucination guards materially improved OOC and cross-company category scores.
+- Single-fact prose regressed sharply — investigate rerank dropping gold chunks vs over-refusal.
+- `Experiments/eval_ooc_quick.py` added for fast OOC-only iteration.
+
+---
+
+## Eval Suite v2 (2026-06-16)
+
+**Artifact:** `Experiments/10k_rag_eval_v2.json` — 43 questions, corpus-verified answers.
+
+| Category | Count |
+|----------|-------|
+| single_fact_prose | 12 |
+| single_fact_table | 10 |
+| cross_company_comparison | 8 |
+| out_of_corpus | 8 |
+| adversarial | 5 |
+
+**Runner changes:** Default suite path → v2 in repo; default `--workers 1`.
+
+**Agent eval run on v2:** Not yet executed. Prior runs (213013, 220605) used v1 (47 questions) — not directly comparable.
+
+**Pre-run checklist:** Reset `active_corpus.json` (remove `tmpedd_eodk`); rebuild xbrl corpus with investee warnings; restart server.
+
 ---
 
 ## How to Add a New Experiment

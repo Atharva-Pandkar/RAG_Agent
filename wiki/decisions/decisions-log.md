@@ -382,3 +382,77 @@ Single chronological record of architectural and technical decisions. Append new
 - Decision: `App.jsx` adds collapsible sidebar: document list from `GET /api/documents`, `+ Add` file picker (`.pdf,.html,.htm,.txt,.md,.docx`), ingest status toast, expandable section lists per doc. Vite proxy routes `/api/*` → backend. App title changed to "Document Research Assistant".
 - Alternatives Considered: Separate admin page; drag-and-drop only; ingest via CLI only.
 - Impact: `python-multipart` added to backend requirements. Upload uses same 120s proxy timeout as chat (large PDFs may need tuning).
+
+---
+
+## End-to-End Agent Eval via HTTP + LLM Judge
+- Date: 2026-06-16
+- Context: Existing `eval/harness/run_eval.py` measures retrieval-only recall@k against chunk IDs. Production chatbot is a deep agent over `/chat` with generation, multi-tool calls, and citation formatting — retrieval metrics alone do not predict answer quality.
+- Decision: Add `Experiments/eval_suite_runner.py`. Sends each question in a structured JSON suite to `POST /chat` (async, configurable workers), then scores responses with GPT-4o-mini as an LLM judge using category-specific 0–2 rubrics. Saves timestamped results to `Experiments/runs/eval_suite_<ts>.json` with per-question scores and category breakdown.
+- Alternatives Considered: Extend golden-set harness with generation; manual spot-checking; retrieval-only proxy for agent quality.
+- Impact: First benchmark of full agent stack. Requires running server (`uvicorn`) separately. Judge cost adds on top of agent token usage. Parallel workers can trigger OpenAI TPM rate limits on the chat model.
+
+---
+
+## Stratified Eval Suite Categories (10K_RAG_Eval_Suite_v1)
+- Date: 2026-06-16
+- Context: Need reproducible tests for single-fact (prose + table), cross-company comparison, out-of-corpus refusal, and adversarial fiscal-year traps — aligned to five seeded 10-K filings in `Dataset/`.
+- Decision: External suite JSON (`10k_rag_eval_suite.json`, 47 questions) tagged with categories: `single_fact_prose`, `single_fact_table`, `cross_company_comparison`, `out_of_corpus`, `adversarial`. Each item includes `id`, `question`, `answer`/`expected_behavior`, `difficulty`, and metadata. Runner applies per-category rubrics; `--skip-ooc` flag for faster fact-only runs.
+- Alternatives Considered: Extend `eval/golden_set/golden_set.json` only; commit suite under `eval/test_suite/` (deferred — file currently lives outside repo).
+- Impact: Enables stratified regression testing beyond retrieval recall. **[OUTDATED — v1 external suite; superseded by `Experiments/10k_rag_eval_v2.json` Iteration 14.]** First run: 57.4% overall score (53.2% judge-marked accuracy).
+
+---
+
+## LLM Reranker in Production Chat Retrieval
+- Date: 2026-06-16
+- Context: `search_documents` passed k=10 full chunks into the deep agent context. Noisy hybrid retrieval (especially with uploaded docs in `active_corpus.json`) increased hallucination risk and token cost. Cross-encoder rerankers (Runs 19–20) underperformed on 10-K text in offline eval.
+- Decision: Add `src/retrieval/llm_reranker.py`. After `faiss_hybrid` returns 10 candidates, `gpt-4o-mini` selects top 5 via numbered 200-char snippet previews (~500 tok input). Wired in `rag_tool.py`: `RETRIEVAL_K=10`, `RERANK_K=5`, `RERANK_MODEL=gpt-4o-mini`. Falls back to first k candidates if rerank parse fails.
+- Alternatives Considered: ms-marco cross-encoder (eval showed recall drop); pass all 10 chunks; increase k without rerank.
+- Impact: Extra OpenAI call per `search_documents` invocation. Tool docstring still says "3 passages" in places — actual return is 5. Reduces context noise but adds latency (~1–2s per search).
+
+---
+
+## Entity Verification and Source-Mismatch Guards
+- Date: 2026-06-16
+- Context: First agent eval (Run 1) showed 30% out-of-corpus accuracy and cross-company failures; agent sometimes answered Tesla/NVIDIA questions using unrelated 10-K chunks (e.g., uploaded `tmpedd_eodk` or Walmart passages).
+- Decision: Two-layer guard:
+  1. **Agent prompt** (`agent.py`): require `list_available_documents` before searching named entities; refuse with fixed template if entity absent; verify retrieved `Source:` doc matches question entity; explicit rules against cross-doc number reuse.
+  2. **Retrieval tool** (`rag_tool.py`): keyword-based mismatch warning appended to tool output when query mentions known out-of-corpus companies (Tesla, NVIDIA, Amazon, etc.) but returned doc ids do not match.
+- Alternatives Considered: Hard retrieval filter by doc metadata; post-generation fact checker; block search entirely for unknown entities at API layer.
+- Impact: Second eval run: out-of-corpus 30% → **70%**, cross-company 12.5% → **68.75%**. Tradeoff: single-fact prose dropped 92.9% → **50%** (stricter entity checks / extra tool calls may cause over-refusal or judge penalties).
+
+---
+
+## OOC Quick Smoke Test Script
+- Date: 2026-06-16
+- Context: Full 47-question eval suite is slow and expensive; out-of-corpus category needs fast iteration while tuning refusal behavior.
+- Decision: `Experiments/eval_ooc_quick.py` — sends only the 10 `out_of_corpus` questions to `/chat`, judges each with a simplified refuse-vs-hallucinate JSON rubric. Sequential (no parallel workers). Hardcoded suite path to Dropbox copy.
+- Alternatives Considered: `--skip-ooc` inverse in full runner; unit tests without live server.
+- Impact: Fast feedback loop for hallucination fixes. Same portability issues as full eval runner (external suite path, aiohttp dep).
+
+---
+
+## Eval Suite v2 — Corpus-Verified Benchmark
+- Date: 2026-06-16
+- Context: v1 suite (`10k_rag_eval_suite.json`, 47 questions) lived outside the repo; some OOC/adversarial questions had ambiguous traps; answers were not all verified against corpus chunks before authoring.
+- Decision: Add `Experiments/10k_rag_eval_v2.json` (`10K_RAG_Eval_v2`, 43 questions). Metadata documents all five corpus doc ids and FY end dates. Each question includes verified `answer` + authoring `notes`. OOC questions use only companies clearly absent from corpus; adversarial items have single unambiguous correct answers with documented traps. Category counts: 12 prose, 10 table, 8 cross-company, 8 OOC, 5 adversarial.
+- Alternatives Considered: Patch v1 in place; move to `eval/test_suite/` subfolder only; auto-generate from golden set.
+- Impact: `eval_suite_runner.py` default `--suite` now points to v2 in-repo. v1 runs (213013, 220605) not directly comparable to v2 (different N and question set). **No v2 agent eval run logged yet.**
+
+---
+
+## Eval Runner Default Workers = 1
+- Date: 2026-06-16
+- Context: First eval suite run with `--workers 3` caused gpt-4o-mini TPM 429 errors, deflating cross-company scores.
+- Decision: Change `eval_suite_runner.py` default `--workers` from 3 to **1** with CLI help text noting 429 avoidance for cross-company questions.
+- Alternatives Considered: Retry/backoff in runner only; separate rate-limit queue; higher API tier.
+- Impact: Slower wall-clock eval (~47 sequential agent turns) but more reliable benchmark signal. Parallel runs still available via explicit `--workers N`.
+
+---
+
+## XBRL Equity-Method Investee Table Warnings
+- Date: 2026-06-16
+- Context: iXBRL chunks from equity-method investee segment tables (e.g., JPM combined investee financials) were retrieved for filer revenue/income questions, causing wrong cross-company and margin answers (e.g., CCC-004 using investee figures as JPM consolidated).
+- Decision: In `build_xbrl_corpus.py`, detect investee segments via regex on segment metadata (`equitymethod|nonconsolidated|investee`). Prepend prominent `NOTE:` warning to chunk header text so LLM reranker (200-char preview) and agent see that figures are **not** the filing company's consolidated results.
+- Alternatives Considered: Exclude investee tables from corpus entirely; post-retrieval filter by segment tag; agent-only prompt rule.
+- Impact: Requires **rebuilding** `xbrl_merged.json` and re-seeding/rebuilding `active_corpus.json` + FAISS cache for warnings to appear in production chatbot. Existing cached chunks lack warnings until corpus rebuild.

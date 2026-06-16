@@ -255,3 +255,67 @@
 - Location: `app/backend/main.py`
 - Priority: Low
 - Notes: Prefer structured tool JSON return if agent turns become very long.
+
+---
+
+## Eval Suite Runner — Parallel /chat Requests
+- Concern: Default 3 workers send concurrent deep-agent turns, each invoking multiple LLM + retrieval calls. First full run (~47 questions) completed in ~few minutes wall time but triggered gpt-4o-mini TPM rate limits (429 → HTTP 500 on several questions).
+- Location: `Experiments/eval_suite_runner.py`, `app/backend/main.py`
+- Priority: High (benchmark validity)
+- Notes: Cross-company category scores may be artificially low until throttling/retry added. Recommend `--workers 1` for reliable baseline runs.
+
+---
+
+## Eval Suite Runner — Sequential LLM Judge Pass
+- Concern: After parallel agent queries, judge calls GPT-4o-mini once per question sequentially (47 API calls). Adds latency and cost on top of agent inference already consumed during query phase.
+- Location: `Experiments/eval_suite_runner.py`
+- Priority: Low
+- Notes: Judge uses `response_format=json_object` and caps system response at 3000 chars. Re-judging cached responses would avoid re-querying agent.
+
+---
+
+## Eval Suite — Full Agent Turn Per Question
+- Concern: Each suite question is an isolated `/chat` with single user message — no conversation reuse. Typical latency 6–30s per question (search + generation + citations). 47 questions × agent turn dominates eval wall time vs judge phase.
+- Location: `Experiments/eval_suite_runner.py`, `app/backend/agent.py`
+- Priority: Medium
+- Notes: Complex cross-company questions may invoke 2–4 tool calls. Timeout set to 180s per request in runner.
+
+---
+
+## LLM Reranker — Extra OpenAI Call Per Search
+- Concern: Every `search_documents` call now runs `llm_rerank()` after hybrid retrieval: ~500 input tokens (10 × 200-char previews + query) + ~20 output tokens on gpt-4o-mini, before the main deep-agent LLM turn.
+- Location: `src/retrieval/llm_reranker.py`, `app/backend/rag_tool.py`
+- Priority: Medium
+- Notes: Multi-search questions (cross-company, comparisons) multiply rerank cost. Falls back to top-5 unranked on API failure. Consider caching rerank results within a single agent turn.
+
+---
+
+## Entity Verification — Extra list_available_documents Tool Call
+- Concern: Updated agent prompt instructs calling `list_available_documents` before searching any named entity. Adds one LLM tool round-trip + registry JSON read per question, increasing latency and TPM usage vs Run 1 eval.
+- Location: `app/backend/agent.py`, `app/backend/rag_tool.py`
+- Priority: Medium
+- Notes: May contribute to single-fact prose regression (50% on Run 2). Registry is small (~5 docs) — could inject doc list into system prompt at startup instead.
+
+---
+
+## eval_ooc_quick — Sequential /chat Without Throttling
+- Concern: Smoke test fires 10 OOC questions one at a time but each still runs full agent + optional list + search + rerank + judge. ~2 LLM calls per question (agent + judge).
+- Location: `Experiments/eval_ooc_quick.py`
+- Priority: Low
+- Notes: Safer than parallel full suite for rate limits; good for iterative prompt tuning.
+
+---
+
+## Eval Suite v2 — Sequential 43-Question Baseline (Not Yet Run)
+- Concern: New v2 suite (43 questions) has no logged agent eval run yet. Wall time estimate: ~6–30s × 43 ≈ 5–20 min sequential at workers=1, plus 43 judge calls.
+- Location: `Experiments/10k_rag_eval_v2.json`, `Experiments/eval_suite_runner.py`
+- Priority: Medium
+- Notes: Run after cleaning `active_corpus.json` and rebuilding xbrl chunks with investee warnings for apples-to-apples benchmark.
+
+---
+
+## XBRL Corpus Rebuild — Full Pipeline Re-run Required
+- Concern: Investee table warnings only exist in newly built xbrl chunks. Rebuild chain: `build_xbrl_corpus.py` → `build_merged_corpus.py` → re-seed `active_corpus.json` → FAISS cache invalidation → server restart.
+- Location: `src/ingestion/build_xbrl_corpus.py`, `Experiments/corpora/`, `Experiments/embeddings/`
+- Priority: Medium
+- Notes: Warning text placed in first ~200 chars intentionally for LLM reranker snippet visibility.

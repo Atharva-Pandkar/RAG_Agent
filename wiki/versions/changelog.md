@@ -244,3 +244,55 @@ Project-level record of what was added, changed, or removed each iteration.
 - `SourceRef.ticker`, `SourceRef.company`, `SourceRef.url` and EDGAR link UI from Iteration 10
 - Chatbot dependency on static `merged_unstr_xbrl.json` path at runtime (eval artifact retained; active corpus is runtime source)
 - Local BGE FAISS index files from working tree (replaced by OpenAI embedding caches for active/merged corpora)
+
+---
+
+## Iteration 12 — 2026-06-16
+
+### Added
+- `Experiments/eval_suite_runner.py` — end-to-end agent eval: async `/chat` queries + GPT-4o-mini LLM judge + category rubrics
+- `Experiments/runs/eval_suite_20260616_213013.json` — first full suite run (47 questions, 57.4% score)
+- Eval categories in runner: `single_fact_prose`, `single_fact_table`, `cross_company_comparison`, `out_of_corpus`, `adversarial` (0–2 rubrics each)
+- CLI flags: `--suite`, `--url`, `--model`, `--workers`, `--out`, `--skip-ooc`
+
+### Changed
+- Benchmark scope expanded from retrieval-only (`run_eval.py`) to full agent + generation path
+- Known failure modes documented from first run: cross-company 12.5%, out-of-corpus 30%, prose 92.9%, table 70%
+
+### Removed
+- (none)
+
+---
+
+## Iteration 13 — 2026-06-16
+
+### Added
+- `src/retrieval/llm_reranker.py` — GPT snippet-based rerank over retrieval candidates
+- `Experiments/eval_ooc_quick.py` — fast 10-question out-of-corpus smoke test against live `/chat`
+- `Experiments/runs/eval_suite_20260616_220605.json` — second full suite run (59.6% overall)
+- Agent rules: entity verification via `list_available_documents`, source-doc matching, trap/ambiguity flagging
+- Retrieval mismatch warning in `search_documents` for known out-of-corpus company keywords
+
+### Changed
+- `app/backend/rag_tool.py` — fetch k=10 → LLM rerank to k=5 before returning passages; mismatch guard appended to tool output
+- `app/backend/agent.py` — expanded system prompt (10 rules): verify entity, verify passages, refuse templates, document-scope numbers
+- Agent eval scores (Run 2 vs Run 1): cross-company **68.75%** (was 12.5%), out-of-corpus **70%** (was 30%), overall **59.6%** (was 57.4%)
+- Regression: single-fact prose **50%** (was 92.9%) — likely over-refusal or judge strictness after guard changes
+
+### Removed
+- Passing all 10 raw retrieval chunks directly to agent (replaced by rerank-to-5 path)
+
+---
+
+## Iteration 14 — 2026-06-16
+
+### Added
+- `Experiments/10k_rag_eval_v2.json` — in-repo eval suite v2 (43 corpus-verified questions, cleaner OOC/adversarial design)
+- XBRL equity-method investee warning header in `build_xbrl_corpus.py` (`_INVESTEE_SEGMENT_PATTERNS`)
+
+### Changed
+- `Experiments/eval_suite_runner.py` — default suite → `Experiments/10k_rag_eval_v2.json`; default `--workers` **3 → 1** (429 mitigation)
+- Eval benchmark methodology: v2 replaces external v1 as canonical suite (v1 runs retained for history only)
+
+### Removed
+- (none — v1 suite file not deleted; runner fallbacks to Downloads v1 still exist)

@@ -209,6 +209,13 @@ def _dedup_md_table(md: str) -> str:
     return "\n".join(lines)
 
 
+# Segment names that indicate data belongs to equity-method investees,
+# NOT the filing company's own consolidated financials.
+_INVESTEE_SEGMENT_PATTERNS = re.compile(
+    r"equitymethod|nonconsolidated|investee", re.IGNORECASE
+)
+
+
 def _concept_header(concept_names: list[str], periods: list[str], segments: list[str]) -> str:
     """Build a short natural-language header for a financial table chunk."""
     labels = [_camel_to_label(n) for n in concept_names[:6]]
@@ -218,6 +225,20 @@ def _concept_header(concept_names: list[str], periods: list[str], segments: list
         years = re.findall(r"\b(20\d{2})\b", p)
         if years:
             period_strs.append(years[-1])  # end year
+
+    # Detect equity-method investee tables and surface the warning prominently
+    # so the reranker sees it within the first 200 chars of the chunk.
+    is_investee = segments and _INVESTEE_SEGMENT_PATTERNS.search(segments[0])
+    if is_investee:
+        warning = (
+            "NOTE: This table shows the COMBINED FINANCIALS OF EQUITY METHOD "
+            "INVESTEES — these are NOT the filing company's own consolidated "
+            "results. Do not use these figures to answer questions about the "
+            "filer's revenue, income, or operating performance.\n\n"
+        )
+    else:
+        warning = ""
+
     header_parts: list[str] = []
     if labels:
         header_parts.append("Financial data: " + ", ".join(labels))
@@ -225,7 +246,8 @@ def _concept_header(concept_names: list[str], periods: list[str], segments: list
         header_parts.append("Period: " + " / ".join(sorted(set(period_strs))))
     if segments:
         header_parts.append("Segment: " + segments[0])
-    return ". ".join(header_parts) + ".\n\n" if header_parts else ""
+    meta = ". ".join(header_parts) + ".\n\n" if header_parts else ""
+    return warning + meta
 
 
 # ── Table-level fact extraction ────────────────────────────────────────────────

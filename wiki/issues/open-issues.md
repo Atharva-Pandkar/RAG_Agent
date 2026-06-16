@@ -330,8 +330,104 @@
 
 ---
 
-## Test Suite JSON Not Yet Created
+## Test Suite JSON Not Yet Created [RESOLVED — Iteration 14]
+- Severity: Low → resolved
+- Location: `Experiments/10k_rag_eval_v2.json`, `Experiments/eval_suite_runner.py`
+- Description: Stratified eval suite now committed in-repo as v2 (43 questions). Runner defaults to this path. v1 external file (`10k_rag_eval_suite.json`) still used as fallback only.
+- Suggested Fix: Move to `eval/test_suite/` for consistency with golden set layout; run v2 baseline and log results.
+
+---
+
+## OpenAI Rate Limits During Parallel Eval Suite [PARTIALLY RESOLVED — Iteration 14]
+- Severity: High → Medium
+- Location: `Experiments/eval_suite_runner.py`
+- Description: Default workers reduced from 3 to **1** to avoid TPM 429 during cross-company eval. First run (213013) failures remain historical; retry/backoff not yet implemented.
+- Suggested Fix: Add exponential backoff on 429 in runner or agent; optional `--workers 3` with inter-query delay.
+
+---
+
+## Test Upload Documents Polluting active_corpus During Eval [OPEN — still present]
+- Severity: Medium
+- Location: `Experiments/corpora/active_corpus.json`
+- Description: `tmpedd_eodk` upload doc still present in active corpus (6 docs, ~1936 chunks vs 5 baseline filings). Eval v2 not yet run on clean corpus.
+- Suggested Fix: Reset active corpus to merged baseline before v2 benchmark; add `DELETE /documents/{id}` API.
+
+---
+
+## eval_ooc_quick Still Points to External v1 Suite Path
 - Severity: Low
-- Location: `eval/` (missing `test_suite/` or benchmark questions file)
-- Description: Requested stratified question set (single-fact, cross-company, out-of-corpus) for experiments was explored against `Dataset/` and structured filings but no committed JSON artifact exists yet.
-- Suggested Fix: Add `eval/test_suite/rag_benchmark_questions.json` with category tags, gold answers, and evaluation metadata aligned to five seeded 10-Ks.
+- Location: `Experiments/eval_ooc_quick.py`
+- Description: Hardcoded `C:\Users\athar\Dropbox\PC\Downloads\10k_rag_eval_suite.json` while full runner now defaults to in-repo v2. OOC smoke test out of sync with canonical suite (v2 has 8 OOC questions vs v1's 10).
+- Suggested Fix: Point `SUITE` to `Experiments/10k_rag_eval_v2.json`; share path constant with `eval_suite_runner.py`.
+
+---
+
+## XBRL Investee Warnings Require Corpus Rebuild to Take Effect
+- Severity: Medium
+- Location: `src/ingestion/build_xbrl_corpus.py`, `Experiments/corpora/active_corpus.json`
+- Description: Equity-method investee `NOTE:` headers added to xbrl chunk builder but existing `xbrl_merged.json` / `active_corpus.json` / FAISS cache were built before this change. Chatbot may still retrieve unlabeled investee tables.
+- Suggested Fix: Re-run `build_xbrl_corpus.py`, `build_merged_corpus.py`, re-seed or rebuild `active_corpus.json`, delete FAISS cache, restart server.
+
+---
+
+## Cross-Company Comparison Questions Fail at 12.5% (First Agent Eval) [PARTIALLY RESOLVED — Iteration 13]
+- Severity: High → Medium
+- Location: `Experiments/runs/eval_suite_20260616_213013.json`, `Experiments/runs/eval_suite_20260616_220605.json`
+- Description: First run scored 2/16 (12.5%), partly due to OpenAI 429 rate limits. After entity-verification prompt + LLM rerank + mismatch guards, second run scored **11/16 (68.75%)** category score (37.5% judge accuracy). Still room to improve synthesis and rate-limit handling.
+- Suggested Fix: Continue tuning multi-search behavior; add retry on 429; re-run with `--workers 1` for clean baseline.
+
+---
+
+## Out-of-Corpus Refusal Rate Low (30% on First Run) [PARTIALLY RESOLVED — Iteration 13]
+- Severity: High → Medium
+- Location: `Experiments/runs/eval_suite_20260616_213013.json`, `Experiments/runs/eval_suite_20260616_220605.json`, `app/backend/agent.py`
+- Description: First run: 6/20 (30%). After entity verification + mismatch warnings + refusal templates, second run: **14/20 (70%)**. Remaining failures may be edge cases (future-year questions, partial hedging).
+- Suggested Fix: Run `eval_ooc_quick.py` after each prompt change; extend keyword list; hard-block search when registry lacks entity.
+
+---
+
+## Single-Fact Prose Regression After Guard Changes
+- Severity: Medium
+- Location: `Experiments/runs/eval_suite_20260616_220605.json`, `app/backend/agent.py`, `app/backend/rag_tool.py`
+- Description: Category score fell from 26/28 (92.9%) on Run 1 to **14/28 (50%)** on Run 2 after adding entity verification, LLM rerank, and stricter prompt. Possible causes: over-refusal for in-corpus companies, rerank dropping gold chunks, extra `list_available_documents` latency causing timeouts, or judge scoring stricter on partial answers.
+- Suggested Fix: Compare per-question diffs Run 1 vs Run 2; tune rerank k; allow search when entity clearly in registry without double tool call; A/B with guards off.
+
+---
+
+## search_documents Tool Docstring Says 3 Passages but Returns 5
+- Severity: Low
+- Location: `app/backend/rag_tool.py`
+- Description: Tool docstring claims "Up to 3 reranked passages" but `RERANK_K=5`. Agent and eval expectations may diverge.
+- Suggested Fix: Align docstring with `RERANK_K` or reduce `RERANK_K` to 3 if context budget requires it.
+
+---
+
+## Out-of-Corpus Keyword List Is Hardcoded and Incomplete
+- Severity: Low
+- Location: `app/backend/rag_tool.py` (`_COMPANY_KEYWORDS`)
+- Description: Mismatch guard only checks ~12 known out-of-corpus keywords (Tesla, NVIDIA, Amazon, etc.). Questions about other absent companies (e.g., PepsiCo, Deere) won't trigger retrieval warning.
+- Suggested Fix: Derive guard from `docs_registry.json` — warn when query entity not in loaded doc ids; remove static keyword map.
+
+---
+
+## llm_reranker Not Listed in Requirements
+- Severity: Low
+- Location: `src/retrieval/llm_reranker.py`, `app/backend/requirements.txt`
+- Description: Reranker imports `openai` at call time (already a backend dep). No separate dep issue, but module is chatbot-only and undocumented in setup docs.
+- Suggested Fix: Document rerank step in `app/README.md`; note extra API cost per search call.
+
+---
+
+## Test Upload Documents Polluting active_corpus During Eval
+- Severity: Medium
+- Location: `Experiments/corpora/active_corpus.json`, `Experiments/runs/eval_suite_20260616_213013.json`
+- Description: First eval run cites chunks from uploaded doc `tmpedd_eodk` (e.g., SFP-002 net income, SFT questions) alongside legitimate 10-K chunks. Ad-hoc uploads merged into active corpus pollute retrieval and citation accuracy for benchmark runs. **`tmpedd_eodk` still in active corpus as of Iteration 14.**
+- Suggested Fix: Reset active corpus to merged baseline before eval; add `DELETE /documents/{id}`; exclude `_upload_` doc ids from eval environment; document clean eval setup in experiment log.
+
+---
+
+## eval_suite_runner Missing Dependencies
+- Severity: Low
+- Location: `Experiments/eval_suite_runner.py`, `requirements.txt`
+- Description: Runner imports `aiohttp` and uses `openai` + `python-dotenv` but is not listed in root or app requirements. Fresh env may fail on `import aiohttp`.
+- Suggested Fix: Add `aiohttp` to root requirements or document in experiment log setup steps.

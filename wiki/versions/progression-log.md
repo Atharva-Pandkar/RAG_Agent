@@ -106,17 +106,23 @@ High-level milestone tracker across project phases. Updated at the end of each i
 | Backend request logging | Done | Rotating file + HTTP middleware |
 | Pre-built embedding cache for deploy | Not started | First boot still embeds ~1,893 chunks via API |
 | Retrieval result caching per turn | Not started | — |
+| Agent E2E eval suite | Done | `eval_suite_runner.py`; Run 2: 59.6% overall |
+| LLM rerank in chatbot | Done | 10 candidates → rerank to 5 via gpt-4o-mini |
+| Hallucination / OOC guards | Done | Entity verify prompt + retrieval mismatch warning |
+| OOC smoke test | Done | `eval_ooc_quick.py` |
+| Eval suite v2 in repo | Done | `Experiments/10k_rag_eval_v2.json` (43 Q) |
+| XBRL investee table warnings | Done | `build_xbrl_corpus.py` (rebuild pending) |
 
 ---
 
-## Next Up (Iteration 12 candidates)
-1. Pass `section` metadata through retrievers (citations often show `"—"` or doc fallback)
-2. Restore optional EDGAR URLs for seeded 10-K docs in `SourceRef`
-3. Fix FAISS vector purge on re-ingest; add document delete API
-4. Commit stratified eval test suite JSON (`eval/test_suite/`) — single-fact, cross-company, out-of-corpus
-5. Update `app/README.md` — active corpus, ingest endpoints, footnote citations, sidebar
-6. Frontend `/health` polling during server boot (disable chat until pipeline warm)
-7. Pin `unstructured` + full RAG deps in `app/backend/requirements.txt`
-8. Re-eval chatbot embedding config (OpenAI vs BGE-small) for benchmark parity
-9. Env-configurable retrieval config in `rag_tool.py` (corpus, k, embed model)
-10. Rerank on Run 36 baseline; document-level filtering
+## Next Up (Iteration 15 candidates)
+1. Run v2 eval suite on clean corpus; log baseline in `Experiments/runs/`
+2. Rebuild xbrl + merged + active corpus with investee warnings; invalidate FAISS cache
+3. Remove `tmpedd_eodk` from active corpus; add document delete API
+4. Sync `eval_ooc_quick.py` to v2 suite path
+5. Fix single-fact prose regression (rerank k, over-refusal tuning)
+6. Registry-driven mismatch guard (replace hardcoded keyword list)
+7. Pass `section` metadata through retrievers
+8. Restore optional EDGAR URLs for seeded 10-K docs
+9. Update `app/README.md` — eval v2, rerank, guards, rebuild workflow
+10. Pin `aiohttp`, `unstructured`, full RAG deps in requirements
