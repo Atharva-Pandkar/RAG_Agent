@@ -133,14 +133,34 @@ class FaissRetriever:
             self._store.save_local(str(self._index_dir))
             log.info("[faiss] Cache updated")
 
-    def retrieve(self, query: str, k: int = 5) -> List[Dict]:
+    def retrieve(self, query: str, k: int = 5,
+                filter_doc: str | None = None) -> List[Dict]:
         self._ensure_loaded()
-        log.debug("[faiss] Dense search — query: %r  k: %d", query[:80], k)
+        log.debug("[faiss] Dense search — query: %r  k: %d  filter_doc: %s",
+                  query[:80], k, filter_doc)
         t0 = time.perf_counter()
-        results = self._store.similarity_search_with_relevance_scores(query, k=k)
-        log.debug("[faiss] %d results (%.3fs)", len(results), time.perf_counter() - t0)
-        return [
-            {"id": doc.metadata["id"], "doc": doc.metadata["doc"],
-             "text": doc.page_content, "score": float(score)}
-            for doc, score in results
-        ]
+
+        if filter_doc:
+            # Fetch a larger candidate set, then post-filter by doc prefix.
+            # LangChain FAISS does not support prefix filtering natively, so
+            # we over-fetch and trim.  The corpus is small enough that this is fast.
+            fetch = min(k * 10, len(self.chunks))
+            raw = self._store.similarity_search_with_relevance_scores(query, k=fetch)
+            results = [
+                {"id": doc.metadata["id"], "doc": doc.metadata["doc"],
+                 "text": doc.page_content, "score": float(score)}
+                for doc, score in raw
+                if doc.metadata.get("doc", "").startswith(filter_doc)
+            ][:k]
+            log.debug("[faiss] %d results after filter (%.3fs)", len(results),
+                      time.perf_counter() - t0)
+        else:
+            raw = self._store.similarity_search_with_relevance_scores(query, k=k)
+            results = [
+                {"id": doc.metadata["id"], "doc": doc.metadata["doc"],
+                 "text": doc.page_content, "score": float(score)}
+                for doc, score in raw
+            ]
+            log.debug("[faiss] %d results (%.3fs)", len(results), time.perf_counter() - t0)
+
+        return results

@@ -88,10 +88,12 @@ class RagPipeline:
         log.info("[pipeline] RagPipeline fully initialised (total %.2fs)",
                  time.perf_counter() - t0)
 
-    def retrieve(self, question: str, k: int = 5) -> List[Dict]:
-        log.debug("[pipeline] retrieve() — question: %r  k: %d", question[:80], k)
+    def retrieve(self, question: str, k: int = 5,
+                filter_doc: str | None = None) -> List[Dict]:
+        log.debug("[pipeline] retrieve() — question: %r  k: %d  filter_doc: %s",
+                  question[:80], k, filter_doc)
         t0 = time.perf_counter()
-        results = self.retriever.retrieve(question, k=k)
+        results = self.retriever.retrieve(question, k=k, filter_doc=filter_doc)
         log.debug("[pipeline] retrieve() returned %d results (%.2fs)",
                   len(results), time.perf_counter() - t0)
         return results

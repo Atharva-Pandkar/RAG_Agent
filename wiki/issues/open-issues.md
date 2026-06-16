@@ -18,8 +18,8 @@
 
 ---
 
-## BM25 Retrieves Cross-Document Chunks
-- Severity: High
+## BM25 Retrieves Cross-Document Chunks [OUTDATED — resolved Iteration 15; see entry below]
+- Severity: High → resolved (chatbot path)
 - Location: `src/retrieval/bm25_retriever.py`, Run 01 results
 - Description: Queries scoped to one company (e.g. AAPL-01) retrieve chunks from unrelated filings (e.g. WMT). No document filter is applied at retrieval time.
 - Suggested Fix: Add optional `doc_filter` derived from question metadata (company tag) or use metadata-aware retrieval; at minimum filter by `doc` field when company is known from golden set.
@@ -346,11 +346,51 @@
 
 ---
 
-## Test Upload Documents Polluting active_corpus During Eval [OPEN — still present]
+## BM25 Retrieves Cross-Document Chunks [RESOLVED — Iteration 15]
+- Severity: High → resolved (chatbot path)
+- Location: `src/retrieval/bm25_retriever.py`, `app/backend/rag_tool.py`, `app/backend/agent.py`
+- Description: Was retrieving unrelated filing chunks for company-scoped questions. `doc_filter` on `search_documents` + agent rule 3b restricts retrieval to one doc prefix. Offline eval harness (`run_eval.py`) still unfiltered unless extended.
+- Suggested Fix: Optional `filter_doc` in golden-set eval configs for company-tagged questions.
+
+---
+
+## Test Upload Documents Polluting active_corpus During Eval [RESOLVED — Iteration 15]
+- Severity: Medium → resolved
+- Location: `Experiments/corpora/active_corpus.json`, `docs_registry.json`
+- Description: `tmpedd_eodk` upload removed. Active corpus back to 5 seeded filings, 1893 chunks. v2 Run 2 (`225849`) executed on clean corpus.
+- Suggested Fix: Add `DELETE /documents/{id}` API to prevent recurrence; document eval reset procedure.
+
+---
+
+## Single-Fact Prose Regression After Guard Changes [RESOLVED — Iteration 15]
+- Severity: Medium → resolved
+- Location: `Experiments/runs/eval_suite_20260616_225849.json`
+- Description: v2 Run 2 with `doc_filter` + hybrid judge: single-fact prose **24/24 (100%)**, table **20/20 (100%)**. Prior 50% regression (Run 220605 v1 / Run 224259 v2) addressed.
+- Suggested Fix: Monitor cross-company category (still weakest at 43.75%).
+
+---
+
+## FaissHybrid RRF Results Still Omit section Metadata
+- Severity: Low
+- Location: `src/retrieval/faiss_hybrid_retriever.py`
+- Description: `BM25Retriever` now returns `section` when filtering, but hybrid fusion builds results from `by_id` with only `{id, doc, text, score}` — `section` dropped before tool output. Citations still show `"—"`.
+- Suggested Fix: Include `section: by_id[i].get("section")` in hybrid return payload; propagate through FAISS unfiltered path too.
+
+---
+
+## Cross-Company Comparison Still Weak on v2 Baseline (43.75%)
 - Severity: Medium
-- Location: `Experiments/corpora/active_corpus.json`
-- Description: `tmpedd_eodk` upload doc still present in active corpus (6 docs, ~1936 chunks vs 5 baseline filings). Eval v2 not yet run on clean corpus.
-- Suggested Fix: Reset active corpus to merged baseline before v2 benchmark; add `DELETE /documents/{id}` API.
+- Location: `Experiments/runs/eval_suite_20260616_225849.json`, `app/backend/agent.py`
+- Description: Best v2 run scores 7/16 (43.75%) on cross-company category despite 79.1% overall. Agent must run unfiltered multi-doc searches and synthesize; doc_filter not applicable.
+- Suggested Fix: Prompt explicit per-company search + comparison template; dedicated multi-retrieval tool; evaluate CCC failures in Run 2 JSON.
+
+---
+
+## Eval Judge Methodology Changed Between v2 Runs
+- Severity: Low
+- Location: `Experiments/eval_suite_runner.py`, `Experiments/runs/eval_suite_20260616_224259.json`, `225849.json`
+- Description: Run 1 (224259) used LLM-only judge; Run 2 (225849) adds hybrid exact-match/refusal pre-checks. Prose/table 100% on Run 2 reflects both `doc_filter` and judge changes — not isolated.
+- Suggested Fix: Tag run JSON with judge version; re-score Run 1 responses with hybrid judge for apples-to-apples comparison.
 
 ---
 
@@ -370,27 +410,19 @@
 
 ---
 
-## Cross-Company Comparison Questions Fail at 12.5% (First Agent Eval) [PARTIALLY RESOLVED — Iteration 13]
-- Severity: High → Medium
+## Cross-Company Comparison Questions Fail at 12.5% (First Agent Eval) [OUTDATED — see v2 baseline]
+- Severity: High → Medium (historical)
 - Location: `Experiments/runs/eval_suite_20260616_213013.json`, `Experiments/runs/eval_suite_20260616_220605.json`
-- Description: First run scored 2/16 (12.5%), partly due to OpenAI 429 rate limits. After entity-verification prompt + LLM rerank + mismatch guards, second run scored **11/16 (68.75%)** category score (37.5% judge accuracy). Still room to improve synthesis and rate-limit handling.
-- Suggested Fix: Continue tuning multi-search behavior; add retry on 429; re-run with `--workers 1` for clean baseline.
+- Description: v1-era runs. v2 Run 2 (`225849`) cross-company category **43.75%** — improved but still weakest. See dedicated open issue above.
+- Suggested Fix: Focus on CCC synthesis improvements (Iteration 16).
 
 ---
 
-## Out-of-Corpus Refusal Rate Low (30% on First Run) [PARTIALLY RESOLVED — Iteration 13]
+## Out-of-Corpus Refusal Rate Low (30% on First Run) [PARTIALLY RESOLVED — v2 Run 2: 75%]
 - Severity: High → Medium
-- Location: `Experiments/runs/eval_suite_20260616_213013.json`, `Experiments/runs/eval_suite_20260616_220605.json`, `app/backend/agent.py`
-- Description: First run: 6/20 (30%). After entity verification + mismatch warnings + refusal templates, second run: **14/20 (70%)**. Remaining failures may be edge cases (future-year questions, partial hedging).
-- Suggested Fix: Run `eval_ooc_quick.py` after each prompt change; extend keyword list; hard-block search when registry lacks entity.
-
----
-
-## Single-Fact Prose Regression After Guard Changes
-- Severity: Medium
-- Location: `Experiments/runs/eval_suite_20260616_220605.json`, `app/backend/agent.py`, `app/backend/rag_tool.py`
-- Description: Category score fell from 26/28 (92.9%) on Run 1 to **14/28 (50%)** on Run 2 after adding entity verification, LLM rerank, and stricter prompt. Possible causes: over-refusal for in-corpus companies, rerank dropping gold chunks, extra `list_available_documents` latency causing timeouts, or judge scoring stricter on partial answers.
-- Suggested Fix: Compare per-question diffs Run 1 vs Run 2; tune rerank k; allow search when entity clearly in registry without double tool call; A/B with guards off.
+- Location: `Experiments/runs/eval_suite_20260616_225849.json`, `app/backend/agent.py`
+- Description: v1 first run 30%; v2 Run 2 **75%** OOC category with entity guards + hybrid refusal judge. Remaining failures need per-question review.
+- Suggested Fix: Run `eval_ooc_quick.py` on v2 path after prompt changes; registry-driven block for unknown entities.
 
 ---
 
@@ -418,10 +450,10 @@
 
 ---
 
-## Test Upload Documents Polluting active_corpus During Eval
-- Severity: Medium
+## Test Upload Documents Polluting active_corpus During Eval [OUTDATED — resolved Iteration 15; see entry above]
+- Severity: Medium → resolved
 - Location: `Experiments/corpora/active_corpus.json`, `Experiments/runs/eval_suite_20260616_213013.json`
-- Description: First eval run cites chunks from uploaded doc `tmpedd_eodk` (e.g., SFP-002 net income, SFT questions) alongside legitimate 10-K chunks. Ad-hoc uploads merged into active corpus pollute retrieval and citation accuracy for benchmark runs. **`tmpedd_eodk` still in active corpus as of Iteration 14.**
+- Description: First eval run cites chunks from uploaded doc `tmpedd_eodk` (e.g., SFP-002 net income, SFT questions) alongside legitimate 10-K chunks. Ad-hoc uploads merged into active corpus pollute retrieval and citation accuracy for benchmark runs.
 - Suggested Fix: Reset active corpus to merged baseline before eval; add `DELETE /documents/{id}`; exclude `_upload_` doc ids from eval environment; document clean eval setup in experiment log.
 
 ---

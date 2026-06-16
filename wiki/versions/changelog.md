@@ -296,3 +296,24 @@ Project-level record of what was added, changed, or removed each iteration.
 
 ### Removed
 - (none — v1 suite file not deleted; runner fallbacks to Downloads v1 still exist)
+
+---
+
+## Iteration 15 — 2026-06-16
+
+### Added
+- `filter_doc` parameter on `RagPipeline.retrieve()`, BM25/FAISS/hybrid retrievers, and `search_documents` tool
+- Agent prompt rule **3b** — use `doc_filter` for single-company questions
+- `list_available_documents` output includes `(doc_id: …)` per document
+- Hybrid eval judge in `eval_suite_runner.py` — numeric exact-match (±2.5%) for SFP/SFT; refusal regex for OOC
+- `Experiments/runs/eval_suite_20260616_224259.json` — v2 Run 1 (52.3% overall)
+- `Experiments/runs/eval_suite_20260616_225849.json` — v2 Run 2 (79.1% overall, production baseline)
+
+### Changed
+- `BM25Retriever.retrieve()` — optional doc prefix filter; returns `section` in result dict
+- `FaissRetriever.retrieve()` — over-fetch + post-filter when `filter_doc` set
+- `FaissHybridRetriever` — passes `filter_doc` to both legs before RRF
+- `active_corpus.json` / `docs_registry.json` — cleaned to 5 baseline filings (1893 chunks); `tmpedd_eodk` removed
+
+### Removed
+- Test upload doc `tmpedd_eodk` from active corpus and registry

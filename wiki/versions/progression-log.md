@@ -26,7 +26,7 @@ High-level milestone tracker across project phases. Updated at the end of each i
 | iXBRL + merged corpora | Done | Runs 37–40 |
 | BM25 / dense / hybrid / FAISS hybrid | Done | All strategies benchmarked |
 | Gold chunk population | Done | **26/26** merged + fixed-size; 25/26 unstructured (KO-03) |
-| Document-level retrieval filtering | Not started | Cross-doc pollution still present |
+| Document-level retrieval filtering | Done | `doc_filter` on chatbot path (Iteration 15); offline `run_eval.py` still unfiltered |
 
 **Best configs (n=26, latest runs):**
 | Run | Strategy | Corpus | k | Recall@k | MRR |
@@ -106,23 +106,26 @@ High-level milestone tracker across project phases. Updated at the end of each i
 | Backend request logging | Done | Rotating file + HTTP middleware |
 | Pre-built embedding cache for deploy | Not started | First boot still embeds ~1,893 chunks via API |
 | Retrieval result caching per turn | Not started | — |
-| Agent E2E eval suite | Done | `eval_suite_runner.py`; Run 2: 59.6% overall |
+| Agent E2E eval suite | Done | v2 baseline Run `225849` — 79.1% overall |
 | LLM rerank in chatbot | Done | 10 candidates → rerank to 5 via gpt-4o-mini |
 | Hallucination / OOC guards | Done | Entity verify prompt + retrieval mismatch warning |
 | OOC smoke test | Done | `eval_ooc_quick.py` |
 | Eval suite v2 in repo | Done | `Experiments/10k_rag_eval_v2.json` (43 Q) |
 | XBRL investee table warnings | Done | `build_xbrl_corpus.py` (rebuild pending) |
+| Document-scoped retrieval | Done | `doc_filter` on search + retrievers |
+| v2 agent eval baseline | Done | Run `225849` — 79.1% overall |
+| BM25 cross-doc filter (chatbot) | Done | Addresses long-standing open issue |
 
 ---
 
-## Next Up (Iteration 15 candidates)
-1. Run v2 eval suite on clean corpus; log baseline in `Experiments/runs/`
-2. Rebuild xbrl + merged + active corpus with investee warnings; invalidate FAISS cache
-3. Remove `tmpedd_eodk` from active corpus; add document delete API
+## Next Up (Iteration 16 candidates)
+1. Improve cross-company synthesis (43.75% on baseline — weakest category)
+2. Rebuild xbrl + merged + active corpus with investee warnings
+3. Pass `section` through faiss_hybrid RRF results
 4. Sync `eval_ooc_quick.py` to v2 suite path
-5. Fix single-fact prose regression (rerank k, over-refusal tuning)
+5. Add `DELETE /documents/{id}` API
 6. Registry-driven mismatch guard (replace hardcoded keyword list)
-7. Pass `section` metadata through retrievers
-8. Restore optional EDGAR URLs for seeded 10-K docs
-9. Update `app/README.md` — eval v2, rerank, guards, rebuild workflow
-10. Pin `aiohttp`, `unstructured`, full RAG deps in requirements
+7. Restore optional EDGAR URLs for seeded 10-K docs
+8. Update `app/README.md` — doc_filter, eval v2 baseline, hybrid judge
+9. Pin `aiohttp`, `unstructured`, full RAG deps in requirements
+10. Optional `filter_doc` in offline `run_eval.py` harness

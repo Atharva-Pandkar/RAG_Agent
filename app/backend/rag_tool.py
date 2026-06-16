@@ -56,8 +56,8 @@ def get_pipeline() -> RagPipeline:
 # ── Tool 1: document search ──────────────────────────────────────────────────
 
 @tool
-def search_documents(query: str) -> str:
-    """Search all documents loaded into the RAG system for passages relevant to the query.
+def search_documents(query: str, doc_filter: str = "") -> str:
+    """Search documents loaded into the RAG system for passages relevant to the query.
 
     Use this tool for ANY factual question — financial figures, risk factors,
     business descriptions, MD&A commentary, footnotes, or any other content
@@ -72,16 +72,24 @@ def search_documents(query: str) -> str:
                - Multi-part question → one call per sub-question.
                - Vague input → rephrase into a specific question first.
 
+        doc_filter: Optional doc_id prefix to restrict search to ONE document.
+               Pass this whenever the question is about a single, identified company.
+               Example: "aapl-20250927" restricts to Apple's filing only.
+               Obtain the exact doc_id from list_available_documents first.
+               Leave empty ("") to search across all documents.
+
     Returns:
-        Up to 3 reranked passages (selected from 10 candidates), each
-        labelled with source document, section, and chunk ID.
+        Up to {RERANK_K} reranked passages, each labelled with source document,
+        section, and chunk ID.
     """
-    log.info("TOOL CALL search_documents — query: %r", query)
+    log.info("TOOL CALL search_documents — query: %r  doc_filter: %r", query, doc_filter)
     t0 = time.perf_counter()
+
+    active_filter = doc_filter.strip() or None
 
     try:
         pipeline = get_pipeline()
-        results  = pipeline.retrieve(query, k=RETRIEVAL_K)
+        results  = pipeline.retrieve(query, k=RETRIEVAL_K, filter_doc=active_filter)
     except Exception:
         log.exception("RAG pipeline retrieval failed for query: %r", query)
         return "Retrieval failed — please try again."
@@ -179,11 +187,12 @@ def list_available_documents() -> str:
     lines = [f"{len(docs)} document(s) are loaded:\n"]
     for d in docs:
         name     = d.get("display_name") or d.get("id", "?")
+        doc_id   = d.get("id", "")
         sections = d.get("sections", [])
         sec_str  = ", ".join(sections[:6])
         if len(sections) > 6:
             sec_str += f" … (+{len(sections) - 6} more)"
-        lines.append(f"• {name}  [{d.get('chunk_count', '?')} chunks]")
+        lines.append(f"• {name}  [{d.get('chunk_count', '?')} chunks]  (doc_id: {doc_id})")
         if sec_str:
             lines.append(f"  Sections: {sec_str}")
 

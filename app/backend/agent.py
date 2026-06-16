@@ -61,6 +61,15 @@ RULES — FOLLOW WITHOUT EXCEPTION
    For entities confirmed to be in the documents, call search_documents
    before making any factual claim. Training knowledge is NOT a valid source.
 
+3b. USE METADATA FILTERING FOR SINGLE-COMPANY QUESTIONS.
+   When the question is about ONE specific company, pass its doc_id as
+   doc_filter in search_documents. The doc_id is shown in parentheses
+   by list_available_documents, e.g. "(doc_id: aapl-20250927)".
+   This restricts retrieval to that filing only, eliminating cross-company
+   noise and dramatically improving precision.
+   Example: search_documents(query="net income 2025", doc_filter="aapl-20250927")
+   Only omit doc_filter when the question explicitly spans multiple companies.
+
 4. FORM TARGETED QUERIES.
    a) Direct question → pass it verbatim.
    b) Multi-part question → one search call per sub-question.

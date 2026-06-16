@@ -36,19 +36,20 @@ class FaissHybridRetriever:
         self.bm25.add_chunks(new_chunks)
         self.dense.add_chunks(new_chunks)
 
-    def retrieve(self, query: str, k: int = 5) -> List[Dict]:
-        log.debug("[faiss_hybrid] Retrieve — query: %r  k: %d  fetch_k: %d",
-                  query[:80], k, self.fetch_k)
+    def retrieve(self, query: str, k: int = 5,
+                filter_doc: str | None = None) -> List[Dict]:
+        log.debug("[faiss_hybrid] Retrieve — query: %r  k: %d  fetch_k: %d  filter_doc: %s",
+                  query[:80], k, self.fetch_k, filter_doc)
 
         # BM25 leg
         t0 = time.perf_counter()
-        bm25_results = self.bm25.retrieve(query, k=self.fetch_k)
+        bm25_results = self.bm25.retrieve(query, k=self.fetch_k, filter_doc=filter_doc)
         log.debug("[faiss_hybrid] BM25 returned %d results (%.3fs)",
                   len(bm25_results), time.perf_counter() - t0)
 
         # Dense leg
         t1 = time.perf_counter()
-        dense_results = self.dense.retrieve(query, k=self.fetch_k)
+        dense_results = self.dense.retrieve(query, k=self.fetch_k, filter_doc=filter_doc)
         log.debug("[faiss_hybrid] Dense returned %d results (%.3fs)",
                   len(dense_results), time.perf_counter() - t1)
 

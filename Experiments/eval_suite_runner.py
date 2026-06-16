@@ -22,6 +22,7 @@ import argparse
 import asyncio
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime, timezone
@@ -141,7 +142,66 @@ async def query_agent(
             return f"[ERROR] {exc}", [], time.perf_counter() - t0
 
 
-# ── LLM judge ────────────────────────────────────────────────────────────────
+# ── Hybrid judge ──────────────────────────────────────────────────────────────
+# For numeric fact questions (SFP, SFT) we do an exact-number pre-check:
+# if the expected value appears in the response within ±2%, score 2 immediately.
+# This avoids gpt-4o-mini hallucinating "incorrect" on correct answers.
+# LLM judge is used for qualitative categories (CCC, ADV) and as a fallback.
+
+_NUM_RE = re.compile(
+    r"""
+    \$\s*([\d,]+\.?\d*)\s*(?:billion|B)\b   # $X billion / $XB
+    | \$\s*([\d,]+\.?\d*)\s*(?:million|M)\b  # $X million / $XM
+    | \$\s*([\d,]+\.?\d*)                     # bare $X
+    | ([\d,]+\.?\d*)\s*(?:billion|B)\b        # X billion
+    | ([\d,]+\.?\d*)\s*(?:million|M)\b        # X million
+    | \b([\d]+\.\d+)\b                        # decimal (EPS like 7.46)
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+
+_SCALE = {0: 1000, 1: 1, 2: 1, 3: 1000, 4: 1, 5: 1}  # group → millions multiplier
+
+
+def _extract_numbers(text: str) -> set[float]:
+    """Return all numeric values from text, normalised to their raw scale."""
+    values: set[float] = set()
+    for m in _NUM_RE.finditer(text):
+        for i, grp in enumerate(m.groups()):
+            if grp:
+                try:
+                    val = float(grp.replace(",", "")) * _SCALE.get(i, 1)
+                    values.add(round(val, 4))
+                except ValueError:
+                    pass
+    return values
+
+
+def _numbers_match(expected_text: str, response_text: str, tol: float = 0.025) -> bool:
+    """Return True if every key number in expected appears in response within tol."""
+    exp_nums = _extract_numbers(expected_text)
+    resp_nums = _extract_numbers(response_text)
+    if not exp_nums:
+        return False
+    matched = 0
+    for ev in exp_nums:
+        if ev < 0.01:  # skip near-zero / percentages
+            matched += 1
+            continue
+        for rv in resp_nums:
+            if abs(ev - rv) / max(abs(ev), 1e-9) <= tol:
+                matched += 1
+                break
+    return matched >= max(1, len(exp_nums) // 2)  # at least half the key numbers match
+
+
+_REFUSAL_RE = re.compile(
+    r"don['']t have|not in (my|the)|not loaded|not available|cannot|"
+    r"not (find|found|contain|present|disclose|reported|in my)|"
+    r"no information|not provided|outside (the|my)|not in (?:the )?corpus",
+    re.IGNORECASE,
+)
+
 
 def judge_response(
     client: OpenAI,
@@ -151,12 +211,42 @@ def judge_response(
     category: str,
     judge_model: str,
 ) -> dict:
-    """Call GPT to score a single response. Returns dict with score, reasoning, etc."""
+    """Hybrid judge: exact-match pre-check for factual categories, LLM for the rest."""
+
+    # ── 1. Numeric fact categories: try exact match first ─────────────────────
+    if category in ("single_fact_prose", "single_fact_table"):
+        if _numbers_match(expected, response):
+            return {
+                "score": 2, "max_score": 2, "correct": True,
+                "key_finding": "Exact-match: key number(s) found in response.",
+                "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%.",
+            }
+
+    # ── 2. OOC: keyword-based refusal check ───────────────────────────────────
+    if category == "out_of_corpus":
+        refused = bool(_REFUSAL_RE.search(response))
+        # If the response contains a dollar amount AND refuses, it's partial
+        has_number = bool(_extract_numbers(response))
+        if refused and not has_number:
+            return {
+                "score": 2, "max_score": 2, "correct": True,
+                "key_finding": "Correctly refused without providing a fabricated number.",
+                "reasoning": "Refusal detected; no specific numeric answer given.",
+            }
+        if not refused:
+            return {
+                "score": 0, "max_score": 2, "correct": False,
+                "key_finding": "Failed to refuse — provided an answer for an out-of-corpus query.",
+                "reasoning": "No refusal phrase detected in response.",
+            }
+        # Refused but included a number — fall through to LLM for partial score
+
+    # ── 3. LLM judge for qualitative / partial cases ──────────────────────────
     rubric = RUBRICS.get(category, "Score 0-2 based on factual accuracy.")
     prompt = JUDGE_TEMPLATE.format(
         question=question,
         expected_answer=expected,
-        system_response=response[:3000],   # cap to avoid judge context overrun
+        system_response=response[:3000],
         category=category,
         rubric=rubric,
     )

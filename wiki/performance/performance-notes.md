@@ -291,10 +291,10 @@
 ---
 
 ## Entity Verification — Extra list_available_documents Tool Call
-- Concern: Updated agent prompt instructs calling `list_available_documents` before searching any named entity. Adds one LLM tool round-trip + registry JSON read per question, increasing latency and TPM usage vs Run 1 eval.
+- Concern: Updated agent prompt instructs calling `list_available_documents` before searching any named entity. Adds one LLM tool round-trip + registry JSON read per question, increasing latency and TPM usage vs unguarded eval runs.
 - Location: `app/backend/agent.py`, `app/backend/rag_tool.py`
 - Priority: Medium
-- Notes: May contribute to single-fact prose regression (50% on Run 2). Registry is small (~5 docs) — could inject doc list into system prompt at startup instead.
+- Notes: v2 Run 1 (224259) showed single-fact regression partly from guards + LLM-only judge; v2 Run 2 (225849) with `doc_filter` + hybrid judge restored prose/table to 100%. Registry is small (~5 docs) — could inject doc list into system prompt at startup to skip one tool round-trip.
 
 ---
 
@@ -306,11 +306,11 @@
 
 ---
 
-## Eval Suite v2 — Sequential 43-Question Baseline (Not Yet Run)
-- Concern: New v2 suite (43 questions) has no logged agent eval run yet. Wall time estimate: ~6–30s × 43 ≈ 5–20 min sequential at workers=1, plus 43 judge calls.
-- Location: `Experiments/10k_rag_eval_v2.json`, `Experiments/eval_suite_runner.py`
-- Priority: Medium
-- Notes: Run after cleaning `active_corpus.json` and rebuilding xbrl chunks with investee warnings for apples-to-apples benchmark.
+## Eval Suite v2 — Sequential 43-Question Baseline [OUTDATED — runs logged]
+- Concern: v2 suite (43 questions) now has two logged agent eval runs on clean 5-doc corpus (`224259`, `225849`). Wall time at workers=1: ~15–25 min sequential `/chat` + judge per full suite.
+- Location: `Experiments/10k_rag_eval_v2.json`, `Experiments/eval_suite_runner.py`, `Experiments/runs/eval_suite_20260616_225849.json`
+- Priority: Low
+- Notes: Production baseline is Run 2 (`225849`, 79.1%). Re-run after xbrl investee-warning rebuild for updated corpus comparison.
 
 ---
 
@@ -319,3 +319,35 @@
 - Location: `src/ingestion/build_xbrl_corpus.py`, `Experiments/corpora/`, `Experiments/embeddings/`
 - Priority: Medium
 - Notes: Warning text placed in first ~200 chars intentionally for LLM reranker snippet visibility.
+
+---
+
+## BM25 doc_filter — Sub-Index Build Per Filtered Query
+- Concern: When `filter_doc` is set, BM25 constructs a new `BM25Okapi` over filtered token lists on every retrieve call rather than caching per-doc indexes.
+- Location: `src/retrieval/bm25_retriever.py`
+- Priority: Low
+- Notes: Fast at ~400 chunks per filing × 5 docs. Consider per-doc index cache if filter used heavily.
+
+---
+
+## FAISS doc_filter — Over-Fetch k×10 Post-Filter
+- Concern: Filtered dense search fetches `min(k×10, len(chunks))` vectors then trims by doc prefix. If target doc chunks rank low semantically, may return fewer than k results.
+- Location: `src/retrieval/faiss_retriever.py`
+- Priority: Low
+- Notes: Corpus small enough for current k=10 chatbot path. Increase multiplier if recall drops on filtered queries.
+
+---
+
+## v2 Eval Suite — ~43 Sequential Agent Turns (~15–25 min)
+- Concern: Run 2 (`225849`) at workers=1 took full sequential `/chat` + hybrid/LLM judge per question. Production baseline established but expensive to re-run frequently.
+- Location: `Experiments/eval_suite_runner.py`, `Experiments/runs/eval_suite_20260616_225849.json`
+- Priority: Low
+- Notes: Cache agent responses JSON for judge-only re-scoring when tuning judge logic.
+
+---
+
+## Hybrid Eval Judge — Reduced LLM Judge Calls for SFP/SFT/OOC
+- Concern: Full LLM judge on every question adds ~43 gpt-4o-mini calls per suite run on top of agent turns. Hybrid pre-checks (numeric ±2.5% match, refusal regex) short-circuit factual and OOC categories before LLM judge.
+- Location: `Experiments/eval_suite_runner.py` (`judge_response`)
+- Priority: Low
+- Notes: Run 2 prose/table 100% reflects both `doc_filter` and judge methodology — not isolated. CCC/ADV still use LLM judge fallback. Tag run JSON with judge version for comparable re-scores.

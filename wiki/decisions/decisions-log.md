@@ -437,7 +437,7 @@ Single chronological record of architectural and technical decisions. Append new
 - Context: v1 suite (`10k_rag_eval_suite.json`, 47 questions) lived outside the repo; some OOC/adversarial questions had ambiguous traps; answers were not all verified against corpus chunks before authoring.
 - Decision: Add `Experiments/10k_rag_eval_v2.json` (`10K_RAG_Eval_v2`, 43 questions). Metadata documents all five corpus doc ids and FY end dates. Each question includes verified `answer` + authoring `notes`. OOC questions use only companies clearly absent from corpus; adversarial items have single unambiguous correct answers with documented traps. Category counts: 12 prose, 10 table, 8 cross-company, 8 OOC, 5 adversarial.
 - Alternatives Considered: Patch v1 in place; move to `eval/test_suite/` subfolder only; auto-generate from golden set.
-- Impact: `eval_suite_runner.py` default `--suite` now points to v2 in-repo. v1 runs (213013, 220605) not directly comparable to v2 (different N and question set). **No v2 agent eval run logged yet.**
+- Impact: `eval_suite_runner.py` default `--suite` now points to v2 in-repo. v1 runs (213013, 220605) not directly comparable to v2 (different N and question set). **v2 baselines logged:** Run 1 `224259` (52.3%), Run 2 `225849` (79.1%).
 
 ---
 
@@ -456,3 +456,24 @@ Single chronological record of architectural and technical decisions. Append new
 - Decision: In `build_xbrl_corpus.py`, detect investee segments via regex on segment metadata (`equitymethod|nonconsolidated|investee`). Prepend prominent `NOTE:` warning to chunk header text so LLM reranker (200-char preview) and agent see that figures are **not** the filing company's consolidated results.
 - Alternatives Considered: Exclude investee tables from corpus entirely; post-retrieval filter by segment tag; agent-only prompt rule.
 - Impact: Requires **rebuilding** `xbrl_merged.json` and re-seeding/rebuilding `active_corpus.json` + FAISS cache for warnings to appear in production chatbot. Existing cached chunks lack warnings until corpus rebuild.
+
+---
+
+## Document-Scoped Retrieval via doc_filter
+- Date: 2026-06-16
+- Context: Cross-corpus BM25/FAISS retrieval returned chunks from wrong companies (e.g., Walmart passages for Apple questions), causing cross-doc hallucinations and low single-fact accuracy on v2 eval Run 1 (52.3%). Open issue from Iteration 1 (`BM25 Retrieves Cross-Document Chunks`) still applied to chatbot path.
+- Decision: Add optional `filter_doc: str | None` through `RagPipeline.retrieve()` → `FaissHybridRetriever` → BM25 + FAISS legs. `search_documents(query, doc_filter="")` accepts doc id prefix (e.g. `aapl-20250927`). BM25 builds a filtered sub-index per query; FAISS over-fetches `k×10` candidates then post-filters by doc prefix. Agent prompt rule **3b** instructs passing `doc_filter` for single-company questions; `list_available_documents` now emits `(doc_id: …)` per registry entry.
+- Alternatives Considered: Hard agent-only doc matching; metadata filter in FAISS natively; separate index per document.
+- Impact: v2 eval Run 2 (`225849`): overall **79.1%**; single-fact prose/table **100%**. Cross-company questions omit filter (multi-doc by design) — still **43.75%** category score.
+
+---
+
+## Hybrid Eval Judge (Exact-Match + Refusal Pre-Check)
+- Date: 2026-06-16
+- Context: Pure LLM judge (gpt-4o-mini) scored correct numeric answers as wrong on v2 Run 1, depressing single-fact categories (41.7% prose, 40% table) despite agent giving right figures.
+- Decision: Extend `eval_suite_runner.judge_response()` with hybrid scoring:
+  1. **SFP/SFT:** regex extract numbers from expected + response; auto-score 2 if ≥ half key numbers match within ±2.5%
+  2. **OOC:** regex refusal phrases; auto-score 2 if refused with no dollar amounts; auto-score 0 if no refusal
+  3. **CCC/ADV / partial cases:** fall through to LLM judge
+- Alternatives Considered: Stronger judge model only; human eval; retrieval-only metrics for facts.
+- Impact: Run 2 prose/table hit 100% (partly judge methodology, partly doc_filter). **Not directly comparable** to Run 1 (224259) or v1 LLM-only judge runs. Reduces judge API cost for factual categories.

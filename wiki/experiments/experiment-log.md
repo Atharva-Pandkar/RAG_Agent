@@ -480,9 +480,16 @@ Side-by-side inspection outputs for AAPL (`aapl-20250927.html`). Not yet benchma
 
 **Runner changes:** Default suite path → v2 in repo; default `--workers 1`.
 
-**Agent eval run on v2:** Not yet executed. Prior runs (213013, 220605) used v1 (47 questions) — not directly comparable.
+**v2 agent eval runs (clean 5-doc corpus, 1893 chunks):**
 
-**Pre-run checklist:** Reset `active_corpus.json` (remove `tmpedd_eodk`); rebuild xbrl corpus with investee warnings; restart server.
+| Run | File | Overall | SFP | SFT | CCC | OOC | ADV | Notes |
+|-----|------|---------|-----|-----|-----|-----|-----|-------|
+| 1 | `224259` | 52.3% | 41.7% | 40% | 50% | 87.5% | 50% | Pre doc_filter; LLM-only judge |
+| 2 | `225849` | **79.1%** | **100%** | **100%** | 43.8% | 75% | 50% | doc_filter + hybrid judge — **production baseline** |
+
+**Pre-run checklist (completed for Run 2):** `tmpedd_eodk` removed; 5 baseline filings only.
+
+**Still pending:** Rebuild xbrl corpus with investee warnings; restart server with refreshed chunks.
 
 ---
 

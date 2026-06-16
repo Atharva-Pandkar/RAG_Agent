@@ -33,16 +33,38 @@ class BM25Retriever:
         self.bm25 = BM25Okapi(self._corpus_tokens)
         log.info("[bm25] Index rebuilt — %d docs total", len(self.chunks))
 
-    def retrieve(self, query: str, k: int = 5) -> List[Dict]:
-        log.debug("[bm25] Scoring query: %r", query[:80])
+    def retrieve(self, query: str, k: int = 5,
+                filter_doc: str | None = None) -> List[Dict]:
+        log.debug("[bm25] Scoring query: %r  filter_doc: %s", query[:80], filter_doc)
         t0 = time.perf_counter()
-        scores = self.bm25.get_scores(_tokenize(query))
-        ranked = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:k]
-        results = [
-            {"id": self.chunks[i]["id"], "doc": self.chunks[i]["doc"],
-             "text": self.chunks[i]["text"], "score": float(scores[i])}
-            for i in ranked
-        ]
+
+        if filter_doc:
+            # Pre-filter: only score chunks whose doc matches the prefix
+            indices = [i for i, c in enumerate(self.chunks)
+                       if c.get("doc", "").startswith(filter_doc)]
+            if not indices:
+                log.warning("[bm25] filter_doc=%r matched 0 chunks — returning empty", filter_doc)
+                return []
+            filtered_tokens = [self._corpus_tokens[i] for i in indices]
+            bm25_local = BM25Okapi(filtered_tokens)
+            scores = bm25_local.get_scores(_tokenize(query))
+            ranked_local = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:k]
+            results = [
+                {"id": self.chunks[indices[i]]["id"], "doc": self.chunks[indices[i]]["doc"],
+                 "text": self.chunks[indices[i]]["text"], "score": float(scores[i]),
+                 "section": self.chunks[indices[i]].get("section")}
+                for i in ranked_local
+            ]
+        else:
+            scores = self.bm25.get_scores(_tokenize(query))
+            ranked = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:k]
+            results = [
+                {"id": self.chunks[i]["id"], "doc": self.chunks[i]["doc"],
+                 "text": self.chunks[i]["text"], "score": float(scores[i]),
+                 "section": self.chunks[i].get("section")}
+                for i in ranked
+            ]
+
         log.debug("[bm25] Top-%d scored in %.3fs  top_score=%.4f",
                   k, time.perf_counter() - t0, results[0]["score"] if results else 0)
         return results
