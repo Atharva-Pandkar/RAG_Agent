@@ -1,3 +1,5 @@
+> **[OUTDATED]** Content moved to [`decisions-log.md`](decisions-log.md).
+
 ## Corpus-Specific Gold Chunk Mapping
 - Date: 2026-06-15
 - Context: Gold evidence is defined as text quotes, but retrieval metrics need chunk IDs. Chunk boundaries change when chunking strategy or size changes.

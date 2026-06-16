@@ -1,3 +1,5 @@
+> **[OUTDATED]** Content moved to [`decisions-log.md`](decisions-log.md).
+
 ## Pipeline Interface (retrieve + generate)
 - Date: 2026-06-15
 - Context: The eval harness must work with any RAG stack (BM25, dense, hybrid, reranked) without rewriting the runner.

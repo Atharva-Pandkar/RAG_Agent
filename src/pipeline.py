@@ -25,6 +25,9 @@ ROOT = Path(__file__).resolve().parent.parent
 class RagPipeline:
     def __init__(self, corpus_path: str, retrieval_strategy: str = "bm25",
                  embedding_model: str = "BAAI/bge-small-en-v1.5",
+                 rerank: bool = False,
+                 rerank_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
+                 rerank_fetch_k: int = 20,
                  llm_fn: Optional[Callable[[str, List[Dict]], str]] = None):
         corpus_path = ROOT / corpus_path
         with open(corpus_path, "r", encoding="utf-8") as f:
@@ -44,8 +47,19 @@ class RagPipeline:
         elif retrieval_strategy == "hybrid":
             from retrieval.hybrid_retriever import HybridRetriever
             self.retriever = HybridRetriever(self.chunks, model_name=embedding_model, cache_key=cache_key)
+        elif retrieval_strategy == "faiss":
+            from retrieval.faiss_retriever import FaissRetriever
+            self.retriever = FaissRetriever(self.chunks, model_name=embedding_model, cache_key=cache_key)
+        elif retrieval_strategy == "faiss_hybrid":
+            from retrieval.faiss_hybrid_retriever import FaissHybridRetriever
+            self.retriever = FaissHybridRetriever(self.chunks, model_name=embedding_model, cache_key=cache_key)
         else:
             raise ValueError(f"Unknown retrieval_strategy: {retrieval_strategy}")
+
+        if rerank:
+            from retrieval.reranker import RerankRetriever
+            self.retriever = RerankRetriever(self.retriever, model_name=rerank_model,
+                                              fetch_k=rerank_fetch_k)
 
     def retrieve(self, question: str, k: int = 5) -> List[Dict]:
         return self.retriever.retrieve(question, k=k)

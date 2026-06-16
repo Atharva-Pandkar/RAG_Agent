@@ -39,3 +39,43 @@
 - Location: `eval/harness/run_eval.py`
 - Priority: Low
 - Notes: Run 01 completes quickly. Parallelism becomes relevant when adding embedding API calls or LLM generation.
+
+---
+
+## DenseRetriever — First-Run Embedding Cost
+- Concern: Initial run per corpus embeds all chunks via SentenceTransformer (batch_size=32). JPM alone contributes ~740 chunks; full corpus ~1,658–2,000+ depending on strategy.
+- Location: `src/retrieval/dense_retriever.py`
+- Priority: Medium
+- Notes: Subsequent runs load from `Experiments/embeddings/*.npy`. First hybrid run also triggers dense embed even if BM25-only run preceded it.
+
+---
+
+## HybridRetriever — Dual Index Memory
+- Concern: Holds BM25 tokenized corpus + full embedding matrix + loaded SentenceTransformer model simultaneously. Fetches top-20 from each retriever per query (40 candidates before RRF merge).
+- Location: `src/retrieval/hybrid_retriever.py`
+- Priority: Medium
+- Notes: Acceptable for 5-document research corpus. Memory scales linearly with chunk count × embedding dim (384 for BGE-small).
+
+---
+
+## DenseRetriever — Full-Corpus Dot Product
+- Concern: Query embedding dotted against entire embedding matrix (`embeddings @ q_emb`) with no approximate nearest-neighbor index.
+- Location: `src/retrieval/dense_retriever.py`
+- Priority: Low (current scale)
+- Notes: Fine at ~2k chunks. FAISS or vector DB needed if corpus grows beyond research set.
+
+---
+
+## extract_structured — Full HTML Parse Per Filing
+- Concern: BeautifulSoup walks entire 10-K HTML DOM per filing; JPM filing is largest (~740 fixed-size chunks worth of content).
+- Location: `src/ingestion/extract_structured.py`
+- Priority: Low
+- Notes: One-time offline step. Output JSON cached in `Documents/structured/`.
+
+---
+
+## RerankRetriever — Cross-Encoder Inference Per Query
+- Concern: Every query runs `CrossEncoder.predict()` over `fetch_k` query–passage pairs (default 20). Model loaded at pipeline init alongside base retriever (BM25 + dense + cross-encoder for hybrid+rerank configs).
+- Location: `src/retrieval/reranker.py`, `src/pipeline.py`
+- Priority: Medium
+- Notes: Acceptable for 28-question eval set. Latency scales with fetch_k × corpus complexity. Hybrid+rerank (Run 20) is the heaviest pipeline init (BM25 + bi-encoder + cross-encoder).

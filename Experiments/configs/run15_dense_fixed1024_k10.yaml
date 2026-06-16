@@ -1,0 +1,13 @@
+# Run 15: Dense retrieval over fixed-size (1024/100) chunks, k=10.
+# Variation vs run11: top_k (5 -> 10).
+run_name: run15_dense_fixed1024_k10
+
+top_k: 10
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/fixed_size_1024_100.json
+  retrieval_strategy: dense
+  embedding_model: BAAI/bge-small-en-v1.5
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_fixed_size_1024_100.json

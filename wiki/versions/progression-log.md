@@ -17,56 +17,70 @@ High-level milestone tracker across project phases. Updated at the end of each i
 ---
 
 ## Phase 1 — Chunking × Retrieval Baselines
-**Status: In Progress**
+**Status: Complete**
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| Fixed-size chunking | Done | 512 tok / 50 overlap |
-| Recursive chunking | Done (code) | Not yet benchmarked |
-| Corpus builder CLI | Done | `build_corpus.py` |
-| Gold chunk population | Done | 15/27 answerable questions matched for fixed_512 corpus |
-| BM25 retriever | Done | First end-to-end retrieval run complete |
-| Dense embeddings (OpenAI/Voyage/BGE/E5) | Not started | `requirements.txt` entries commented out |
-| Hybrid retrieval (dense + BM25) | Not started | — |
-| Section-based chunking | Not started | Planned for Phase 1 |
-| Parent-child chunking | Not started | Planned for Phase 1 |
+| Fixed-size chunking | Done | 256/512/1024 token variants |
+| Recursive chunking | Done | Run 02 benchmarked |
+| Section-based chunking | Done | Structured extraction + `section_based` chunker |
+| Corpus builder CLI | Done | Plain text + structured JSON inputs |
+| Gold chunk population | Done | 26/27 answerable matched on latest corpora |
+| BM25 retriever | Done | Runs 01–06, 09, 13, 17 |
+| Dense embeddings (BGE-small) | Done | Runs 07, 11, 15; `.npy` cache |
+| Hybrid retrieval (BM25 + dense RRF) | Done | Runs 08, 10, 12, 14, 16, 18 |
+| Top-k sweep (k=3, 5, 10) | Done | Runs 05, 06, 15–18 |
+| Run comparison helper | Done | `Experiments/summarize_runs.py` |
+| Parent-child chunking | Not started | Planned |
 | LLM generation wired | Not started | Placeholder answers only |
-| Aggregate metrics in run output | Not started | Per-question metrics only |
+| Aggregate metrics in run output | Not started | Use `summarize_runs.py` post-hoc |
+| Document-level retrieval filtering | Not started | Cross-doc pollution still present |
 
-**Current baseline (Run 01):** BM25 + fixed 512/50 → mean recall@5 **0.444**, MRR **0.317**, context precision **0.107** (15 questions with gold chunks).
+**Best configs so far (n=26, latest runs):**
+| Run | Strategy | Chunking | k | Recall@k | MRR |
+|-----|----------|----------|---|----------|-----|
+| run16 | hybrid | fixed 1024/100 | 10 | **0.598** | 0.379 |
+| run06 | bm25 | fixed 512/50 | 10 | 0.572 | 0.347 |
+| run18 | hybrid | section 1024/100 | 10 | 0.528 | 0.348 |
+| run04 | bm25 | fixed 1024/100 | 5 | 0.416 | **0.397** |
 
 ---
 
 ## Phase 2 — Reranking
-**Status: Not Started**
+**Status: In Progress (initial results negative on recall)**
 
-| Milestone | Status |
-|-----------|--------|
-| Cohere reranker | Not started |
-| BGE cross-encoder reranker | Not started |
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| Cross-encoder reranker (ms-marco MiniLM) | Done | `RerankRetriever` wrapper; Runs 19–20 |
+| Rerank on BM25 baseline (Run 04 → 19) | Done | Recall dropped 0.416 → 0.394 |
+| Rerank on hybrid baseline (Run 12 → 20) | Done | Recall dropped 0.440 → 0.348 |
+| Cohere reranker | Not started | — |
+| BGE cross-encoder reranker | Not started | Try domain-finetuned model |
+| Rerank on best config (Run 16, k=10) | Not started | Next candidate |
 
 ---
 
 ## Phase 3 — Advanced Retrieval
-**Status: Not Started**
+**Status: Partially Started**
 
-| Milestone | Status |
-|-----------|--------|
-| Multi-query retrieval | Not started |
-| Query expansion | Not started |
-| Parent-document retrieval | Not started |
-| Contextual retrieval (Anthropic-style) | Not started |
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| Structured cross-reference graph | Done (extracted) | Not yet used at retrieval time |
+| Multi-query retrieval | Not started | — |
+| Query expansion | Not started | — |
+| Parent-document retrieval | Not started | — |
+| Contextual retrieval (Anthropic-style) | Partial | Section heading prepended to chunks |
 
 ---
 
 ## Phase 4 — Context Construction
-**Status: Not Started**
+**Status: Partially Started**
 
-| Milestone | Status |
-|-----------|--------|
-| Top-k sweep | Not started |
-| Context compression | Not started |
-| Long-context baseline | Not started |
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| Top-k sweep | Done | k=3, 5, 10 in runs 05–06, 15–17 |
+| Context compression | Not started | — |
+| Long-context baseline | Not started | — |
 
 ---
 
@@ -75,9 +89,9 @@ High-level milestone tracker across project phases. Updated at the end of each i
 
 ---
 
-## Next Up (Iteration 2 candidates)
-1. Fix gold chunk matching for the 12 unmatched answerable questions
-2. Add document-level filtering so BM25 doesn't retrieve cross-company chunks
-3. Run recursive chunking baseline (Run 02)
-4. Uncomment and pin `rank-bm25` in `requirements.txt`
-5. Add aggregate summary metrics to run output JSON
+## Next Up (Iteration 4 candidates)
+1. Rerank on Run 16 baseline (hybrid fixed 1024, k=10) — current best without rerank
+2. Try BGE reranker or domain-specific cross-encoder instead of ms-marco
+3. Add document-level filtering by company to reduce cross-filing retrieval
+4. Pin `rank-bm25` and `sentence-transformers` in `requirements.txt`
+5. Wire LLM generation for end-to-end answer quality metrics

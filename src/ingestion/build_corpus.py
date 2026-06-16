@@ -26,7 +26,7 @@ def build(strategy: str, chunk_size: int, overlap: int) -> Path:
     fn = STRATEGIES[strategy]
     all_chunks = []
 
-    if strategy == "section_based":
+    if strategy in ("section_based", "langchain_section"):
         for json_file in sorted(STRUCTURED_DIR.glob("*.json")):
             doc_id = json_file.stem
             structured_doc = json.loads(json_file.read_text(encoding="utf-8"))
@@ -41,12 +41,22 @@ def build(strategy: str, chunk_size: int, overlap: int) -> Path:
             all_chunks.extend(chunks)
             print(f"  {doc_id}: {len(chunks)} chunks")
 
+    # Reverse index: table block_id -> list of chunk ids containing that
+    # table (built post-hoc from each chunk's "table_ids" metadata, if any).
+    table_index: dict[str, list[str]] = {}
+    for c in all_chunks:
+        for tid in c.get("table_ids", []):
+            table_index.setdefault(tid, []).append(c["id"])
+
     CORPORA_DIR.mkdir(parents=True, exist_ok=True)
     out_path = CORPORA_DIR / f"{strategy}_{chunk_size}_{overlap}.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump({"strategy": strategy, "chunk_size": chunk_size,
-                    "overlap": overlap, "chunks": all_chunks}, f, indent=1)
+                    "overlap": overlap, "chunks": all_chunks,
+                    "table_index": table_index}, f, indent=1)
     print(f"Wrote {len(all_chunks)} chunks -> {out_path}")
+    if table_index:
+        print(f"  table_index: {len(table_index)} tables -> chunks")
     return out_path
 
 

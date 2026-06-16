@@ -1,3 +1,5 @@
+> **[OUTDATED]** Content moved to [`decisions-log.md`](decisions-log.md).
+
 ## Experiment-First Eval Harness
 - Date: 2026-06-15
 - Context: The project goal is to benchmark RAG architectures on SEC 10-K filings before building production. We need reproducible, comparable runs across chunking/embedding/retrieval combinations.

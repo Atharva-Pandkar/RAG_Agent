@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(python src/ingestion/extract_structured.py)",
-      "Bash(python eval/golden_set/populate_gold_chunks.py --corpus Experiments/corpora/section_based_512_50.json)"
+      "Bash(python eval/golden_set/populate_gold_chunks.py --corpus Experiments/corpora/section_based_512_50.json)",
+      "Bash(python Experiments/summarize_runs.py)"
     ]
   }
 }

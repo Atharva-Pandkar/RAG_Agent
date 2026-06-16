@@ -1,0 +1,15 @@
+# Run 23: FAISS-hybrid retrieval (BM25 + FAISS dense via RRF) over LangChain
+# RecursiveCharacterTextSplitter chunks (512/50).
+# Variation vs run08: dense retriever backend (numpy -> FAISS) + chunking
+# (custom fixed_size -> LangChain splitter).
+run_name: run23_faisshybrid_lcrecursive512
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/langchain_recursive_512_50.json
+  retrieval_strategy: faiss_hybrid
+  embedding_model: BAAI/bge-small-en-v1.5
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_langchain_recursive_512_50.json

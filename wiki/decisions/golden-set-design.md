@@ -1,3 +1,5 @@
+> **[OUTDATED]** Content moved to [`decisions-log.md`](decisions-log.md).
+
 ## Golden Set Design (28 Q&A, 7 Types)
 - Date: 2026-06-15
 - Context: Need a fixed benchmark to compare retrieval and generation quality across experiments without re-authoring questions each time.

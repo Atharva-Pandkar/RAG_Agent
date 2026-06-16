@@ -1,3 +1,5 @@
+> **[OUTDATED]** Content moved to [`decisions-log.md`](decisions-log.md).
+
 ## Phase 1 Baseline: BM25 + Fixed-Size Chunking
 - Date: 2026-06-15
 - Context: Phase 1 requires establishing the simplest end-to-end retrieval baseline before adding embeddings, hybrid search, or reranking.

@@ -1,0 +1,15 @@
+# Run 31: FAISS-hybrid retrieval over LangChain-segmented section chunks
+# (1024/100), k=10. Variation vs run16/run27 (current best k=10 hybrids):
+# chunking via LangChain MarkdownHeaderTextSplitter segmentation + custom
+# fixed_size token-window within each section.
+run_name: run31_faisshybrid_lcsection1024_k10
+
+top_k: 10
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/langchain_section_1024_100.json
+  retrieval_strategy: faiss_hybrid
+  embedding_model: BAAI/bge-small-en-v1.5
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_langchain_section_1024_100.json

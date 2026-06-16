@@ -1,0 +1,16 @@
+# Run 19: BM25 retrieval over fixed-size (1024/100) chunks, with cross-encoder
+# reranking (fetch 20 candidates, rerank, keep top 5).
+# Variation vs run04: add reranking stage.
+run_name: run19_bm25_fixed1024_rerank
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/fixed_size_1024_100.json
+  retrieval_strategy: bm25
+  rerank: true
+  rerank_model: cross-encoder/ms-marco-MiniLM-L-6-v2
+  rerank_fetch_k: 20
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_fixed_size_1024_100.json
