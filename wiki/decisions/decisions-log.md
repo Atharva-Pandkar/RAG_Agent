@@ -237,4 +237,40 @@ Single chronological record of architectural and technical decisions. Append new
 - Context: After Runs 01–40, unstructured corpus with faiss_hybrid at k=10 is the clear retrieval leader.
 - Decision: Treat Run 36 (`faiss_hybrid` + `unstructured_4000_200` + k=10) as the production retrieval baseline until superseded. Run 40 (merged corpus) preferred when full gold-chunk coverage (26/26) is required for eval completeness.
 - Alternatives Considered: Run 16 fixed 1024 hybrid; Run 31 langchain section; merged corpus as default.
-- Impact: Chatbot `rag_tool.py` still on old hybrid fixed 1024 k=5 — needs update to Run 36 config.
+- Impact: Chatbot `rag_tool.py` still on old hybrid fixed 1024 k=5 — needs update to Run 36 config. **[OUTDATED — updated to Run 40 in Iteration 8]**
+
+---
+
+## Multi-Anchor Gold Chunk Matching (`chunk_anchors`)
+- Date: 2026-06-16
+- Context: Single 60-char evidence anchor failed for table_numerical and multi-value questions where evidence is paraphrased or split across cells (e.g. operating income + total assets in separate table regions).
+- Decision: Add optional `chunk_anchors` field to `golden_set.json` — list of substring groups; a chunk matches if **all** substrings in any group appear in normalized chunk text. `populate_gold_chunks.py` tries quote anchors first, then `chunk_anchors`. Sidecars regenerated for all corpora.
+- Alternatives Considered: Manual chunk ID annotation; fuzzy token overlap; lower anchor length threshold only.
+- Impact: Fixed-size corpora now **26/26** matched (up from 15/26 early iterations). Merged corpus remains 26/26. Unstructured still 25/26 (KO-03 unmatched). Enables fairer eval on table-heavy questions.
+
+---
+
+## Deep Agent for Production Chatbot
+- Date: 2026-06-16
+- Context: Basic LangChain ReAct loop lacked planning, context management, and strict grounding controls for financial Q&A.
+- Decision: Replace `create_agent` with `deepagents.create_deep_agent` in `app/backend/agent.py`. System prompt enforces: search-before-answer, no hallucination, multi-search for complex questions, on-topic only (5 companies), source citation. Single tool: `search_10k_filings`.
+- Alternatives Considered: Basic ReAct; custom LangGraph; RAG-only pipeline without agent layer.
+- Impact: Agent can plan sub-queries and call retrieval multiple times per turn. Adds `deepagents` to `app/backend/requirements.txt`.
+
+---
+
+## Chatbot Retrieval: Run 40 (Merged FAISS-Hybrid k=10)
+- Date: 2026-06-16
+- Context: Eval best recall is Run 36 (unstructured, 0.677) but merged corpus has 26/26 gold-chunk coverage and includes iXBRL table recovery. Chatbot needs full filing coverage for demo Q&A.
+- Decision: `rag_tool.py` uses Run 40 config: `faiss_hybrid` + `merged_unstr_xbrl.json` + k=10. Tool output includes ranked passages with doc, chunk ID, and section (when available in corpus metadata).
+- Alternatives Considered: Run 36 (best recall); env-configurable corpus; dual-index routing (narrative vs table).
+- Impact: Chatbot trades ~0.10 recall vs Run 36 for complete table+narrative coverage. First request ~20s (FAISS index load on 1,893-chunk merged corpus).
+
+---
+
+## API Source Extraction and Restricted CORS
+- Date: 2026-06-16
+- Context: Frontend needed citation traceability; wildcard CORS was flagged as unsafe.
+- Decision: `POST /chat` returns `{response, sources[]}` — chunk IDs parsed from `search_10k_filings` ToolMessages via regex. CORS restricted to `localhost:5173` and `localhost:3000`. `python-dotenv` loads `app/backend/.env`.
+- Alternatives Considered: Stream SSE with inline citations; keep wildcard CORS for dev simplicity.
+- Impact: Backend ready for source UI; frontend (`App.jsx`) not yet displaying `sources`. CORS issue resolved for local dev.

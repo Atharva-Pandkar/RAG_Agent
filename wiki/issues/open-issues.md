@@ -58,6 +58,22 @@
 
 ---
 
+## KO-03 Unmatched on Unstructured Corpus
+- Severity: Low
+- Location: `Experiments/corpora/golden_set_with_chunks_unstructured_4000_200.json`, question KO-03
+- Description: Despite `chunk_anchors` improvements (26/26 on fixed-size and merged), unstructured sidecar still misses KO-03. Evidence/anchors may not appear in any unstructured chunk for that KO filing section.
+- Suggested Fix: Add KO-03-specific `chunk_anchors`; manually inspect KO chunks near evidence; or accept merged corpus for full coverage eval.
+
+---
+
+## merged_unstr_xbrl.json File Size (~24 MB)
+- Severity: Medium
+- Location: `Experiments/corpora/merged_unstr_xbrl.json`
+- Description: Merged corpus JSON is ~749k lines / 24 MB with full chunk text inline. Slow to open in editors, heavy for git diffs, and loads entirely into memory at pipeline init alongside FAISS/BM25 indexes.
+- Suggested Fix: Store chunk text in separate per-doc files; use compact JSON without pretty-print; add to `.gitattributes` LFS or document as generated artifact not for manual editing.
+
+---
+
 ## sentence-transformers Missing from requirements.txt
 - Severity: Medium
 - Location: `requirements.txt`, `src/retrieval/dense_retriever.py`, `src/retrieval/hybrid_retriever.py`
@@ -98,11 +114,51 @@
 
 ---
 
-## Chatbot Uses Suboptimal Retrieval Config [OUTDATED — severity raised]
-- Severity: **High** (was Medium)
+## Chatbot Uses Suboptimal Retrieval Config [RESOLVED]
+- Severity: High → resolved (with tradeoff)
 - Location: `app/backend/rag_tool.py`
-- Description: Demo app hardcodes hybrid (numpy) over `fixed_size_1024_100` at k=5 (recall ~0.440). Current best is Run 36: faiss_hybrid + unstructured 4000/200 at k=10 (recall **0.677**). Gap of ~0.24 recall vs production baseline.
-- Suggested Fix: Update to Run 36 pipeline kwargs; expose via env/YAML; set k=10 for retrieval tool.
+- Description: Was hardcoded to hybrid fixed 1024 k=5. Now uses Run 40: faiss_hybrid + merged_unstr_xbrl k=10. Chose merged over Run 36 (best recall 0.677) for 26/26 gold coverage and iXBRL tables. Eval recall for chatbot config: 0.575.
+- Suggested Fix: Consider env toggle between Run 36 (max recall) and Run 40 (max coverage).
+
+---
+
+## CORS Wildcard on Chatbot API [RESOLVED]
+- Severity: Low → resolved
+- Location: `app/backend/main.py`
+- Description: Was `allow_origins=["*"]`. Now restricted to `http://localhost:5173` and `http://localhost:3000`.
+- Suggested Fix: Add production origin when deploying.
+
+---
+
+## Frontend Ignores Source Citations from API
+- Severity: Low
+- Location: `app/frontend/src/App.jsx`, `app/backend/main.py`
+- Description: Backend returns `sources: string[]` (chunk IDs) in `ChatResponse`, but frontend only displays `data.response`. Retrieved chunk IDs are discarded in the UI.
+- Suggested Fix: Render sources list or inline citations below assistant messages.
+
+---
+
+## Section Metadata Not Passed Through Retrievers
+- Severity: Low
+- Location: `src/retrieval/faiss_hybrid_retriever.py`, `app/backend/rag_tool.py`
+- Description: Merged/unstructured chunks have `section` field in corpus JSON, but retrievers only return `{id, doc, text, score}`. Tool output always shows `Section: —`.
+- Suggested Fix: Include `section` (and `has_table`) from `by_id` chunk dict in retriever return payloads.
+
+---
+
+## app/README.md Outdated
+- Severity: Low
+- Location: `app/README.md`
+- Description: Still describes `create_agent` ReAct loop and hybrid fixed 1024 corpus. Actual stack is deep agent + Run 40 merged faiss_hybrid k=10.
+- Suggested Fix: Update setup docs, API response shape, and retrieval config description.
+
+---
+
+## Deep Agent Cold-Start Latency
+- Severity: Medium
+- Location: `app/backend/main.py`, `app/backend/rag_tool.py`
+- Description: First `/chat` request triggers lazy init of deep agent + FAISS-hybrid pipeline over 1,893-chunk merged corpus (~20s noted in code comment). No warmup endpoint.
+- Suggested Fix: Eager-init on startup or `/health` warmup; show loading state in frontend.
 
 ---
 
@@ -130,11 +186,19 @@
 
 ---
 
-## Split Requirements Files and Missing Root Deps
+## Split Requirements Files and Missing Root Deps [OUTDATED — app deps updated]
 - Severity: Medium
 - Location: `requirements.txt`, `app/backend/requirements.txt`
-- Description: Root `requirements.txt` still has Phase 1+ deps commented out. LangChain, FAISS, sentence-transformers, rank-bm25 needed for runs 21–31 but not pinned at root. App has separate deps (fastapi, langchain, langgraph) with no link to experiment stack.
-- Suggested Fix: Consolidate or cross-reference; uncomment and pin experiment deps at root.
+- Description: Root `requirements.txt` still has Phase 1+ deps commented out. App now uses `deepagents` (not langgraph). Experiment deps (sentence-transformers, rank-bm25, faiss, unstructured) still not pinned at root.
+- Suggested Fix: Pin full experiment + app stacks; cross-reference in README.
+
+---
+
+## CORS Wildcard on Chatbot API [RESOLVED — see updated entry above]
+- Severity: Low
+- Location: `app/backend/main.py`
+- Description: `allow_origins=["*"]` on FastAPI CORS middleware. Fine for local dev; should be restricted before deployment.
+- Suggested Fix: Restrict to frontend origin in production.
 
 ---
 
@@ -143,14 +207,6 @@
 - Location: `src/retrieval/faiss_retriever.py`
 - Description: `FAISS.load_local(..., allow_dangerous_deserialization=True)` required for cached indexes. Acceptable for local research artifacts; risky if index files are untrusted.
 - Suggested Fix: Document trust boundary; consider safer serialization for production.
-
----
-
-## CORS Wildcard on Chatbot API
-- Severity: Low
-- Location: `app/backend/main.py`
-- Description: `allow_origins=["*"]` on FastAPI CORS middleware. Fine for local dev; should be restricted before deployment.
-- Suggested Fix: Restrict to frontend origin in production.
 
 ---
 

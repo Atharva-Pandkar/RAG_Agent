@@ -143,3 +143,27 @@
 - Location: `src/ingestion/build_merged_corpus.py`
 - Priority: Low
 - Notes: Dedup may collapse distinct tables with similar headers — could explain merged underperformance vs unstructured-only.
+
+---
+
+## merged_unstr_xbrl.json — 24 MB Inline Text
+- Concern: Single JSON file holds all 1,893 chunks with full text (~24 MB). `RagPipeline` loads entire file into memory; git operations and IDE indexing suffer.
+- Location: `Experiments/corpora/merged_unstr_xbrl.json`, `src/pipeline.py`
+- Priority: Medium
+- Notes: Unstructured corpus (`unstructured_4000_200.json`) is smaller but same pattern. Consider sharded storage or sqlite for production.
+
+---
+
+## Chatbot Pipeline — Merged Corpus Cold Start (~20s)
+- Concern: Lazy init loads 24 MB merged JSON + BM25 index + HuggingFaceEmbeddings + FAISS index (1,893 chunks). Comment in `main.py` notes ~20s first request.
+- Location: `app/backend/rag_tool.py`, `app/backend/main.py`
+- Priority: High (user-facing)
+- Notes: Subsequent requests reuse singleton pipeline. Deep agent may invoke `search_10k_filings` 2–4× per complex question, multiplying retrieval cost.
+
+---
+
+## Deep Agent — Multi-Tool-Call Per Turn
+- Concern: System prompt instructs multi-search for complex questions; deep agent adds planning overhead (write_todos, subagents) on top of each retrieval call.
+- Location: `app/backend/agent.py`
+- Priority: Medium
+- Notes: Each search retrieves k=10 passages from 1,893-chunk index. Monitor token usage and latency for multi-part financial questions.

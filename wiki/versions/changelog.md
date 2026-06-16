@@ -133,3 +133,39 @@ Project-level record of what was added, changed, or removed each iteration.
 
 ### Removed
 - (none)
+
+---
+
+## Iteration 7 — 2026-06-16
+
+### Added
+- `chunk_anchors` field in `eval/golden_set/golden_set.json` — multi-substring gold chunk matching for 8 table/numerical questions
+- `Experiments/configs/run41_hybrid_merged_k5.yaml` — hybrid merged corpus k=5 (mirrors Run 33 on merged)
+- `Experiments/runs/run41_hybrid_merged_k5_20260616_031856.json`
+
+### Changed
+- `eval/golden_set/populate_gold_chunks.py` — supports `chunk_anchors` (AND matching within anchor groups)
+- All golden sidecars regenerated; fixed-size corpora now **26/26** gold-chunk match
+- Run 41: hybrid merged k=5 → recall 0.478, MRR 0.379 (same ballpark as Run 39 faiss_hybrid merged k=5)
+- Production baseline unchanged: Run 36 recall **0.677**
+
+### Removed
+- (none)
+
+---
+
+## Iteration 8 — 2026-06-16
+
+### Added
+- `deepagents` integration — `create_deep_agent` with strict RAG grounding prompt
+- `app/backend/.env.example` — `OPENAI_API_KEY`, `CHAT_MODEL` template
+- `POST /chat` `sources` field — chunk IDs extracted from tool messages
+
+### Changed
+- `app/backend/rag_tool.py` — Run 40 config (faiss_hybrid + merged_unstr_xbrl, k=10); richer tool docstring and formatted output
+- `app/backend/agent.py` — deep agent with 8-rule grounding system prompt
+- `app/backend/main.py` — dotenv load, restricted CORS, source extraction, robust final-message parsing
+- `app/backend/requirements.txt` — added `deepagents`, `python-dotenv`; removed `langgraph`
+
+### Removed
+- LangChain basic `create_agent` ReAct loop (replaced by deep agent)

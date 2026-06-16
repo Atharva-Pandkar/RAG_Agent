@@ -376,13 +376,15 @@ Side-by-side inspection outputs for AAPL (`aapl-20250927.html`). Not yet benchma
 | 38 | hybrid | merged | 10 | 0.575 | 0.398 | 0.085 |
 | 39 | faiss_hybrid | merged | 5 | 0.478 | 0.379 | 0.123 |
 | 40 | faiss_hybrid | merged | 10 | 0.575 | 0.398 | 0.085 |
+| 41 | hybrid (numpy) | merged | 5 | 0.478 | 0.379 | 0.123 |
 
 **Corpus stats:**
 | Corpus | Chunks | Table Chunks | Gold Match |
 |--------|--------|--------------|------------|
-| unstructured_4000_200 | 1,492 | 698 | 25/26 |
+| unstructured_4000_200 | 1,492 | 698 | 25/26 (KO-03) |
 | xbrl_merged | 401 | 401 | — |
 | merged_unstr_xbrl | 1,893 | 1,099 | **26/26** |
+| fixed_size_512_50 | ~1,658 | — | **26/26** (after chunk_anchors) |
 
 **Key findings:**
 - **New overall best:** Run 34/36 → recall **0.677** (+13% vs Run 16)
@@ -401,13 +403,13 @@ Side-by-side inspection outputs for AAPL (`aapl-20250927.html`). Not yet benchma
 | fixed 1024/100 | ✅ 04 | ✅ 12, 16 | — |
 | lc section 1024 | ✅ 30 | — | ✅ 31 |
 | **unstructured 4000/200** | ✅ 32 | ✅ 33, **34** | ✅ 35, **36** |
-| **merged unstr+xbrl** | ✅ 37 | ✅ 38 | ✅ 39, 40 |
+| **merged unstr+xbrl** | ✅ 37 | ✅ 38, 41 | ✅ 39, 40 |
 
 **Overall best:** Run **36** — faiss_hybrid unstructured k=10 → recall **0.677**.
 
-**App demo:** `rag_tool.py` — still hybrid fixed 1024 k=5 (suboptimal).
+**App demo:** `rag_tool.py` — **Run 40** faiss_hybrid merged k=10 (updated Iteration 8). Eval recall 0.575; chosen for 26/26 gold coverage.
 
-**Generation:** Chatbot uses LangChain agent + OpenAI; eval harness retrieval-only.
+**Generation:** Deep agent + OpenAI via chatbot; eval harness retrieval-only.
 
 ---
 
