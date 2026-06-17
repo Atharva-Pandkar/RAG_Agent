@@ -1,0 +1,14 @@
+# Run 36: FAISS-hybrid retrieval (BM25 + FAISS dense via RRF) over Unstructured-IO
+# corpus, k=10. Promotes run31 (best recall@10 = 0.613) and run27 (third best
+# recall@10 = 0.587) — both faiss_hybrid at k=10 — to the unstructured corpus.
+run_name: run36_faisshybrid_unstructured_k10
+
+top_k: 10
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/unstructured_4000_200.json
+  retrieval_strategy: faiss_hybrid
+  embedding_model: BAAI/bge-small-en-v1.5
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_unstructured_4000_200.json

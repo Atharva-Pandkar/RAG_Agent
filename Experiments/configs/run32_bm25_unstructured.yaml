@@ -1,0 +1,13 @@
+# Run 32: BM25 retrieval over Unstructured-IO corpus (4000 chars / 200 overlap).
+# Baseline for comparing retrieval strategies on the new unstructured corpus.
+# Promoted from: top-5 evaluation tier.
+run_name: run32_bm25_unstructured
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/unstructured_4000_200.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_unstructured_4000_200.json

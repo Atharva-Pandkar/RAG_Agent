@@ -283,9 +283,265 @@ Largest recall regression in Phase 2 so far. Hybrid+rerank at k=5 underperforms 
 | BM25 (Run 04) | 19 + ms-marco | 0.394 | −0.022 |
 | Hybrid (Run 12) | 20 + ms-marco | 0.348 | −0.092 |
 
-**Overall best:** Run 16 — hybrid fixed 1024/100, k=10, no rerank → recall **0.598**.
+**Overall best:** Run 16 — hybrid fixed 1024/100, k=10 → recall **0.598**. Run 31 (FAISS hybrid + langchain section 1024, k=10) → **0.589** (close second).
 
-**Generation (Phase 1+):** wire LLM after retrieval tuning; add correctness/faithfulness via LLM-judge.
+**Generation (Phase 1+):** eval harness still placeholder; chatbot app has LLM via LangChain agent.
+
+---
+
+## LangChain + FAISS Grid Summary (Runs 21–31, n=26)
+
+| Run | Retrieval | Chunking | k | Recall@k | MRR | Ctx Prec |
+|-----|-----------|----------|---|----------|-----|----------|
+| 21 | bm25 | lc recursive 512 | 5 | 0.331 | 0.311 | 0.092 |
+| 22 | faiss | lc recursive 512 | 5 | 0.308 | 0.299 | 0.146 |
+| 23 | faiss_hybrid | lc recursive 512 | 5 | 0.415 | 0.279 | 0.138 |
+| 24 | bm25 | lc recursive 1024 | 5 | 0.407 | 0.376 | 0.131 |
+| 25 | faiss | lc recursive 1024 | 5 | 0.337 | 0.314 | 0.146 |
+| 26 | faiss_hybrid | lc recursive 1024 | 5 | 0.436 | 0.346 | 0.146 |
+| 27 | faiss_hybrid | lc recursive 1024 | 10 | 0.587 | 0.374 | 0.112 |
+| 28 | bm25 | lc section 512 | 5 | 0.404 | 0.292 | 0.115 |
+| 29 | faiss_hybrid | lc section 512 | 5 | 0.416 | **0.474** | 0.123 |
+| 30 | bm25 | lc section 1024 | 5 | 0.418 | 0.385 | 0.138 |
+| 31 | faiss_hybrid | lc section 1024 | 10 | **0.589** | 0.365 | 0.119 |
+
+**Key findings:**
+- FAISS hybrid + langchain section 1024 k=10 (Run 31) nearly matches Run 16 on recall
+- Run 29 (faiss_hybrid lc section 512 k=5) achieves best MRR overall (0.474)
+- LangChain recursive underperforms hand-rolled recursive at same token budget
+- FAISS and numpy hybrid paths produce comparable top configs when chunking matches
+
+---
+
+## Experiment Matrix (Updated)
+
+| Chunking ↓ / Retrieval → | BM25 | Dense/FAISS | Hybrid (numpy) | FAISS Hybrid |
+|--------------------------|------|---------------|----------------|--------------|
+| fixed 1024/100 | ✅ 04 | ✅ 11 (dense) | ✅ 12, **16** | — |
+| hand recursive 512 | ✅ 02 | — | — | — |
+| lc recursive 512 | ✅ 21 | ✅ 22 (faiss) | — | ✅ 23 |
+| lc recursive 1024 | ✅ 24 | ✅ 25 (faiss) | — | ✅ 26, 27 |
+| lc section 512 | ✅ 28 | — | — | ✅ 29 |
+| lc section 1024 | ✅ 30 | — | — | ✅ **31** |
+| section_based (custom) | ✅ 09, 13, 17 | — | ✅ 10, 14, 18 | — |
+
+**Reranking overlay (Phase 2):** Runs 19–20 on fixed 1024; negative recall impact.
+
+**App demo:** `app/backend/rag_tool.py` — hybrid fixed 1024 k=5 (suboptimal vs Run 31).
+
+**Generation:** Chatbot uses LangChain agent + OpenAI; eval harness still retrieval-only.
+
+---
+
+## Chunking Exploration Comparison (Pre-Eval)
+
+Side-by-side inspection outputs for AAPL (`aapl-20250927.html`). Not yet benchmarked on golden set.
+
+| Path | Script | Chunks | Table Chunks | Sections | Avg Tokens | In Eval? |
+|------|--------|--------|--------------|----------|------------|----------|
+| Structured → fixed 1024 | `build_corpus.py` | ~110 (fixed_size) | — | — | 1024 window | ✅ Runs 04, 16 |
+| LangChain semantic | `explore_html_semantic.py` | 112 (50 shown) | 0 detected | — | ~497 | ❌ |
+| Unstructured-IO | `explore_unstructured.py` | 89 | 29 | 12 | ~453 | ❌ |
+
+**All-filings unstructured stats:**
+
+| Filing | Elements | Chunks | Table Chunks | Sections |
+|--------|----------|--------|--------------|----------|
+| AAPL | 540 | 89 | 29 | 12 |
+| CAT | 955 | 145 | 55 | 12 |
+| JPM | 2,853 | 890 | 486 | 49 |
+| KO | 916 | 183 | 57 | 13 |
+| WMT | 682 | 185 | 71 | 29 |
+
+**Observations:**
+- Unstructured produces fewer, larger chunks than fixed-token windows for AAPL (89 vs ~110)
+- Unstructured explicitly links table chunks to narrative siblings within same section
+- Semantic explore table detection appears broken (0 table chunks for AAPL)
+- JPM unstructured granularity (890 chunks) may inflate retrieval index size vs fixed 1024 corpus
+
+**Next:** Convert unstructured/semantic outputs to `Experiments/corpora/` format and run BM25/FAISS-hybrid eval (proposed Runs 32+).
+
+---
+
+## Unstructured + Merged Corpus Grid (Runs 32–40, n=26)
+
+| Run | Retrieval | Corpus | k | Recall@k | MRR | Ctx Prec |
+|-----|-----------|--------|---|----------|-----|----------|
+| 32 | bm25 | unstructured | 5 | 0.557 | 0.376 | 0.128 |
+| 33 | hybrid | unstructured | 5 | 0.450 | 0.361 | 0.112 |
+| 34 | hybrid | unstructured | 10 | **0.677** | 0.396 | 0.088 |
+| 35 | faiss_hybrid | unstructured | 5 | 0.450 | 0.361 | 0.112 |
+| 36 | faiss_hybrid | unstructured | 10 | **0.677** | 0.396 | 0.088 |
+| 37 | bm25 | merged | 5 | 0.458 | 0.365 | 0.108 |
+| 38 | hybrid | merged | 10 | 0.575 | 0.398 | 0.085 |
+| 39 | faiss_hybrid | merged | 5 | 0.478 | 0.379 | 0.123 |
+| 40 | faiss_hybrid | merged | 10 | 0.575 | 0.398 | 0.085 |
+| 41 | hybrid (numpy) | merged | 5 | 0.478 | 0.379 | 0.123 |
+
+**Corpus stats:**
+| Corpus | Chunks | Table Chunks | Gold Match |
+|--------|--------|--------------|------------|
+| unstructured_4000_200 | 1,492 | 698 | 25/26 (KO-03) |
+| xbrl_merged | 401 | 401 | — |
+| merged_unstr_xbrl | 1,893 | 1,099 | **26/26** |
+| fixed_size_512_50 | ~1,658 | — | **26/26** (after chunk_anchors) |
+
+**Key findings:**
+- **New overall best:** Run 34/36 → recall **0.677** (+13% vs Run 16)
+- Unstructured BM25 alone (Run 32, k=5) beats Run 16 hybrid (0.557 vs 0.598 at different k)
+- Merged corpus: full gold coverage but lower recall — extra iXBRL chunks may hurt ranking
+- hybrid vs faiss_hybrid identical on unstructured (same RRF logic, different dense backend)
+
+**Production baseline:** Run 36 — `faiss_hybrid` + `unstructured_4000_200` + k=10.
+
+---
+
+## Experiment Matrix (Updated)
+
+| Corpus ↓ / Retrieval → | BM25 | Hybrid | FAISS Hybrid |
+|------------------------|------|--------|--------------|
+| fixed 1024/100 | ✅ 04 | ✅ 12, 16 | — |
+| lc section 1024 | ✅ 30 | — | ✅ 31 |
+| **unstructured 4000/200** | ✅ 32 | ✅ 33, **34** | ✅ 35, **36** |
+| **merged unstr+xbrl** | ✅ 37 | ✅ 38, 41 | ✅ 39, 40 |
+
+**Overall best:** Run **36** — faiss_hybrid unstructured k=10 → recall **0.677**.
+
+**App demo:** `rag_tool.py` — **Run 40** faiss_hybrid merged k=10 (updated Iteration 8). Eval recall 0.575; chosen for 26/26 gold coverage.
+
+**Generation:** Deep agent + OpenAI via chatbot; eval harness retrieval-only.
+
+**Agent E2E eval:** `Experiments/eval_suite_runner.py` — full `/chat` + LLM judge (Iteration 12).
+
+---
+
+## Run Eval Suite — Agent E2E (2026-06-16)
+
+**Setup:**
+- Suite: `10K_RAG_Eval_Suite_v1` (47 questions, external JSON)
+- Endpoint: `http://localhost:8000/chat` via `eval_suite_runner.py`
+- Judge: gpt-4o-mini, category rubrics 0–2
+- Workers: 3 (parallel)
+- Corpus: `active_corpus.json` (includes ad-hoc uploads — see open issues)
+
+**Results (`eval_suite_20260616_213013.json`):**
+
+| Category | N | Score | % | Accuracy |
+|----------|---|-------|---|----------|
+| single_fact_prose | 14 | 26/28 | 92.9% | 92.9% |
+| single_fact_table | 10 | 14/20 | 70.0% | 70.0% |
+| cross_company_comparison | 8 | 2/16 | 12.5% | 0.0% |
+| out_of_corpus | 10 | 6/20 | 30.0% | 30.0% |
+| adversarial | 5 | 6/10 | 60.0% | 40.0% |
+| **Overall** | **47** | **54/94** | **57.4%** | **53.2%** |
+
+**Observations:**
+- Prose single-fact strong; table questions weaker (column/year confusion).
+- Cross-company failures partly from OpenAI 429 rate limits during parallel run, partly from single-doc retrieval / synthesis gaps.
+- Out-of-corpus refusal needs prompt and retrieval-guard improvements.
+- Uploaded test doc `tmpedd_eodk` appeared in citations — reset active corpus before benchmark runs.
+- CCC-006 (highest EPS across companies) succeeded with multi-doc retrieval.
+
+---
+
+## Run Eval Suite — Agent E2E Run 2 (2026-06-16, post-guards)
+
+**Setup:** Same suite and endpoint as Run 1. After Iteration 13 changes: LLM rerank (10→5), entity verification prompt, source-mismatch warnings.
+
+**Results (`eval_suite_20260616_220605.json`):**
+
+| Category | N | Score | % | Accuracy |
+|----------|---|-------|---|----------|
+| single_fact_prose | 14 | 14/28 | 50.0% | 50.0% |
+| single_fact_table | 10 | 12/20 | 60.0% | 60.0% |
+| cross_company_comparison | 8 | 11/16 | 68.8% | 37.5% |
+| out_of_corpus | 10 | 14/20 | 70.0% | 70.0% |
+| adversarial | 5 | 5/10 | 50.0% | 60.0% |
+| **Overall** | **47** | **56/94** | **59.6%** | **55.3%** |
+
+**Observations:**
+- Hallucination guards materially improved OOC and cross-company category scores.
+- Single-fact prose regressed sharply — investigate rerank dropping gold chunks vs over-refusal.
+- `Experiments/eval_ooc_quick.py` added for fast OOC-only iteration.
+
+---
+
+## Eval Suite v2 (2026-06-16)
+
+**Artifact:** `Experiments/10k_rag_eval_v2.json` — 43 questions, corpus-verified answers.
+
+| Category | Count |
+|----------|-------|
+| single_fact_prose | 12 |
+| single_fact_table | 10 |
+| cross_company_comparison | 8 |
+| out_of_corpus | 8 |
+| adversarial | 5 |
+
+**Runner changes:** Default suite path → v2 in repo; default `--workers 1`.
+
+**v2 agent eval runs (clean 5-doc corpus, 1893 chunks):**
+
+| Run | File | Overall | SFP | SFT | CCC | OOC | ADV | Notes |
+|-----|------|---------|-----|-----|-----|-----|-----|-------|
+| 1 | `224259` | 52.3% | 41.7% | 40% | 50% | 87.5% | 50% | Pre doc_filter; LLM-only judge |
+| 2 | `225849` | **79.1%** | **100%** | **100%** | 43.8% | 75% | 50% | doc_filter + hybrid judge — **production baseline** |
+
+**Pre-run checklist (completed for Run 2):** `tmpedd_eodk` removed; 5 baseline filings only.
+
+**Still pending:** Rebuild xbrl corpus with investee warnings; restart server with refreshed chunks.
+
+---
+
+## Reranker Isolation Eval (2026-06-17)
+
+**Script:** `Experiments/eval_reranker.py`  
+**Setup:** `active_corpus.json`, `faiss_hybrid`, `retrieval_k=10`, `rerank_k=5`, `gpt-4o-mini`. SFP+SFT only (n=22). Auto `doc_filter` from company keywords in question text.
+
+**Results (`reranker_eval_1781652118.json`):**
+
+| Metric | Before rerank (@10) | After rerank (@5) |
+|--------|--------------------:|------------------:|
+| Recall (answer chunk in top-k) | 72.7% | 40.9% |
+| MRR | 0.442 | 0.231 |
+| Avg rank of answer chunk | 3.3 | 2.4 |
+| Drops (in @10, out @5) | — | **7 / 22 (32%)** |
+| Promotions | — | 1 / 22 |
+
+**Observations:**
+- Reranker improves average rank when answer survives cut, but **drops** answer chunks in 7 cases — net recall loss.
+- SFP-001: answer not in top-10 at all (retrieval gap, not rerank).
+- Agent E2E still 100% SFP/SFT on Run `225849` — rerank harm may be masked by agent synthesis or citation of adjacent chunks.
+- Next: A/B `RERANK_K=10` or disable rerank for high-BM25-score queries.
+
+---
+
+## RAGAS-Style Agent Eval (2026-06-17)
+
+**Script:** `Experiments/eval_ragas.py`  
+**Setup:** Live `/chat`, v2 suite, chunk text from `active_corpus.json` by cited `SourceRef.id`.
+
+| Run | File | N | Composite | C-Recall | C-Prec | Faithful | Correct |
+|-----|------|--:|----------:|---------:|-------:|---------:|--------:|
+| Pilot | `1781652528` | 18 | 0.299 | 0.111 | 0.111 | 0.141 | 0.833 |
+| SFP+SFT | `1781653924` | 22 | 0.701 | 0.227 | 0.932 | 0.645 | 1.000 |
+| Full | `1781654954` | 43 | **0.613** | 0.321 | 0.702 | 0.626 | 0.802 |
+
+**Full run by category (`1781654954`):**
+
+| Category | N | C-Recall | C-Prec | Faithful | Correct |
+|----------|--:|---------:|-------:|---------:|--------:|
+| SFP | 12 | 0.25 | 0.98 | 0.67 | 1.00 |
+| SFT | 10 | 0.10 | 0.80 | 0.55 | 0.90 |
+| CCC | 8 | 0.50 | 0.78 | 0.38 | 0.56 |
+| OOC | 8 | 0.35 | 0.08 | 0.91 | 0.88 |
+| ADV | 5 | 0.60 | 0.70 | 0.62 | 0.40 |
+
+**Observations:**
+- Pilot run had broken context lookup (near-zero CR/CP) — fixed by `_load_corpus()` indexing chunk IDs.
+- Low context recall despite high answer correctness: metric uses **cited** chunks only, not full retrieved set.
+- OOC context precision near zero expected (agent should refuse, not retrieve relevant corpus chunks).
+- CCC faithfulness 0.38 aligns with cross-company synthesis weakness (43.75% E2E baseline).
 
 ---
 

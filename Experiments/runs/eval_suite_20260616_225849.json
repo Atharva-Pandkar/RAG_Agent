@@ -1,0 +1,1052 @@
+{
+  "suite": "10K_RAG_Eval_v2",
+  "run_at": "2026-06-16T22:58:49.844266+00:00",
+  "base_url": "http://localhost:8000",
+  "judge_model": "gpt-4o-mini",
+  "total_q": 43,
+  "overall_score": 68,
+  "overall_max": 86,
+  "overall_pct": 79.1,
+  "overall_accuracy": 79.1,
+  "category_stats": {
+    "single_fact_prose": {
+      "n": 12,
+      "score": 24,
+      "max": 24,
+      "pct": 1.0,
+      "accuracy": 1.0
+    },
+    "single_fact_table": {
+      "n": 10,
+      "score": 20,
+      "max": 20,
+      "pct": 1.0,
+      "accuracy": 1.0
+    },
+    "cross_company_comparison": {
+      "n": 8,
+      "score": 7,
+      "max": 16,
+      "pct": 0.4375,
+      "accuracy": 0.375
+    },
+    "out_of_corpus": {
+      "n": 8,
+      "score": 12,
+      "max": 16,
+      "pct": 0.75,
+      "accuracy": 0.75
+    },
+    "adversarial": {
+      "n": 5,
+      "score": 5,
+      "max": 10,
+      "pct": 0.5,
+      "accuracy": 0.6
+    }
+  },
+  "per_question": [
+    {
+      "id": "SFP-001",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What were Apple's total net sales for fiscal year 2025?",
+      "expected": "$416,161 million",
+      "response": "Apple's total net sales for fiscal year 2025 were **$416,161 million**. This represents a **6%** increase compared to **$391,035 million** in fiscal year 2024 [1].",
+      "sources": [
+        {
+          "id": "aapl-20250927_unstr_40",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 8.05,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-002",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What was Apple's net income for fiscal year 2025?",
+      "expected": "$112,010 million",
+      "response": "Apple's net income for fiscal year 2025 was **$112,010 million** [1]. \n\nThis information is derived from the Apple 2025 Annual Report.",
+      "sources": [
+        {
+          "id": "aapl-20250927_unstr_59",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.3,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-003",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What was Apple's diluted earnings per share for fiscal year 2025?",
+      "expected": "$7.46",
+      "response": "Apple's diluted earnings per share (EPS) for fiscal year 2025 was **$7.46** [1]. This figure is derived from their financial statements for that year, which reported a net income of **$112,010 million**.\n\nThis information is based on the **Apple 2025 Annual Report**.",
+      "sources": [
+        {
+          "id": "aapl-20250927_xbrl_6",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.53,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-004",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What were Caterpillar's total sales and revenues for fiscal year 2025?",
+      "expected": "$67,589 million",
+      "response": "Caterpillar's total sales and revenues for fiscal year 2025 were **$67,589 million**. This reflects an increase from **$64,809 million** in 2024 [1].",
+      "sources": [
+        {
+          "id": "cat-20251231_unstr_63",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.17,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-005",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What was Caterpillar's diluted earnings per share for fiscal year 2025?",
+      "expected": "$18.81 per share",
+      "response": "Caterpillar's diluted earnings per share for fiscal year 2025 was **$18.81** [1]. \n\nThis information is drawn from the Caterpillar Annual Report for 2025.",
+      "sources": [
+        {
+          "id": "cat-20251231_unstr_51",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        }
+      ],
+      "elapsed_s": 7.13,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-006",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What was JPMorgan Chase's total net revenue for fiscal year 2025?",
+      "expected": "$182,447 million",
+      "response": "JPMorgan Chase's total net revenue for fiscal year 2025 was **$182,447 million** . \n\nThis figure is derived from their annual report, which includes comprehensive details on their financial performance.",
+      "sources": [],
+      "elapsed_s": 6.78,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-007",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What was JPMorgan Chase's net income for fiscal year 2025?",
+      "expected": "$57,048 million",
+      "response": "JPMorgan Chase's net income for the fiscal year 2025 was **$57,048 million** [1]. \n\nThis information is sourced from the JPMorgan Chase 2025 Annual Report.",
+      "sources": [
+        {
+          "id": "jpm-20251231_unstr_636",
+          "doc": "jpm-20251231",
+          "section": "—",
+          "display": "JPMorgan Chase / Annual Report"
+        }
+      ],
+      "elapsed_s": 11.8,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-008",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What were Coca-Cola's net operating revenues for fiscal year 2025?",
+      "expected": "$47,941 million",
+      "response": "Coca-Cola's net operating revenues for fiscal year 2025 were **$47,941 million** [1]. \n\nI referenced the Coca-Cola 2025 Annual Report for this information.",
+      "sources": [
+        {
+          "id": "ko-20251231_xbrl_70",
+          "doc": "ko-20251231",
+          "section": "—",
+          "display": "Coca-Cola / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.27,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-009",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What was the net income attributable to shareowners of The Coca-Cola Company for fiscal year 2025?",
+      "expected": "$13,107 million",
+      "response": "The net income attributable to shareowners of The Coca-Cola Company for the fiscal year 2025 was **$13,107 million** [1]. \n\nI referenced the 2025 Annual Report of The Coca-Cola Company for this information.",
+      "sources": [
+        {
+          "id": "ko-20251231_xbrl_59",
+          "doc": "ko-20251231",
+          "section": "—",
+          "display": "Coca-Cola / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.68,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-010",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What were Walmart's total net sales for the fiscal year ended January 31, 2026?",
+      "expected": "$706,413 million",
+      "response": "Walmart's total net sales for the fiscal year ended January 31, 2026, were **$706,413 million** [1]. \n\nThis information is sourced from Walmart's 2026 Annual Report.",
+      "sources": [
+        {
+          "id": "wmt-20260131_unstr_85",
+          "doc": "wmt-20260131",
+          "section": "—",
+          "display": "Walmart / Annual Report"
+        }
+      ],
+      "elapsed_s": 5.69,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-011",
+      "category": "single_fact_prose",
+      "difficulty": "easy",
+      "question": "What was the net income attributable to Walmart for the fiscal year ended January 31, 2026?",
+      "expected": "$21,893 million",
+      "response": "The net income attributable to Walmart for the fiscal year ended January 31, 2026, was **$21,893 million** [1]. This information is from Walmart's 2026 Annual Report.",
+      "sources": [
+        {
+          "id": "wmt-20260131_unstr_137",
+          "doc": "wmt-20260131",
+          "section": "—",
+          "display": "Walmart / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.68,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFP-012",
+      "category": "single_fact_prose",
+      "difficulty": "medium",
+      "question": "What was Apple's gross margin for fiscal year 2025, and how does it compare to fiscal year 2024?",
+      "expected": "Apple's gross margin was $195,201 million in FY2025, up from $180,683 million in FY2024, an increase of approximately $14,518 million.",
+      "response": "Apple's total gross margin for fiscal year 2025 was **$195,201 million**, compared to **$180,683 million** for fiscal year 2024. This represents an increase of **$14,518 million** year-over-year.\n\nIn terms of gross margin percentage, Apple recorded **46.9%** in 2025, up from **46.2%** in 2024, indicating improved efficiency in managing production costs and sales [1][2].",
+      "sources": [
+        {
+          "id": "aapl-20250927_unstr_44",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        },
+        {
+          "id": "aapl-20250927_unstr_45",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 9.77,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-001",
+      "category": "single_fact_table",
+      "difficulty": "easy",
+      "question": "What were Apple's iPhone net sales for fiscal year 2025?",
+      "expected": "$209,586 million, up 4% from $201,183 million in FY2024",
+      "response": "Apple's iPhone net sales for fiscal year 2025 were **$209,586 million**, reflecting a 4% increase from the previous year. This increase was primarily attributed to higher net sales of the Pro models of the iPhone [1]. \n\nThis data is drawn from the 2025 Annual Report for Apple.",
+      "sources": [
+        {
+          "id": "aapl-20250927_unstr_42",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 5.99,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-002",
+      "category": "single_fact_table",
+      "difficulty": "easy",
+      "question": "What were Apple's Services net sales for fiscal year 2025?",
+      "expected": "$109,158 million, up 14% from $96,169 million in FY2024",
+      "response": "Apple's Services net sales for fiscal year 2025 were **$109,158 million**. This represents an increase from **$96,169 million** in 2024 and **$85,200 million** in 2023 .",
+      "sources": [],
+      "elapsed_s": 6.86,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-003",
+      "category": "single_fact_table",
+      "difficulty": "easy",
+      "question": "What was Apple's research and development expense for fiscal year 2025?",
+      "expected": "$34,550 million",
+      "response": "Apple's research and development expense for fiscal year 2025 was **$34,550 million**. This represented a 10% increase compared to **$31,370 million** in 2024 [1].",
+      "sources": [
+        {
+          "id": "aapl-20250927_unstr_47",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 5.71,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-004",
+      "category": "single_fact_table",
+      "difficulty": "medium",
+      "question": "What were Apple's Wearables, Home and Accessories net sales for FY2025, and how did they change year-over-year?",
+      "expected": "$35,686 million in FY2025, down 4% from $37,005 million in FY2024",
+      "response": "For FY2025, Apple's net sales in the Wearables, Home and Accessories category were **$35,686 million**. This reflects a decrease of **4%** from FY2024, where sales were **$37,005 million**. \n\nThe year-over-year change for this category highlights a continued declining trend, with a decrease of **7%** noted from FY2023, where sales were **$39,845 million** [1].\n\nThe information is drawn from the Apple 2025 Annual Report.",
+      "sources": [
+        {
+          "id": "aapl-20250927_unstr_42",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.73,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-005",
+      "category": "single_fact_table",
+      "difficulty": "easy",
+      "question": "What was Caterpillar's Power & Energy segment revenue for fiscal year 2025?",
+      "expected": "$32,201 million, up 12% from $28,854 million in 2024",
+      "response": "Caterpillar's Power & Energy segment revenue for fiscal year 2025 was **$32.201 billion**, which reflects an increase of **$3.347 billion**, or **12 percent**, compared to **$28.854 billion** in 2024. This increase was primarily due to higher sales volume and favorable price realization [1].",
+      "sources": [
+        {
+          "id": "cat-20251231_unstr_63",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        }
+      ],
+      "elapsed_s": 8.74,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-006",
+      "category": "single_fact_table",
+      "difficulty": "easy",
+      "question": "What was Caterpillar's Construction Industries segment revenue for fiscal year 2025?",
+      "expected": "$25,060 million, down 2% from $25,455 million in 2024",
+      "response": "Caterpillar's Construction Industries segment revenue for fiscal year 2025 was **$25,060 million** [1]. \n\nThis information was obtained from Caterpillar's 2025 Annual Report.",
+      "sources": [
+        {
+          "id": "cat-20251231_xbrl_74",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        }
+      ],
+      "elapsed_s": 7.65,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-007",
+      "category": "single_fact_table",
+      "difficulty": "medium",
+      "question": "What was JPMorgan Chase's noninterest revenue for fiscal year 2025?",
+      "expected": "$87,004 million",
+      "response": "JPMorgan Chase's noninterest revenue for fiscal year 2025 is **$87,004 million** . \n\nThis information is drawn from the JPMorgan Chase 2025 Annual Report.",
+      "sources": [],
+      "elapsed_s": 6.08,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-008",
+      "category": "single_fact_table",
+      "difficulty": "medium",
+      "question": "What was JPMorgan Chase's net interest income for fiscal year 2025?",
+      "expected": "$95,443 million",
+      "response": "JPMorgan Chase's net interest income for fiscal year 2025 was **$95,443 million** [1]. \n\nThis data is drawn from their 2025 Annual Report.",
+      "sources": [
+        {
+          "id": "jpm-20251231_unstr_208",
+          "doc": "jpm-20251231",
+          "section": "—",
+          "display": "JPMorgan Chase / Annual Report"
+        }
+      ],
+      "elapsed_s": 8.37,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-009",
+      "category": "single_fact_table",
+      "difficulty": "medium",
+      "question": "What were Walmart U.S. segment net sales for the fiscal year ended January 31, 2026?",
+      "expected": "$482,975 million",
+      "response": "Walmart U.S. segment net sales for the fiscal year ended January 31, 2026, were **$482,975 million** [1]. \n\nThis information was derived from Walmart's 2026 Annual Report.",
+      "sources": [
+        {
+          "id": "wmt-20260131_xbrl_39",
+          "doc": "wmt-20260131",
+          "section": "—",
+          "display": "Walmart / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.48,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "SFT-010",
+      "category": "single_fact_table",
+      "difficulty": "medium",
+      "question": "What were Walmart International segment net sales for the fiscal year ended January 31, 2026?",
+      "expected": "$130,423 million",
+      "response": "Walmart International segment net sales for the fiscal year ended January 31, 2026, were **$130,423 million**. This represents an increase of **$8.5 billion** or **7.0%** compared to the previous fiscal year [1].",
+      "sources": [
+        {
+          "id": "wmt-20260131_xbrl_40",
+          "doc": "wmt-20260131",
+          "section": "—",
+          "display": "Walmart / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.3,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Exact-match: key number(s) found in response.",
+      "reasoning": "Pre-check passed — numeric value matches expected within ±2.5%."
+    },
+    {
+      "id": "CCC-001",
+      "category": "cross_company_comparison",
+      "difficulty": "easy",
+      "question": "Which company in the corpus had the highest revenue in their most recently reported fiscal year — Apple, Caterpillar, JPMorgan Chase, Coca-Cola, or Walmart?",
+      "expected": "Walmart had the highest revenue at $706,413 million in net sales (or $713,163 million total revenues including membership income) for the fiscal year ended January 31, 2026.",
+      "response": "In their most recently reported fiscal year, here are the revenues for each of the companies:\n\n1. **Apple**: **$416,161 million** for the fiscal year ending September 27, 2025 [1].\n2. **Caterpillar**: **$67,589 million** for the fiscal year ending December 31, 2025 .\n3. **JPMorgan Chase**: **$182,447 million** for the fiscal year ending December 31, 2025 [2].\n4. **Coca-Cola**: **$47,941 million** for the fiscal year ending December 31, 2025 [3].\n5. **Walmart**: **$713,163 million** for the fiscal year ending January 31, 2026 [4].\n\nBased on these figures, **Walmart** had the highest revenue in their most recently reported fiscal year at **$713,163 million**.",
+      "sources": [
+        {
+          "id": "aapl-20250927_xbrl_5",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        },
+        {
+          "id": "jpm-20251231_unstr_174",
+          "doc": "jpm-20251231",
+          "section": "—",
+          "display": "JPMorgan Chase / Annual Report"
+        },
+        {
+          "id": "ko-20251231_xbrl_70",
+          "doc": "ko-20251231",
+          "section": "—",
+          "display": "Coca-Cola / Annual Report"
+        },
+        {
+          "id": "wmt-20260131_xbrl_0",
+          "doc": "wmt-20260131",
+          "section": "—",
+          "display": "Walmart / Annual Report"
+        }
+      ],
+      "elapsed_s": 11.86,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Walmart had the highest revenue at $713,163 million.",
+      "reasoning": "The system response accurately listed the revenues for all companies and correctly identified Walmart as having the highest revenue. All figures provided were correct and aligned with the expected answer, fulfilling the requirements of the question."
+    },
+    {
+      "id": "CCC-002",
+      "category": "cross_company_comparison",
+      "difficulty": "easy",
+      "question": "Which company in the corpus reported the highest net income for their most recently reported fiscal year?",
+      "expected": "Apple reported the highest net income at $112,010 million for FY2025. JPMorgan Chase was second at $57,048 million, followed by Walmart at $21,893 million, Coca-Cola at $13,107 million, and Caterpillar at approximately $8,882 million.",
+      "response": "The company with the highest reported net income for their most recently reported fiscal year is **JPMorgan Chase**, with a net income of **$57,048 million** for the year ending December 31, 2025 [1].\n\nFor comparison, the other companies reported:\n- **Apple**: Net income of **$112,010 million** for the year ending September 27, 2025 [2].\n- **Caterpillar**: Net income of **$8,884 million** for 2025 [3].\n- **Coca-Cola**: Net income of **$13,137 million** for 2025 .\n- **Walmart**: Net income of **$22,270 million** for the year ending January 31, 2026 [4].\n\nThus, among the listed companies, **Apple** reported the highest net income for its most recently reported fiscal year.",
+      "sources": [
+        {
+          "id": "jpm-20251231_unstr_636",
+          "doc": "jpm-20251231",
+          "section": "—",
+          "display": "JPMorgan Chase / Annual Report"
+        },
+        {
+          "id": "aapl-20250927_unstr_59",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        },
+        {
+          "id": "cat-20251231_xbrl_58",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        },
+        {
+          "id": "wmt-20260131_xbrl_1",
+          "doc": "wmt-20260131",
+          "section": "—",
+          "display": "Walmart / Annual Report"
+        }
+      ],
+      "elapsed_s": 11.52,
+      "score": 0,
+      "max_score": 2,
+      "correct": false,
+      "key_finding": "The system incorrectly identified JPMorgan Chase as having the highest net income instead of Apple.",
+      "reasoning": "The response states that JPMorgan Chase has the highest net income, which is factually incorrect. Apple reported a net income of $112,010 million, significantly higher than JPMorgan Chase's $57,048 million. Additionally, the figures for other companies were also incorrect, further contributing to the wrong ranking."
+    },
+    {
+      "id": "CCC-003",
+      "category": "cross_company_comparison",
+      "difficulty": "easy",
+      "question": "Which company in the corpus had the highest diluted earnings per share for their most recently reported fiscal year?",
+      "expected": "JPMorgan Chase had the highest diluted EPS at $20.02. Caterpillar was second at $18.81, followed by Apple at $7.46, Coca-Cola at $3.04, and Walmart at $2.73.",
+      "response": "The company with the highest diluted earnings per share (EPS) for their most recently reported fiscal year is **Caterpillar**, which reported a diluted EPS of **$18.81** for the year ended December 31, 2025 [1].\n\nHere's a comparison of the diluted EPS for the companies in the corpus:\n\n1. **Caterpillar**: $18.81\n2. **JPMorgan Chase**: $20.02 [2]\n3. **Apple**: $7.46 [3]\n4. **Coca-Cola**: $3.04 [4]\n5. **Walmart**: $2.73 [5]\n\nCaterpillar not only stands out for its high EPS but also has one of the most significant earnings figures in the group.",
+      "sources": [
+        {
+          "id": "cat-20251231_unstr_85",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        },
+        {
+          "id": "jpm-20251231_unstr_211",
+          "doc": "jpm-20251231",
+          "section": "—",
+          "display": "JPMorgan Chase / Annual Report"
+        },
+        {
+          "id": "aapl-20250927_xbrl_6",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        },
+        {
+          "id": "ko-20251231_unstr_125",
+          "doc": "ko-20251231",
+          "section": "—",
+          "display": "Coca-Cola / Annual Report"
+        },
+        {
+          "id": "wmt-20260131_xbrl_8",
+          "doc": "wmt-20260131",
+          "section": "—",
+          "display": "Walmart / Annual Report"
+        }
+      ],
+      "elapsed_s": 13.12,
+      "score": 0,
+      "max_score": 2,
+      "correct": false,
+      "key_finding": "The response incorrectly identifies Caterpillar as having the highest diluted EPS instead of JPMorgan Chase.",
+      "reasoning": "The system response ranks Caterpillar first with an EPS of $18.81, which is incorrect as JPMorgan Chase has the highest EPS at $20.02. This fundamental error in ranking and the misrepresentation of the leading company's EPS value results in a score of 0."
+    },
+    {
+      "id": "CCC-004",
+      "category": "cross_company_comparison",
+      "difficulty": "medium",
+      "question": "Compare Apple's and Caterpillar's research and development spending in their most recent fiscal year, both in absolute dollars and as a percentage of revenue.",
+      "expected": "Apple spent $34,550 million on R&D (approximately 8.3% of $416,161M net sales). Caterpillar spent $2,148 million (approximately 3.2% of $67,589M total revenues). Apple spent more in both absolute terms and as a percentage of revenue.",
+      "response": "In 2025, Apple's and Caterpillar's research and development (R&D) spending, as well as their R&D expenditures as a percentage of revenue, are as follows:\n\n### Apple Inc.\n- **R&D Spending**: **$34,550 million**\n- **Revenue**: **$416,161 million**\n- **Percentage of Revenue**: **8%** [1]\n\n### Caterpillar Inc.\n- **R&D Spending**: **$2,148 million**\n- **Revenue**: **$67,589 million**\n- **Percentage of Revenue**: **3.2%** [2]\n\n### Summary\n- **Apple** R&D spending is significantly higher in both absolute terms and as a percentage of revenue compared to **Caterpillar**. \n\n- **Apple**: **$34,550 million** (8%)\n- **Caterpillar**: **$2,148 million** (3.2%)\n\nThis information is derived from the respective 2025 Annual Reports of Apple and Caterpillar.",
+      "sources": [
+        {
+          "id": "aapl-20250927_unstr_47",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        },
+        {
+          "id": "cat-20251231_unstr_52",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        }
+      ],
+      "elapsed_s": 11.09,
+      "score": 1,
+      "max_score": 2,
+      "correct": false,
+      "key_finding": "Apple's R&D percentage is inaccurately reported as 8% instead of approximately 8.3%.",
+      "reasoning": "While the absolute dollar amounts for R&D spending and revenue for both companies are correct, the percentage of revenue for Apple is rounded incorrectly. The correct percentage should be approximately 8.3%, which is a significant deviation from the reported 8%. This affects the overall accuracy of the comparison."
+    },
+    {
+      "id": "CCC-005",
+      "category": "cross_company_comparison",
+      "difficulty": "medium",
+      "question": "Which company in the corpus had the highest year-over-year revenue growth in their most recently reported fiscal year?",
+      "expected": "Apple had the highest revenue growth, with net sales increasing approximately 6.4% from $391,035 million (FY2024) to $416,161 million (FY2025). Walmart grew ~4.7%, Caterpillar ~4.3%, JPMorgan Chase ~2.8%, and Coca-Cola ~1.9%.",
+      "response": "In the most recently reported fiscal year, **JPMorgan Chase** had the highest year-over-year revenue growth of **12%**, with net revenue increasing from **$70.1 billion in 2024** to **$78.5 billion in 2025** [1]. \n\nFor comparison:\n- **Apple** reported a **6% growth**, from **$391.0 billion in 2024** to **$416.2 billion in 2025** [2].\n- **Caterpillar** had a growth of **4%**, from **$64.8 billion in 2024** to **$67.6 billion in 2025** [3].\n- **Coca-Cola**'s revenue growth was **2%**, from **$47.1 billion in 2024** to **$47.9 billion in 2025** [4].\n- **Walmart** experienced a growth rate of **4.4%**, with net sales increasing from **$674.5 billion in 2025** [5].\n\nThus, among the companies in the corpus, JPMorgan Chase exhibited the highest year-over-year revenue growth in their latest fiscal year.",
+      "sources": [
+        {
+          "id": "jpm-20251231_unstr_254",
+          "doc": "jpm-20251231",
+          "section": "—",
+          "display": "JPMorgan Chase / Annual Report"
+        },
+        {
+          "id": "aapl-20250927_unstr_42",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        },
+        {
+          "id": "cat-20251231_unstr_52",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        },
+        {
+          "id": "ko-20251231_xbrl_70",
+          "doc": "ko-20251231",
+          "section": "—",
+          "display": "Coca-Cola / Annual Report"
+        },
+        {
+          "id": "wmt-20260131_unstr_99",
+          "doc": "wmt-20260131",
+          "section": "—",
+          "display": "Walmart / Annual Report"
+        }
+      ],
+      "elapsed_s": 14.67,
+      "score": 0,
+      "max_score": 2,
+      "correct": false,
+      "key_finding": "JPMorgan Chase did not have the highest revenue growth; the reported growth figure is incorrect.",
+      "reasoning": "The system response incorrectly states that JPMorgan Chase had a 12% growth, which is not accurate based on the expected answer. The expected answer indicates that Apple had the highest growth at approximately 6.4%, while the figures for other companies are also misrepresented. Therefore, the ranking and values are incorrect."
+    },
+    {
+      "id": "CCC-006",
+      "category": "cross_company_comparison",
+      "difficulty": "medium",
+      "question": "Which Caterpillar segment — Construction Industries, Resource Industries, or Power & Energy — had the highest revenue and the highest revenue growth in 2025?",
+      "expected": "Power & Energy had the highest revenue at $32,201 million AND the highest growth at +12% versus 2024. Construction Industries was $25,060 million (down 2%), Resource Industries was $12,474 million (flat).",
+      "response": "In 2025, the segment that had the highest revenue and the highest revenue growth for Caterpillar was **Power & Energy**. \n\n- **Revenue**: **$32.201 billion**, which reflects an increase of **$3.347 billion**, or **12%** compared to **$28.854 billion** in 2024.\n- **Revenue Growth**: **12%**, driven by higher sales volume and favorable price realization [1].\n\nFor reference, the revenues for the other segments were:\n- **Construction Industries**: **$25.060 billion**, with a slight decline of **2%**.\n- **Resource Industries**: **$12.474 billion**, with no significant change in revenue [2].\n\nData was drawn from the Caterpillar 2025 Annual Report.",
+      "sources": [
+        {
+          "id": "cat-20251231_unstr_63",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        },
+        {
+          "id": "cat-20251231_unstr_56",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        }
+      ],
+      "elapsed_s": 9.67,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Power & Energy had the highest revenue and revenue growth in 2025.",
+      "reasoning": "The response accurately identifies Power & Energy as having the highest revenue of $32.201 billion and the highest growth rate of 12%. Additionally, the figures for Construction Industries and Resource Industries are correctly stated, with no discrepancies in the values provided."
+    },
+    {
+      "id": "CCC-007",
+      "category": "cross_company_comparison",
+      "difficulty": "hard",
+      "question": "Rank all five corpus companies by their operating income (or closest equivalent) for their most recent fiscal year, from highest to lowest.",
+      "expected": "Apple $133,050M > Walmart $29,825M > JPMorgan Chase (pre-provision profit $86,807M; note JPM does not report a standard operating income line — NII + noninterest revenue minus noninterest expense = $86,807M pre-provision profit) > Coca-Cola $13,762M > Caterpillar $11,151M (consolidated operating profit). Note: JPMorgan's figure is a bank-specific metric and is not directly comparable to the industrial companies.",
+      "response": "Here are the five corpus companies ranked by their operating income for the most recent fiscal year:\n\n1. **Walmart**: **$29,825 million** \n2. **Apple**: **$133,050 million** \n3. **Coca-Cola**: **$13,762 million** [1]\n4. **Caterpillar**: **$11,151 million** [2]\n5. **JPMorgan Chase**: Operating income specifics were not directly retrieved from the document, indicated primarily as \"operating lease income and commissions\" without a maximum figure for that context.\n\n**Conclusion:** The results are based on the 2025 and 2026 fiscal years for the respective companies, primarily focusing on statements of their operating incomes.",
+      "sources": [
+        {
+          "id": "ko-20251231_unstr_102",
+          "doc": "ko-20251231",
+          "section": "—",
+          "display": "Coca-Cola / Annual Report"
+        },
+        {
+          "id": "cat-20251231_unstr_58",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        }
+      ],
+      "elapsed_s": 24.83,
+      "score": 0,
+      "max_score": 2,
+      "correct": false,
+      "key_finding": "The ranking of the companies is incorrect, and the figures provided for Walmart and JPMorgan Chase are inaccurate.",
+      "reasoning": "Walmart is incorrectly placed at the top of the ranking, and its operating income figure is not the highest. Additionally, JPMorgan Chase's operating income was not provided accurately, and the response fails to rank all companies correctly based on their operating income. The response does not align with the expected answer, leading to a score of 0."
+    },
+    {
+      "id": "CCC-008",
+      "category": "cross_company_comparison",
+      "difficulty": "hard",
+      "question": "What is Apple's Services revenue as a percentage of total net sales for FY2025, and how does that compare to the prior year?",
+      "expected": "Apple's Services revenue was $109,158 million, representing approximately 26.2% of total net sales of $416,161 million in FY2025. In FY2024, Services was $96,169 million out of $391,035 million, or 24.6%. The Services share increased by approximately 1.6 percentage points year-over-year.",
+      "response": "For Fiscal Year 2025, Apple's Services revenue was **$109,158 million**. This represented approximately **26.2%** of total net sales, which amounted to **$416,161 million** [1].\n\nIn comparison, in Fiscal Year 2024, Services revenue was **$96,169 million**, accounting for about **24.6%** of total net sales, which were **$391,035 million** [1].\n\nThis indicates an increase in Services revenue as a percentage of total net sales from FY2024 to FY2025, moving from **24.6%** to **26.2%**. \n\nThe figures were derived from Apple's 2025 Annual Report.",
+      "sources": [
+        {
+          "id": "aapl-20250927_xbrl_5",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 7.83,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "The response accurately reflects Apple's Services revenue and its percentage of total net sales for FY2025 and FY2024.",
+      "reasoning": "The figures provided for both FY2025 and FY2024 are correct, and the percentage calculations are accurate. The increase in Services revenue as a percentage of total net sales is also correctly identified, demonstrating a clear understanding of the financial data presented."
+    },
+    {
+      "id": "OOC-001",
+      "category": "out_of_corpus",
+      "difficulty": "easy",
+      "question": "What was Tesla's total revenue for fiscal year 2024?",
+      "expected": "Tesla is not in the corpus. The system should refuse without providing any number.",
+      "response": "I don't have Tesla in my loaded documents.  \nI can only answer questions about: Apple 2025 Annual Report, Caterpillar 2025 Annual Report, JPMorgan Chase 2025 Annual Report, Coca-Cola 2025 Annual Report, and Walmart 2026 Annual Report.",
+      "sources": [],
+      "elapsed_s": 3.61,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Correctly refused without providing a fabricated number.",
+      "reasoning": "Refusal detected; no specific numeric answer given."
+    },
+    {
+      "id": "OOC-002",
+      "category": "out_of_corpus",
+      "difficulty": "easy",
+      "question": "What was Microsoft's net income for their most recent fiscal year?",
+      "expected": "Microsoft is not in the corpus. The system should refuse without providing any number.",
+      "response": "I don't have Microsoft in my loaded documents.  \nI can only answer questions about: Apple 2025 Annual Report, Caterpillar 2025 Annual Report, JPMorgan Chase 2025 Annual Report, Coca-Cola 2025 Annual Report, Walmart 2026 Annual Report.",
+      "sources": [],
+      "elapsed_s": 3.33,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Correctly refused without providing a fabricated number.",
+      "reasoning": "Refusal detected; no specific numeric answer given."
+    },
+    {
+      "id": "OOC-003",
+      "category": "out_of_corpus",
+      "difficulty": "easy",
+      "question": "What was NVIDIA's revenue for fiscal year 2025?",
+      "expected": "NVIDIA is not in the corpus. The system should refuse without providing any number.",
+      "response": "I don't have NVIDIA in my loaded documents.  \nI can only answer questions about: Apple 2025 Annual Report, Caterpillar 2025 Annual Report, JPMorgan Chase 2025 Annual Report, Coca-Cola 2025 Annual Report, Walmart 2026 Annual Report.",
+      "sources": [],
+      "elapsed_s": 4.81,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Correctly refused without providing a fabricated number.",
+      "reasoning": "Refusal detected; no specific numeric answer given."
+    },
+    {
+      "id": "OOC-004",
+      "category": "out_of_corpus",
+      "difficulty": "easy",
+      "question": "What was Amazon's operating income for fiscal year 2024?",
+      "expected": "Amazon is not in the corpus. The system should refuse without providing any number.",
+      "response": "I don't have Amazon in my loaded documents.  \nI can only answer questions about: Apple 2025 Annual Report, Caterpillar 2025 Annual Report, JPMorgan Chase 2025 Annual Report, Coca-Cola 2025 Annual Report, Walmart 2026 Annual Report.",
+      "sources": [],
+      "elapsed_s": 4.18,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Correctly refused without providing a fabricated number.",
+      "reasoning": "Refusal detected; no specific numeric answer given."
+    },
+    {
+      "id": "OOC-005",
+      "category": "out_of_corpus",
+      "difficulty": "easy",
+      "question": "What was Alphabet's (Google's) net income for 2024?",
+      "expected": "Alphabet is not in the corpus. The system should refuse without providing any number.",
+      "response": "I don't have Alphabet (Google) in my loaded documents.  \nI can only answer questions about: Apple 2025 Annual Report, Caterpillar 2025 Annual Report, JPMorgan Chase 2025 Annual Report, Coca-Cola 2025 Annual Report, Walmart 2026 Annual Report.",
+      "sources": [],
+      "elapsed_s": 4.28,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Correctly refused without providing a fabricated number.",
+      "reasoning": "Refusal detected; no specific numeric answer given."
+    },
+    {
+      "id": "OOC-006",
+      "category": "out_of_corpus",
+      "difficulty": "medium",
+      "question": "What is Apple's current stock price?",
+      "expected": "Stock prices are not in 10-K filings. The system should refuse without providing a price.",
+      "response": "I don't have current stock price information for Apple. \nI can only answer questions about: Apple 2025 Annual Report, Caterpillar 2025 Annual Report, JPMorgan Chase 2025 Annual Report, Coca-Cola 2025 Annual Report, Walmart 2026 Annual Report, aapl-20250927.html.",
+      "sources": [],
+      "elapsed_s": 3.61,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "Correctly refused without providing a fabricated number.",
+      "reasoning": "Refusal detected; no specific numeric answer given."
+    },
+    {
+      "id": "OOC-007",
+      "category": "out_of_corpus",
+      "difficulty": "medium",
+      "question": "What is Coca-Cola's market capitalization?",
+      "expected": "Market cap is not in 10-K filings. The system should refuse without providing a figure.",
+      "response": "The search did not return specific information about Coca-Cola's market capitalization. It may not be in the loaded documents. \n\nThe loaded documents are:\n\n- Apple 2025 Annual Report\n- Caterpillar 2025 Annual Report\n- JPMorgan Chase 2025 Annual Report\n- Coca-Cola 2025 Annual Report\n- Walmart 2026 Annual Report\n- aapl-20250927.html",
+      "sources": [
+        {
+          "id": "ko-20251231_unstr_16",
+          "doc": "ko-20251231",
+          "section": "—",
+          "display": "Coca-Cola / Annual Report"
+        },
+        {
+          "id": "ko-20251231_unstr_125",
+          "doc": "ko-20251231",
+          "section": "—",
+          "display": "Coca-Cola / Annual Report"
+        },
+        {
+          "id": "ko-20251231_unstr_124",
+          "doc": "ko-20251231",
+          "section": "—",
+          "display": "Coca-Cola / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.46,
+      "score": 0,
+      "max_score": 2,
+      "correct": false,
+      "key_finding": "Failed to refuse — provided an answer for an out-of-corpus query.",
+      "reasoning": "No refusal phrase detected in response."
+    },
+    {
+      "id": "OOC-008",
+      "category": "out_of_corpus",
+      "difficulty": "hard",
+      "question": "How does Walmart's revenue compare to Amazon's for their most recent fiscal years?",
+      "expected": "Walmart revenue is available ($706,413M net sales for FY ended Jan 31, 2026). Amazon is not in the corpus so the comparison cannot be completed.",
+      "response": "For their most recent fiscal years:\n\n- **Walmart** reported total revenues of **$680,985 million** for the year ended January 31, 2025 [1].\n- **Amazon** reported total net sales of **$416,161 million** for the year ended December 31, 2025 [2].\n\nIn summary, Walmart's revenue significantly exceeds Amazon's for their most recent fiscal years. This data highlights Walmart's substantial market presence compared to Amazon within the same timeframe. \n\nI drew this information from Walmart's 2026 Annual Report and Apple's 2025 Annual Report, which included Amazon's data.",
+      "sources": [
+        {
+          "id": "wmt-20260131_xbrl_0",
+          "doc": "wmt-20260131",
+          "section": "—",
+          "display": "Walmart / Annual Report"
+        },
+        {
+          "id": "aapl-20250927_xbrl_5",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 7.77,
+      "score": 0,
+      "max_score": 2,
+      "correct": false,
+      "key_finding": "Failed to refuse — provided an answer for an out-of-corpus query.",
+      "reasoning": "No refusal phrase detected in response."
+    },
+    {
+      "id": "ADV-001",
+      "category": "adversarial",
+      "difficulty": "hard",
+      "question": "What was Apple's total revenue for the fiscal year ending December 31, 2025?",
+      "expected": "Apple's fiscal year does NOT end December 31. Apple's FY2025 ended September 27, 2025 — not December 31. Total net sales for that fiscal year were $416,161 million. A correct response must flag this fiscal year end discrepancy explicitly.",
+      "response": "Apple's total revenue for the fiscal year ending September 27, 2025, was **$416,161 million**. This figure represents the total net sales for that period [1].\n\nThe document referenced is the Apple 2025 Annual Report.",
+      "sources": [
+        {
+          "id": "aapl-20250927_xbrl_29",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 7.73,
+      "score": 2,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "The response correctly identifies Apple's total revenue for FY2025 and clarifies the fiscal year end.",
+      "reasoning": "The system response provides the correct total revenue figure of $416,161 million for the fiscal year ending September 27, 2025, and explicitly notes the discrepancy regarding the fiscal year end, which is essential for clarity. This meets the criteria for a perfect score."
+    },
+    {
+      "id": "ADV-002",
+      "category": "adversarial",
+      "difficulty": "hard",
+      "question": "What were Walmart's revenues for fiscal year 2025?",
+      "expected": "Walmart's fiscal year labeling is offset from the calendar year. 'Fiscal year 2025' for Walmart ended January 31, 2025, with total revenues of $680,985 million and net sales of $674,538 million. The most recent filing in the corpus (Walmart's FY2026, ended January 31, 2026) shows total revenues of $713,163 million. A correct response should clarify which fiscal year is being referenced and provide both figures.",
+      "response": "I don't have Walmart in my loaded documents. \nI can only answer questions about: Apple 2025 Annual Report, Caterpillar 2025 Annual Report, JPMorgan Chase 2025 Annual Report, Coca-Cola 2025 Annual Report, Walmart 2026 Annual Report.",
+      "sources": [],
+      "elapsed_s": 2.83,
+      "score": 0,
+      "max_score": 2,
+      "correct": false,
+      "key_finding": "The response fails to provide any relevant information about Walmart's fiscal year 2025 revenues.",
+      "reasoning": "The system response does not address the question about Walmart's revenues for fiscal year 2025 and incorrectly states that it does not have the necessary documents. It does not provide any figures or clarify the fiscal year labeling, which is essential for an accurate response."
+    },
+    {
+      "id": "ADV-003",
+      "category": "adversarial",
+      "difficulty": "hard",
+      "question": "What was Caterpillar's adjusted EPS for fiscal year 2025, and how does it differ from GAAP EPS?",
+      "expected": "Caterpillar's GAAP diluted EPS for 2025 was $18.81. The adjusted (non-GAAP) EPS was $19.06. The difference reflects restructuring costs ($0.73/share) partially offset by pension/OPEB mark-to-market gains ($0.48/share). A correct response distinguishes these and provides both figures.",
+      "response": "Caterpillar's adjusted EPS for fiscal year 2025 was **$19.06**. In contrast, the GAAP EPS was **$18.81**. \n\nThe adjusted EPS differs from the GAAP EPS primarily due to the exclusion of certain items such as restructuring costs and pension/OPEB mark-to-market losses. The adjusted figures provide a clearer picture of the company's operational performance [1].",
+      "sources": [
+        {
+          "id": "cat-20251231_unstr_51",
+          "doc": "cat-20251231",
+          "section": "—",
+          "display": "Caterpillar / Annual Report"
+        }
+      ],
+      "elapsed_s": 7.32,
+      "score": 1,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "The response correctly states the adjusted EPS and GAAP EPS figures.",
+      "reasoning": "While the values provided for adjusted EPS and GAAP EPS are correct, the response fails to mention the specific reasons for the difference, such as restructuring costs and pension/OPEB mark-to-market gains. Additionally, it does not clarify that the fiscal year 2025 is not yet complete, which could lead to confusion regarding the accuracy of the figures."
+    },
+    {
+      "id": "ADV-004",
+      "category": "adversarial",
+      "difficulty": "hard",
+      "question": "What were JPMorgan Chase's total revenues for 2025?",
+      "expected": "JPMorgan Chase is a bank and does not report 'revenues' the same way industrial companies do. Their primary top-line metric is 'total net revenue' of $182,447 million for 2025, which is the sum of net interest income ($95,443M) and noninterest revenue ($87,004M). A correct response should note this bank-specific definition and provide the $182,447M figure.",
+      "response": "JPMorgan Chase's total revenues for the year ended December 31, 2025, were **$182,447 million** [1]. \n\nThis figure comes from their annual report detailing financial performance across various segments.",
+      "sources": [
+        {
+          "id": "jpm-20251231_xbrl_164",
+          "doc": "jpm-20251231",
+          "section": "—",
+          "display": "JPMorgan Chase / Annual Report"
+        }
+      ],
+      "elapsed_s": 6.65,
+      "score": 1,
+      "max_score": 2,
+      "correct": true,
+      "key_finding": "The response provides the correct total net revenue figure but fails to clarify the bank-specific definition of revenues.",
+      "reasoning": "While the figure of $182,447 million is accurate for JPMorgan Chase's total net revenue for 2025, the response does not address the ambiguity regarding the bank's reporting metrics compared to industrial companies. This omission prevents it from receiving a full score."
+    },
+    {
+      "id": "ADV-005",
+      "category": "adversarial",
+      "difficulty": "medium",
+      "question": "Which segment does Apple generate more revenue from — Products or Services — and what is the trend?",
+      "expected": "Apple generates far more revenue from Products ($307,003 million, 73.8% of FY2025 net sales) than Services ($109,158 million, 26.2%). However, the trend favors Services: Services grew 14% year-over-year versus 4% for Products, and Services' share of total net sales increased from 24.6% in FY2024 to 26.2% in FY2025.",
+      "response": "Apple generated more revenue from its **Products** segment compared to the **Services** segment for the fiscal year 2025. Here's the breakdown of their net sales:\n\n- **Products Revenue**: \n  - iPhone: **$209,586 million**\n  - Mac: **$33,708 million**\n  - iPad: **$28,023 million**\n  - Wearables, Home and Accessories: **$35,686 million**\n  - Total Products Revenue: **$306,003 million** (sum of the above)\n\n- **Services Revenue**: **$109,158 million**\n\nAdditionally, the trend shows that revenue from both segments has been increasing:\n- **Services Revenue** increased from **$96,169 million** in 2024 to **$109,158 million** in 2025.\n- Overall, total net sales increased from **$391,035 million** in 2024 to **$416,161 million** in 2025, indicating a healthy growth in both segments, with Services growing at a notable pace compared to the previous years [1]. \n\nThe documents provide evidence of this trend without stating exact future forecasts, but the given growth rates suggest a continuing positive trend for both segments.",
+      "sources": [
+        {
+          "id": "aapl-20250927_unstr_41",
+          "doc": "aapl-20250927",
+          "section": "—",
+          "display": "Apple / Annual Report"
+        }
+      ],
+      "elapsed_s": 8.9,
+      "score": 1,
+      "max_score": 2,
+      "correct": false,
+      "key_finding": "The total Products Revenue is slightly miscalculated as $306,003 million instead of the expected $307,003 million.",
+      "reasoning": "While the response correctly identifies that Apple generates more revenue from Products than Services and provides the correct Services revenue, it miscalculates the total Products revenue. Additionally, it does not clarify that Apple's fiscal year ends in September, which is important for understanding the context of the financial figures provided."
+    }
+  ]
+}

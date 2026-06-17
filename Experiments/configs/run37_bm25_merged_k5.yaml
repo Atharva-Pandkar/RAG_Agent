@@ -1,0 +1,12 @@
+# Run 37: BM25 baseline on merged Unstructured+iXBRL corpus, k=5.
+# Establishes whether iXBRL additions help sparse retrieval.
+run_name: run37_bm25_merged_k5
+
+top_k: 5
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/merged_unstr_xbrl.json
+  retrieval_strategy: bm25
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_merged_unstr_xbrl.json

@@ -21,42 +21,33 @@ High-level milestone tracker across project phases. Updated at the end of each i
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| Fixed-size chunking | Done | 256/512/1024 token variants |
-| Recursive chunking | Done | Run 02 benchmarked |
-| Section-based chunking | Done | Structured extraction + `section_based` chunker |
-| Corpus builder CLI | Done | Plain text + structured JSON inputs |
-| Gold chunk population | Done | 26/27 answerable matched on latest corpora |
-| BM25 retriever | Done | Runs 01–06, 09, 13, 17 |
-| Dense embeddings (BGE-small) | Done | Runs 07, 11, 15; `.npy` cache |
-| Hybrid retrieval (BM25 + dense RRF) | Done | Runs 08, 10, 12, 14, 16, 18 |
-| Top-k sweep (k=3, 5, 10) | Done | Runs 05, 06, 15–18 |
-| Run comparison helper | Done | `Experiments/summarize_runs.py` |
-| Parent-child chunking | Not started | Planned |
-| LLM generation wired | Not started | Placeholder answers only |
-| Aggregate metrics in run output | Not started | Use `summarize_runs.py` post-hoc |
-| Document-level retrieval filtering | Not started | Cross-doc pollution still present |
+| Fixed/recursive/section/LangChain chunkers | Done | Runs 01–31 |
+| Unstructured-IO corpus in eval | Done | Runs 32–36 |
+| iXBRL + merged corpora | Done | Runs 37–40 |
+| BM25 / dense / hybrid / FAISS hybrid | Done | All strategies benchmarked |
+| Gold chunk population | Done | **26/26** merged + fixed-size; 25/26 unstructured (KO-03) |
+| Document-level retrieval filtering | Done | `doc_filter` on chatbot path (Iteration 15); offline `run_eval.py` still unfiltered |
 
-**Best configs so far (n=26, latest runs):**
-| Run | Strategy | Chunking | k | Recall@k | MRR |
-|-----|----------|----------|---|----------|-----|
-| run16 | hybrid | fixed 1024/100 | 10 | **0.598** | 0.379 |
-| run06 | bm25 | fixed 512/50 | 10 | 0.572 | 0.347 |
-| run18 | hybrid | section 1024/100 | 10 | 0.528 | 0.348 |
-| run04 | bm25 | fixed 1024/100 | 5 | 0.416 | **0.397** |
+**Best configs (n=26, latest runs):**
+| Run | Strategy | Corpus | k | Recall@k | MRR |
+|-----|----------|--------|---|----------|-----|
+| **36** | faiss_hybrid | unstructured 4000/200 | 10 | **0.677** | 0.396 |
+| 34 | hybrid (numpy) | unstructured 4000/200 | 10 | 0.677 | 0.396 |
+| 32 | bm25 | unstructured 4000/200 | 5 | 0.557 | 0.376 |
+| 16 | hybrid (numpy) | fixed 1024/100 | 10 | 0.598 | 0.379 |
+| 40 | faiss_hybrid | merged unstr+xbrl | 10 | 0.575 | 0.398 |
+| 41 | hybrid (numpy) | merged unstr+xbrl | 5 | 0.478 | 0.379 |
 
 ---
 
 ## Phase 2 — Reranking
-**Status: In Progress (initial results negative on recall)**
+**Status: In Progress (ms-marco negative; not retried on best configs)**
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| Cross-encoder reranker (ms-marco MiniLM) | Done | `RerankRetriever` wrapper; Runs 19–20 |
-| Rerank on BM25 baseline (Run 04 → 19) | Done | Recall dropped 0.416 → 0.394 |
-| Rerank on hybrid baseline (Run 12 → 20) | Done | Recall dropped 0.440 → 0.348 |
-| Cohere reranker | Not started | — |
-| BGE cross-encoder reranker | Not started | Try domain-finetuned model |
-| Rerank on best config (Run 16, k=10) | Not started | Next candidate |
+| Cross-encoder reranker (ms-marco MiniLM) | Done | Runs 19–20; hurts recall |
+| Rerank on Run 36 baseline | Not started | — |
+| BGE / domain cross-encoder | Not started | — |
 
 ---
 
@@ -65,11 +56,10 @@ High-level milestone tracker across project phases. Updated at the end of each i
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| Structured cross-reference graph | Done (extracted) | Not yet used at retrieval time |
-| Multi-query retrieval | Not started | — |
-| Query expansion | Not started | — |
-| Parent-document retrieval | Not started | — |
-| Contextual retrieval (Anthropic-style) | Partial | Section heading prepended to chunks |
+| iXBRL table recovery | Done | `build_xbrl_corpus.py` |
+| Section/table cross-refs in chunks | Done | unstructured + merged corpora |
+| Structured cross-reference graph | Done (extracted) | Not used at retrieval time |
+| Multi-query / query expansion | Not started | — |
 
 ---
 
@@ -78,20 +68,66 @@ High-level milestone tracker across project phases. Updated at the end of each i
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| Top-k sweep | Done | k=3, 5, 10 in runs 05–06, 15–17 |
+| Top-k sweep | Done | k=3, 5, 10 benchmarked |
 | Context compression | Not started | — |
-| Long-context baseline | Not started | — |
+
+---
+
+## App / Demo Layer
+**Status: Functional (MVP)**
+
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| FastAPI + deep agent | Done | `deepagents.create_deep_agent` |
+| RAG tool | Done | `active_corpus.json`; faiss_hybrid k=10; OpenAI embeddings |
+| Source IDs in API | Done | `SourceRef[]` with footnote resolution; `{id, doc, section, display}` |
+| Source citations in UI | Done | Inline `[N]` superscripts + footnote list (EDGAR links removed in Iter 11) |
+| Live document ingest | Done | `POST /ingest`, `ingest_document.py`, incremental BM25/FAISS |
+| Document registry + sidebar | Done | `docs_registry.json`, `GET /documents`, upload UI |
+| Document-agnostic agent | Done | `search_documents` + `list_available_documents` |
+| Markdown rendering | Done | `react-markdown` + GFM tables for assistant answers |
+| React frontend | Done | Vite dev server + API proxy; `npm install` required |
+| Production frontend build | Done | `npm run build` → `dist/` |
+| Startup warmup | Done | Lifespan loads pipeline + agent before requests |
+| Backend logging | Done | `logger.py` + `logs/rag_backend.log` |
+| Streaming responses | Not started | — |
+| CORS restricted | Done | localhost:5173/3000 only |
 
 ---
 
 ## Phase 5 — Cost / Latency Optimization
-**Status: Not Started**
+**Status: Partially Started**
+
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| Eager startup warmup | Done | FastAPI lifespan; no per-request cold start |
+| OpenAI embeddings (no local model) | Done | `text-embedding-3-small`; faster client init |
+| FAISS index disk cache | Done | Rebuild only on cache miss or model change |
+| Backend request logging | Done | Rotating file + HTTP middleware |
+| Pre-built embedding cache for deploy | Not started | First boot still embeds ~1,893 chunks via API |
+| Retrieval result caching per turn | Not started | — |
+| Agent E2E eval suite | Done | v2 baseline Run `225849` — 79.1% overall |
+| LLM rerank in chatbot | Done | 10 candidates → rerank to 5 via gpt-4o-mini |
+| Hallucination / OOC guards | Done | Entity verify prompt + retrieval mismatch warning |
+| OOC smoke test | Done | `eval_ooc_quick.py` |
+| Eval suite v2 in repo | Done | `Experiments/10k_rag_eval_v2.json` (43 Q) |
+| XBRL investee table warnings | Done | `build_xbrl_corpus.py` (rebuild pending) |
+| Document-scoped retrieval | Done | `doc_filter` on search + retrievers |
+| v2 agent eval baseline | Done | Run `225849` — 79.1% overall |
+| BM25 cross-doc filter (chatbot) | Done | Addresses long-standing open issue |
+| RAGAS-style diagnostic eval | Done | `eval_ragas.py` — 4-metric decomposition on live agent |
+| Reranker isolation benchmark | Done | `eval_reranker.py` — recall drop 72.7%→40.9% flagged |
 
 ---
 
-## Next Up (Iteration 4 candidates)
-1. Rerank on Run 16 baseline (hybrid fixed 1024, k=10) — current best without rerank
-2. Try BGE reranker or domain-specific cross-encoder instead of ms-marco
-3. Add document-level filtering by company to reduce cross-filing retrieval
-4. Pin `rank-bm25` and `sentence-transformers` in `requirements.txt`
-5. Wire LLM generation for end-to-end answer quality metrics
+## Next Up (Iteration 17 candidates)
+1. Fix or tune LLM reranker (7/22 answer-chunk drops; consider `RERANK_K` increase or bypass)
+2. Improve cross-company synthesis (43.75% E2E; RAGAS faithfulness 0.38 on CCC)
+3. Rebuild xbrl + merged + active corpus with investee warnings
+4. Pass `section` through faiss_hybrid RRF results
+5. Expose retrieved (not just cited) chunks in API for accurate RAGAS context recall
+6. Sync `eval_ooc_quick.py` to v2 suite path
+7. Add `DELETE /documents/{id}` API
+8. Registry-driven mismatch guard (replace hardcoded keyword list)
+9. Update `app/README.md` — doc_filter, eval tooling, reranker findings
+10. Pin `aiohttp`, `unstructured`, full RAG deps in requirements

@@ -1,0 +1,14 @@
+# Run 34: Hybrid retrieval (BM25 + dense RRF, numpy backend) over Unstructured-IO
+# corpus, k=10. Promotes run16 (best MRR at k=10, second-best recall@10) to
+# the unstructured corpus.
+run_name: run34_hybrid_unstructured_k10
+
+top_k: 10
+
+pipeline_class: src.pipeline.RagPipeline
+pipeline_kwargs:
+  corpus_path: Experiments/corpora/unstructured_4000_200.json
+  retrieval_strategy: hybrid
+  embedding_model: BAAI/bge-small-en-v1.5
+
+golden_set_override: Experiments/corpora/golden_set_with_chunks_unstructured_4000_200.json

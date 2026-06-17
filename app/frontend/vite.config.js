@@ -7,7 +7,11 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
+        changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
+        // Deep agent can take 30-60s (multiple LLM + retrieval calls)
+        timeout: 120000,
+        proxyTimeout: 120000,
       },
     },
   },

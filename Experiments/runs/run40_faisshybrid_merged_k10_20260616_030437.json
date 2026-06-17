@@ -1,0 +1,753 @@
+{
+  "run_name": "run40_faisshybrid_merged_k10",
+  "timestamp": "2026-06-16T08:03:56.207158+00:00",
+  "config": {
+    "run_name": "run40_faisshybrid_merged_k10",
+    "top_k": 10,
+    "pipeline_class": "src.pipeline.RagPipeline",
+    "pipeline_kwargs": {
+      "corpus_path": "Experiments/corpora/merged_unstr_xbrl.json",
+      "retrieval_strategy": "faiss_hybrid",
+      "embedding_model": "BAAI/bge-small-en-v1.5"
+    },
+    "golden_set_override": "Experiments/corpora/golden_set_with_chunks_merged_unstr_xbrl.json"
+  },
+  "n_questions": 28,
+  "per_question": [
+    {
+      "id": "AAPL-01",
+      "type": "factual_lookup",
+      "question": "What was Apple's total net sales for fiscal year 2025?",
+      "gold_answer": "$416,161 million (approximately $416.2 billion)",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "aapl-20250927_unstr_38",
+        "aapl-20250927_unstr_43",
+        "aapl-20250927_unstr_41",
+        "wmt-20260131_unstr_103",
+        "aapl-20250927_xbrl_5",
+        "wmt-20260131_unstr_101",
+        "wmt-20260131_unstr_99",
+        "wmt-20260131_unstr_96",
+        "aapl-20250927_unstr_42",
+        "wmt-20260131_unstr_84"
+      ],
+      "gold_chunk_ids": [
+        "aapl-20250927_unstr_40",
+        "aapl-20250927_unstr_42",
+        "aapl-20250927_unstr_57",
+        "aapl-20250927_xbrl_0",
+        "aapl-20250927_xbrl_5",
+        "aapl-20250927_xbrl_29"
+      ],
+      "recall_at_k": 0.3333333333333333,
+      "mrr": 0.2,
+      "context_precision": 0.2
+    },
+    {
+      "id": "AAPL-02",
+      "type": "table_numerical",
+      "question": "What was Apple's operating income and total assets for fiscal year 2025?",
+      "gold_answer": "Operating income was $133,050 million; total assets were $359,241 million.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "aapl-20250927_unstr_38",
+        "aapl-20250927_unstr_48",
+        "jpm-20251231_unstr_231",
+        "jpm-20251231_unstr_233",
+        "wmt-20260131_unstr_99",
+        "aapl-20250927_unstr_58",
+        "wmt-20260131_unstr_103",
+        "aapl-20250927_unstr_69",
+        "wmt-20260131_unstr_96",
+        "wmt-20260131_unstr_101"
+      ],
+      "gold_chunk_ids": [
+        "aapl-20250927_unstr_57",
+        "aapl-20250927_unstr_61",
+        "aapl-20250927_xbrl_0",
+        "aapl-20250927_xbrl_2",
+        "aapl-20250927_xbrl_26"
+      ],
+      "recall_at_k": 0.0,
+      "mrr": 0.0,
+      "context_precision": 0.0
+    },
+    {
+      "id": "AAPL-03",
+      "type": "multi_hop_comparative",
+      "question": "How much did Apple's total net sales grow from fiscal 2024 to fiscal 2025, in both dollar terms and percentage?",
+      "gold_answer": "Net sales grew from $391,035 million to $416,161 million, an increase of $25,126 million, or approximately 6.4%.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "wmt-20260131_unstr_99",
+        "aapl-20250927_unstr_43",
+        "wmt-20260131_unstr_101",
+        "aapl-20250927_unstr_41",
+        "aapl-20250927_unstr_38",
+        "wmt-20260131_unstr_85",
+        "wmt-20260131_unstr_96",
+        "aapl-20250927_xbrl_5",
+        "wmt-20260131_unstr_86",
+        "aapl-20250927_unstr_48"
+      ],
+      "gold_chunk_ids": [
+        "aapl-20250927_unstr_40",
+        "aapl-20250927_unstr_42",
+        "aapl-20250927_unstr_57",
+        "aapl-20250927_xbrl_0",
+        "aapl-20250927_xbrl_5",
+        "aapl-20250927_xbrl_29"
+      ],
+      "recall_at_k": 0.16666666666666666,
+      "mrr": 0.125,
+      "context_precision": 0.1
+    },
+    {
+      "id": "AAPL-04",
+      "type": "risk_factor_synthesis",
+      "question": "What are some of the key risk factors Apple discloses related to its workforce and macroeconomic environment?",
+      "gold_answer": "Apple highlights risks from global macroeconomic conditions affecting demand, and the need to attract and retain highly skilled employees while preserving its company culture as it grows.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "aapl-20250927_unstr_38",
+        "aapl-20250927_unstr_12",
+        "jpm-20251231_unstr_595",
+        "jpm-20251231_unstr_88",
+        "aapl-20250927_unstr_15",
+        "jpm-20251231_unstr_503",
+        "aapl-20250927_unstr_23",
+        "jpm-20251231_unstr_598",
+        "aapl-20250927_unstr_21",
+        "aapl-20250927_unstr_13"
+      ],
+      "gold_chunk_ids": [
+        "aapl-20250927_unstr_21"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 0.1111111111111111,
+      "context_precision": 0.1
+    },
+    {
+      "id": "AAPL-05",
+      "type": "mda_interpretive",
+      "question": "Why does Apple typically report higher net sales in its fiscal first quarter?",
+      "gold_answer": "Because the first quarter includes the holiday season, which drives seasonal demand, and new product/service introductions can significantly affect net sales.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "aapl-20250927_unstr_12",
+        "jpm-20251231_unstr_160",
+        "aapl-20250927_unstr_43",
+        "aapl-20250927_unstr_41",
+        "aapl-20250927_unstr_38",
+        "wmt-20260131_unstr_99",
+        "wmt-20260131_unstr_101",
+        "wmt-20260131_unstr_84",
+        "aapl-20250927_unstr_8",
+        "wmt-20260131_unstr_86"
+      ],
+      "gold_chunk_ids": [
+        "aapl-20250927_unstr_12"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 1.0,
+      "context_precision": 0.1
+    },
+    {
+      "id": "AAPL-06",
+      "type": "cross_section_fact",
+      "question": "How many full-time equivalent employees did Apple have as of the end of fiscal 2025?",
+      "gold_answer": "Approximately 166,000 full-time equivalent employees as of September 27, 2025.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "aapl-20250927_unstr_38",
+        "aapl-20250927_unstr_12",
+        "cat-20251231_unstr_24",
+        "aapl-20250927_unstr_66",
+        "jpm-20251231_unstr_28",
+        "aapl-20250927_unstr_82",
+        "cat-20251231_unstr_23",
+        "aapl-20250927_unstr_58",
+        "jpm-20251231_unstr_120",
+        "aapl-20250927_unstr_60"
+      ],
+      "gold_chunk_ids": [
+        "aapl-20250927_unstr_12"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 0.5,
+      "context_precision": 0.1
+    },
+    {
+      "id": "CAT-01",
+      "type": "factual_lookup",
+      "question": "What were Caterpillar's total sales and revenues for 2025?",
+      "gold_answer": "$67.589 billion.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "cat-20251231_xbrl_0",
+        "cat-20251231_unstr_54",
+        "cat-20251231_unstr_103",
+        "cat-20251231_unstr_50",
+        "cat-20251231_unstr_12",
+        "cat-20251231_unstr_47",
+        "cat-20251231_unstr_67",
+        "wmt-20260131_unstr_96",
+        "aapl-20250927_unstr_44",
+        "cat-20251231_unstr_58"
+      ],
+      "gold_chunk_ids": [
+        "cat-20251231_unstr_12"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 0.2,
+      "context_precision": 0.1
+    },
+    {
+      "id": "CAT-02",
+      "type": "table_numerical",
+      "question": "What was Caterpillar's operating profit for 2025?",
+      "gold_answer": "$11.151 billion.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "cat-20251231_unstr_58",
+        "cat-20251231_unstr_103",
+        "cat-20251231_unstr_50",
+        "cat-20251231_xbrl_0",
+        "cat-20251231_unstr_12",
+        "cat-20251231_unstr_47",
+        "cat-20251231_unstr_63",
+        "ko-20251231_unstr_96",
+        "cat-20251231_unstr_117",
+        "cat-20251231_unstr_67"
+      ],
+      "gold_chunk_ids": [
+        "cat-20251231_unstr_58"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 1.0,
+      "context_precision": 0.1
+    },
+    {
+      "id": "CAT-03",
+      "type": "multi_hop_comparative",
+      "question": "How did Caterpillar's operating profit change from 2024 to 2025, and what were the main drivers?",
+      "gold_answer": "Operating profit decreased from $13.072 billion in 2024 to $11.151 billion in 2025, a decrease of $1.921 billion (15%). The decrease was primarily due to unfavorable manufacturing costs of $2.148 billion (largely from higher tariffs) and unfavorable price realization of $817 million, partially offset by higher sales volume contributing $1.218 billion.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "cat-20251231_unstr_58",
+        "cat-20251231_unstr_50",
+        "cat-20251231_unstr_12",
+        "cat-20251231_unstr_103",
+        "cat-20251231_unstr_54",
+        "cat-20251231_xbrl_0",
+        "wmt-20260131_unstr_81",
+        "cat-20251231_unstr_71",
+        "cat-20251231_unstr_47",
+        "ko-20251231_unstr_96"
+      ],
+      "gold_chunk_ids": [
+        "cat-20251231_unstr_58"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 1.0,
+      "context_precision": 0.1
+    },
+    {
+      "id": "CAT-04",
+      "type": "risk_factor_synthesis",
+      "question": "What risk does Caterpillar disclose regarding its relationship with its dealer network?",
+      "gold_answer": "Caterpillar relies on a network of independent dealers under non-exclusive agreements that are generally terminable at will, creating dependency risk on third parties it does not control.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "cat-20251231_unstr_22",
+        "cat-20251231_unstr_19",
+        "cat-20251231_unstr_12",
+        "cat-20251231_unstr_65",
+        "cat-20251231_unstr_26",
+        "cat-20251231_unstr_20",
+        "jpm-20251231_unstr_116",
+        "cat-20251231_unstr_18",
+        "ko-20251231_unstr_80",
+        "cat-20251231_unstr_34"
+      ],
+      "gold_chunk_ids": [
+        "cat-20251231_unstr_22"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 1.0,
+      "context_precision": 0.1
+    },
+    {
+      "id": "CAT-05",
+      "type": "mda_interpretive",
+      "question": "What role did tariffs play in Caterpillar's 2025 financial performance?",
+      "gold_answer": "Higher tariffs were a major contributor to unfavorable manufacturing costs ($2.148 billion increase), which was the primary driver of the decline in operating profit in 2025.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "cat-20251231_unstr_58",
+        "cat-20251231_unstr_12",
+        "cat-20251231_unstr_46",
+        "cat-20251231_unstr_27",
+        "cat-20251231_unstr_53",
+        "wmt-20260131_unstr_81",
+        "cat-20251231_unstr_21",
+        "aapl-20250927_unstr_38",
+        "cat-20251231_unstr_54",
+        "aapl-20250927_unstr_14"
+      ],
+      "gold_chunk_ids": [
+        "cat-20251231_unstr_52",
+        "cat-20251231_unstr_58",
+        "cat-20251231_unstr_60",
+        "cat-20251231_unstr_61"
+      ],
+      "recall_at_k": 0.25,
+      "mrr": 1.0,
+      "context_precision": 0.1
+    },
+    {
+      "id": "CAT-06",
+      "type": "cross_section_fact",
+      "question": "How many people did Caterpillar employ as of December 31, 2025, and what are its reportable segments?",
+      "gold_answer": "Approximately 118,000 full-time employees (51,600 in the U.S. and 66,400 outside the U.S.). Reportable segments: Construction Industries, Resource Industries, Energy & Transportation (Power & Energy), and Financial Products.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "cat-20251231_unstr_12",
+        "cat-20251231_unstr_100",
+        "cat-20251231_unstr_137",
+        "aapl-20250927_unstr_9",
+        "cat-20251231_unstr_139",
+        "jpm-20251231_unstr_10",
+        "cat-20251231_unstr_42",
+        "jpm-20251231_unstr_155",
+        "cat-20251231_unstr_47",
+        "jpm-20251231_unstr_219"
+      ],
+      "gold_chunk_ids": [
+        "cat-20251231_unstr_23"
+      ],
+      "recall_at_k": 0.0,
+      "mrr": 0.0,
+      "context_precision": 0.0
+    },
+    {
+      "id": "JPM-01",
+      "type": "factual_lookup",
+      "question": "What was JPMorgan Chase's total net revenue for 2025?",
+      "gold_answer": "$182,447 million (approximately $182.4 billion).",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "jpm-20251231_unstr_299",
+        "jpm-20251231_unstr_160",
+        "jpm-20251231_unstr_719",
+        "jpm-20251231_unstr_797",
+        "jpm-20251231_unstr_254",
+        "jpm-20251231_unstr_614",
+        "aapl-20250927_xbrl_5",
+        "jpm-20251231_unstr_700",
+        "jpm-20251231_unstr_278",
+        "jpm-20251231_unstr_769"
+      ],
+      "gold_chunk_ids": [
+        "jpm-20251231_unstr_146",
+        "jpm-20251231_unstr_159",
+        "jpm-20251231_unstr_174",
+        "jpm-20251231_unstr_204",
+        "jpm-20251231_unstr_632",
+        "jpm-20251231_xbrl_1",
+        "jpm-20251231_xbrl_162",
+        "jpm-20251231_xbrl_164"
+      ],
+      "recall_at_k": 0.0,
+      "mrr": 0.0,
+      "context_precision": 0.0
+    },
+    {
+      "id": "JPM-02",
+      "type": "multi_hop_comparative",
+      "question": "How did JPMorgan's total net revenue change from 2024 to 2025, and what factor affects the comparability of these two years?",
+      "gold_answer": "Total net revenue increased from $177,556 million in 2024 to $182,447 million in 2025, an increase of about $4,891 million (~2.75%). Comparability is affected because 2024 included a one-time $7.9 billion net gain related to Visa shares (with an offsetting $1.0 billion Visa share contribution to the JPMorgan Chase Foundation, both recorded in Q2 2024).",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "jpm-20251231_unstr_226",
+        "cat-20251231_unstr_71",
+        "jpm-20251231_unstr_268",
+        "jpm-20251231_unstr_254",
+        "ko-20251231_unstr_105",
+        "jpm-20251231_unstr_170",
+        "ko-20251231_unstr_94",
+        "jpm-20251231_unstr_299",
+        "jpm-20251231_unstr_203",
+        "jpm-20251231_unstr_233"
+      ],
+      "gold_chunk_ids": [
+        "jpm-20251231_unstr_147"
+      ],
+      "recall_at_k": 0.0,
+      "mrr": 0.0,
+      "context_precision": 0.0
+    },
+    {
+      "id": "JPM-03",
+      "type": "risk_factor_synthesis",
+      "question": "What are some risk factors JPMorgan discloses related to data, legal proceedings, and climate?",
+      "gold_answer": "JPMorgan discloses risks from data privacy, cybersecurity, and AI-related regulation; significant legal risk from civil and governmental proceedings, investigations, and enforcement actions; and risks from climate change affecting its business and clients.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "aapl-20250927_unstr_7",
+        "jpm-20251231_unstr_306",
+        "jpm-20251231_unstr_81",
+        "jpm-20251231_unstr_565",
+        "jpm-20251231_unstr_36",
+        "wmt-20260131_unstr_130",
+        "jpm-20251231_unstr_39",
+        "ko-20251231_unstr_43",
+        "jpm-20251231_unstr_618",
+        "cat-20251231_unstr_46"
+      ],
+      "gold_chunk_ids": [
+        "jpm-20251231_unstr_42"
+      ],
+      "recall_at_k": 0.0,
+      "mrr": 0.0,
+      "context_precision": 0.0
+    },
+    {
+      "id": "JPM-04",
+      "type": "cross_section_fact",
+      "question": "How many employees did JPMorgan Chase have globally as of December 31, 2025, and where are they located?",
+      "gold_answer": "318,512 employees globally, located in 66 countries, with 58% of employees located in the U.S.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "jpm-20251231_unstr_28",
+        "jpm-20251231_unstr_155",
+        "jpm-20251231_unstr_10",
+        "ko-20251231_unstr_26",
+        "cat-20251231_unstr_23",
+        "jpm-20251231_unstr_614",
+        "ko-20251231_unstr_122",
+        "jpm-20251231_unstr_797",
+        "ko-20251231_unstr_55",
+        "jpm-20251231_unstr_787"
+      ],
+      "gold_chunk_ids": [
+        "jpm-20251231_unstr_28"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 1.0,
+      "context_precision": 0.1
+    },
+    {
+      "id": "JPM-05",
+      "type": "unanswerable",
+      "question": "What was JPMorgan Chase's total net revenue for fiscal year 2030?",
+      "gold_answer": "The filing does not contain this information (it covers fiscal year 2025 and prior years only); this question cannot be answered from the document.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "jpm-20251231_unstr_299",
+        "wmt-20260131_unstr_99",
+        "jpm-20251231_unstr_631",
+        "jpm-20251231_unstr_160",
+        "jpm-20251231_unstr_647",
+        "wmt-20260131_unstr_96",
+        "jpm-20251231_unstr_635",
+        "wmt-20260131_unstr_101",
+        "jpm-20251231_unstr_159",
+        "jpm-20251231_unstr_254"
+      ],
+      "gold_chunk_ids": [],
+      "recall_at_k": null,
+      "mrr": null,
+      "context_precision": null
+    },
+    {
+      "id": "KO-01",
+      "type": "factual_lookup",
+      "question": "What were Coca-Cola's net operating revenues for 2025?",
+      "gold_answer": "$47,941 million.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "ko-20251231_unstr_125",
+        "ko-20251231_unstr_73",
+        "ko-20251231_xbrl_25",
+        "ko-20251231_unstr_91",
+        "ko-20251231_unstr_103",
+        "ko-20251231_unstr_96",
+        "ko-20251231_unstr_14",
+        "ko-20251231_xbrl_59",
+        "ko-20251231_unstr_16",
+        "aapl-20250927_unstr_39"
+      ],
+      "gold_chunk_ids": [
+        "ko-20251231_unstr_91"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 0.25,
+      "context_precision": 0.1
+    },
+    {
+      "id": "KO-02",
+      "type": "multi_hop_comparative",
+      "question": "How did Coca-Cola's net operating revenues change from 2024 to 2025?",
+      "gold_answer": "Net operating revenues increased from $47,061 million in 2024 to $47,941 million in 2025, an increase of $880 million, or approximately 2%.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "ko-20251231_unstr_96",
+        "ko-20251231_unstr_125",
+        "ko-20251231_xbrl_59",
+        "ko-20251231_unstr_89",
+        "ko-20251231_unstr_91",
+        "ko-20251231_unstr_103",
+        "ko-20251231_unstr_14",
+        "ko-20251231_xbrl_0",
+        "ko-20251231_unstr_15",
+        "ko-20251231_unstr_104"
+      ],
+      "gold_chunk_ids": [
+        "ko-20251231_unstr_91"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 0.2,
+      "context_precision": 0.1
+    },
+    {
+      "id": "KO-03",
+      "type": "table_numerical",
+      "question": "What was Coca-Cola's total operating income for 2025?",
+      "gold_answer": "$13,426 million.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "ko-20251231_unstr_103",
+        "ko-20251231_xbrl_59",
+        "ko-20251231_unstr_73",
+        "ko-20251231_unstr_72",
+        "ko-20251231_unstr_125",
+        "ko-20251231_xbrl_25",
+        "ko-20251231_unstr_102",
+        "ko-20251231_unstr_127",
+        "ko-20251231_unstr_124",
+        "ko-20251231_unstr_174"
+      ],
+      "gold_chunk_ids": [
+        "ko-20251231_xbrl_23"
+      ],
+      "recall_at_k": 0.0,
+      "mrr": 0.0,
+      "context_precision": 0.0
+    },
+    {
+      "id": "KO-04",
+      "type": "risk_factor_synthesis",
+      "question": "What supply-related risk does Coca-Cola disclose regarding packaging materials?",
+      "gold_answer": "Coca-Cola notes that certain packaging materials, such as aluminum cans, are available from only a limited number of suppliers, creating a supply concentration risk.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "ko-20251231_unstr_52",
+        "ko-20251231_unstr_36",
+        "ko-20251231_unstr_35",
+        "ko-20251231_unstr_31",
+        "ko-20251231_unstr_54",
+        "ko-20251231_unstr_12",
+        "ko-20251231_unstr_38",
+        "ko-20251231_unstr_22",
+        "ko-20251231_unstr_73",
+        "ko-20251231_unstr_21"
+      ],
+      "gold_chunk_ids": [
+        "ko-20251231_unstr_22"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 0.125,
+      "context_precision": 0.1
+    },
+    {
+      "id": "KO-05",
+      "type": "mda_interpretive",
+      "question": "What drove the change in Coca-Cola's North America segment operating income from 2024 to 2025?",
+      "gold_answer": "North America operating income increased from $4,556 million in 2024 to $5,070 million in 2025, primarily driven by favorable pricing initiatives, partially offset by a 1% decrease in concentrate sales volume, higher commodity costs, increased marketing spending, higher other operating charges, and a 1% unfavorable foreign currency impact.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "ko-20251231_unstr_103",
+        "ko-20251231_unstr_102",
+        "ko-20251231_xbrl_59",
+        "ko-20251231_unstr_90",
+        "ko-20251231_unstr_13",
+        "ko-20251231_unstr_127",
+        "ko-20251231_unstr_96",
+        "ko-20251231_unstr_67",
+        "ko-20251231_unstr_91",
+        "cat-20251231_unstr_63"
+      ],
+      "gold_chunk_ids": [
+        "ko-20251231_unstr_102"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 0.5,
+      "context_precision": 0.1
+    },
+    {
+      "id": "WMT-01",
+      "type": "factual_lookup",
+      "question": "What were Walmart's total net sales for fiscal year 2026 (ended January 31, 2026)?",
+      "gold_answer": "$706,413 million.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "wmt-20260131_unstr_99",
+        "wmt-20260131_xbrl_39",
+        "wmt-20260131_unstr_127",
+        "wmt-20260131_unstr_101",
+        "wmt-20260131_unstr_96",
+        "wmt-20260131_xbrl_40",
+        "wmt-20260131_unstr_84",
+        "wmt-20260131_unstr_83",
+        "wmt-20260131_unstr_86",
+        "wmt-20260131_unstr_112"
+      ],
+      "gold_chunk_ids": [
+        "wmt-20260131_unstr_85",
+        "wmt-20260131_unstr_95",
+        "wmt-20260131_unstr_135",
+        "wmt-20260131_xbrl_0",
+        "wmt-20260131_xbrl_36"
+      ],
+      "recall_at_k": 0.0,
+      "mrr": 0.0,
+      "context_precision": 0.0
+    },
+    {
+      "id": "WMT-02",
+      "type": "multi_hop_comparative",
+      "question": "How did Walmart's net sales, operating income, and total assets change from fiscal 2025 to fiscal 2026?",
+      "gold_answer": "Net sales grew from $674,538 million to $706,413 million (+4.7%). Operating income grew from $29,348 million to $29,825 million. Total assets grew from $260,823 million to $284,668 million.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "wmt-20260131_unstr_99",
+        "wmt-20260131_unstr_84",
+        "wmt-20260131_unstr_101",
+        "wmt-20260131_unstr_96",
+        "wmt-20260131_unstr_86",
+        "wmt-20260131_unstr_97",
+        "wmt-20260131_unstr_85",
+        "wmt-20260131_xbrl_36",
+        "wmt-20260131_unstr_98",
+        "wmt-20260131_unstr_102"
+      ],
+      "gold_chunk_ids": [
+        "wmt-20260131_unstr_85",
+        "wmt-20260131_unstr_87",
+        "wmt-20260131_unstr_89",
+        "wmt-20260131_unstr_95",
+        "wmt-20260131_unstr_135",
+        "wmt-20260131_unstr_139",
+        "wmt-20260131_xbrl_0",
+        "wmt-20260131_xbrl_2",
+        "wmt-20260131_xbrl_36",
+        "wmt-20260131_xbrl_37"
+      ],
+      "recall_at_k": 0.2,
+      "mrr": 0.14285714285714285,
+      "context_precision": 0.2
+    },
+    {
+      "id": "WMT-03",
+      "type": "mda_interpretive",
+      "question": "What were the primary drivers of the increase in Walmart's operating expenses for fiscal 2026?",
+      "gold_answer": "The increase was primarily due to higher self-insured general liability claims expense in the U.S. of approximately $0.9 billion, a $0.7 billion charge related to modification of share-based compensation arrangements for the PhonePe subsidiary, and increased depreciation related to capital investments.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "wmt-20260131_unstr_99",
+        "wmt-20260131_unstr_96",
+        "wmt-20260131_unstr_101",
+        "wmt-20260131_unstr_84",
+        "wmt-20260131_unstr_86",
+        "wmt-20260131_unstr_97",
+        "wmt-20260131_unstr_112",
+        "wmt-20260131_xbrl_36",
+        "wmt-20260131_unstr_16",
+        "wmt-20260131_unstr_103"
+      ],
+      "gold_chunk_ids": [
+        "wmt-20260131_unstr_86",
+        "wmt-20260131_unstr_96",
+        "wmt-20260131_unstr_99"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 1.0,
+      "context_precision": 0.3
+    },
+    {
+      "id": "WMT-04",
+      "type": "risk_factor_synthesis",
+      "question": "What workforce-related risk does Walmart disclose in its risk factors?",
+      "gold_answer": "Walmart discloses risk related to its workforce strategy, including the availability of necessary personnel to staff its stores, clubs, and other facilities, and the potential impact of changes in labor costs.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "wmt-20260131_unstr_22",
+        "jpm-20251231_unstr_36",
+        "jpm-20251231_unstr_81",
+        "jpm-20251231_unstr_306",
+        "jpm-20251231_unstr_490",
+        "wmt-20260131_unstr_44",
+        "jpm-20251231_unstr_417",
+        "wmt-20260131_unstr_28",
+        "wmt-20260131_unstr_27",
+        "jpm-20251231_unstr_543"
+      ],
+      "gold_chunk_ids": [
+        "wmt-20260131_unstr_13"
+      ],
+      "recall_at_k": 0.0,
+      "mrr": 0.0,
+      "context_precision": 0.0
+    },
+    {
+      "id": "WMT-05",
+      "type": "cross_section_fact",
+      "question": "How many stores does Walmart International operate and in how many countries?",
+      "gold_answer": "Walmart International, the company's second-largest segment, operates 5,743 stores across 18 countries outside the U.S.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "wmt-20260131_unstr_18",
+        "wmt-20260131_unstr_16",
+        "wmt-20260131_unstr_46",
+        "wmt-20260131_unstr_17",
+        "wmt-20260131_unstr_21",
+        "wmt-20260131_unstr_63",
+        "wmt-20260131_unstr_22",
+        "wmt-20260131_unstr_48",
+        "wmt-20260131_unstr_66",
+        "wmt-20260131_unstr_49"
+      ],
+      "gold_chunk_ids": [
+        "wmt-20260131_unstr_18"
+      ],
+      "recall_at_k": 1.0,
+      "mrr": 1.0,
+      "context_precision": 0.1
+    },
+    {
+      "id": "WMT-06",
+      "type": "unanswerable",
+      "question": "What was Walmart's net sales figure for its operations in Antarctica?",
+      "gold_answer": "The filing does not mention any Walmart operations in Antarctica; this question cannot be answered from the document.",
+      "generated_answer": "[NO LLM CONFIGURED] Retrieved context only - see retrieved_ids.",
+      "retrieved_ids": [
+        "wmt-20260131_unstr_99",
+        "wmt-20260131_unstr_101",
+        "wmt-20260131_unstr_96",
+        "wmt-20260131_unstr_84",
+        "wmt-20260131_unstr_86",
+        "wmt-20260131_unstr_17",
+        "wmt-20260131_unstr_16",
+        "wmt-20260131_unstr_18",
+        "wmt-20260131_unstr_46",
+        "wmt-20260131_unstr_63"
+      ],
+      "gold_chunk_ids": [],
+      "recall_at_k": null,
+      "mrr": null,
+      "context_precision": null
+    }
+  ]
+}

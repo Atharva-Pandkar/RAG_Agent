@@ -1,44 +1,203 @@
-"""LangChain tool wrapping the experiment RagPipeline retriever.
+"""
+RAG tools for the document research agent.
 
-Defaults to the strongest retrieval config found so far (hybrid retrieval
-over fixed_size_1024_100 chunks - see Experiments/summarize_runs.py).
+Tools
+-----
+search_documents          — semantic + keyword search over the active corpus
+list_available_documents  — return registry of what documents are loaded
+
+Corpus
+------
+Uses active_corpus.json (seeded from merged_unstr_xbrl.json on first run,
+then extended as users ingest new documents).
 """
 from __future__ import annotations
+import json
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from langchain_core.tools import tool  # noqa: E402
-from src.pipeline import RagPipeline  # noqa: E402
+from langchain_core.tools import tool       # noqa: E402
+from src.pipeline import RagPipeline        # noqa: E402
+from src.retrieval.llm_reranker import llm_rerank  # noqa: E402
+from .logger import get_logger              # noqa: E402
+
+log = get_logger(__name__)
 
 _PIPELINE: RagPipeline | None = None
+
+CORPUS_PATH  = "Experiments/corpora/active_corpus.json"
+EMBED_MODEL  = "text-embedding-3-small"
+RETRIEVAL_K  = 10   # candidates fetched from FAISS + BM25
+RERANK_K     = 5    # chunks actually passed to the agent
+RERANK_MODEL = "gpt-4o-mini"
+
+REGISTRY_PATH = ROOT / "Experiments" / "corpora" / "docs_registry.json"
 
 
 def get_pipeline() -> RagPipeline:
     global _PIPELINE
     if _PIPELINE is None:
+        log.info("Initialising RAG pipeline — corpus: %s | strategy: faiss_hybrid | k: %d",
+                 CORPUS_PATH, RETRIEVAL_K)
+        t0 = time.perf_counter()
         _PIPELINE = RagPipeline(
-            corpus_path="Experiments/corpora/fixed_size_1024_100.json",
-            retrieval_strategy="hybrid",
-            embedding_model="BAAI/bge-small-en-v1.5",
+            corpus_path=CORPUS_PATH,
+            retrieval_strategy="faiss_hybrid",
+            embedding_model=EMBED_MODEL,
         )
+        log.info("RAG pipeline ready (%.1fs)", time.perf_counter() - t0)
     return _PIPELINE
 
 
-@tool
-def search_10k_filings(query: str) -> str:
-    """Search the 10-K filings of AAPL, CAT, JPM, KO, and WMT for passages
-    relevant to the query. Use this for any question about financial figures,
-    risk factors, business segments, or other content found in a company's
-    annual report (10-K)."""
-    pipeline = get_pipeline()
-    results = pipeline.retrieve(query, k=5)
-    if not results:
-        return "No relevant passages found."
+# ── Tool 1: document search ──────────────────────────────────────────────────
 
-    parts = []
-    for r in results:
-        parts.append(f"[Source: {r['doc']} | chunk {r['id']}]\n{r['text']}")
-    return "\n\n---\n\n".join(parts)
+@tool
+def search_documents(query: str, doc_filter: str = "") -> str:
+    """Search documents loaded into the RAG system for passages relevant to the query.
+
+    Use this tool for ANY factual question — financial figures, risk factors,
+    business descriptions, MD&A commentary, footnotes, or any other content
+    found in the ingested documents.
+
+    You may call this tool multiple times with different queries if the first
+    result does not fully answer the question.
+
+    Args:
+        query: The search query.
+               - Direct question → pass verbatim.
+               - Multi-part question → one call per sub-question.
+               - Vague input → rephrase into a specific question first.
+
+        doc_filter: Optional doc_id prefix to restrict search to ONE document.
+               Pass this whenever the question is about a single, identified company.
+               Example: "aapl-20250927" restricts to Apple's filing only.
+               Obtain the exact doc_id from list_available_documents first.
+               Leave empty ("") to search across all documents.
+
+    Returns:
+        Up to {RERANK_K} reranked passages, each labelled with source document,
+        section, and chunk ID.
+    """
+    log.info("TOOL CALL search_documents — query: %r  doc_filter: %r", query, doc_filter)
+    t0 = time.perf_counter()
+
+    active_filter = doc_filter.strip() or None
+
+    try:
+        pipeline = get_pipeline()
+        results  = pipeline.retrieve(query, k=RETRIEVAL_K, filter_doc=active_filter)
+    except Exception:
+        log.exception("RAG pipeline retrieval failed for query: %r", query)
+        return "Retrieval failed — please try again."
+
+    log.info("TOOL RESULT — %d candidates retrieved in %.2fs", len(results),
+             time.perf_counter() - t0)
+
+    # ── LLM rerank: select top RERANK_K most relevant chunks ─────────────────
+    results = llm_rerank(query, results, return_k=RERANK_K, model=RERANK_MODEL)
+    log.info("After reranking: %d chunks | total tool time %.2fs",
+             len(results), time.perf_counter() - t0)
+
+    if not results:
+        log.warning("No chunks matched query: %r", query)
+        return "No relevant passages found for this query."
+
+    # ── Source-mismatch guard ─────────────────────────────────────────────────
+    # Extract the distinct source documents returned and surface them to the
+    # agent. If every result comes from a single document that seems unrelated
+    # to what was asked (e.g. asking about Tesla but getting Walmart chunks),
+    # prepend an explicit warning so the agent does not fabricate an answer.
+    returned_docs = list(dict.fromkeys(r.get("doc", "") for r in results))
+    known_doc_ids = set(returned_docs)
+
+    # Detect obvious mismatch: query names a known-company keyword but no
+    # result prefix matches it.
+    _COMPANY_KEYWORDS = {
+        "tesla": "tsla", "microsoft": "msft", "nvidia": "nvda",
+        "amazon": "amzn", "google": "googl", "alphabet": "googl",
+        "meta": "meta", "netflix": "nflx", "uber": "uber",
+        "ford": "ford", "gm": "gm", "boeing": "ba",
+    }
+    query_lower = query.lower()
+    mismatch_warning = ""
+    for keyword, _ in _COMPANY_KEYWORDS.items():
+        if keyword in query_lower:
+            # Check whether any returned doc belongs to this company
+            if not any(keyword in doc.lower() for doc in returned_docs):
+                mismatch_warning = (
+                    f"\n\n⚠ RETRIEVAL WARNING: The query mentions '{keyword}' but "
+                    f"none of the returned passages are from a '{keyword}' document. "
+                    f"Returned sources: {returned_docs}. "
+                    f"If '{keyword}' is not in the loaded documents, do NOT use these "
+                    f"passages to answer — refuse instead."
+                )
+                log.warning(
+                    "Source mismatch — query mentions %r but results are from: %s",
+                    keyword, returned_docs,
+                )
+            break
+
+    parts: list[str] = []
+    for i, r in enumerate(results, 1):
+        doc  = r.get("doc", "unknown")
+        cid  = r.get("id", "")
+        sec  = r.get("section") or "—"
+        text = r.get("text", "").strip()
+        log.debug("  [%d] %s | %s | %d chars", i, doc, sec, len(text))
+        parts.append(f"[{i}] Source: {doc} | Section: {sec} | ID: {cid}\n{text}")
+
+    body = "\n\n---\n\n".join(parts)
+    return body + mismatch_warning
+
+
+# ── Tool 2: list documents ───────────────────────────────────────────────────
+
+@tool
+def list_available_documents() -> str:
+    """Return a structured summary of all documents currently loaded in the RAG system.
+
+    Call this tool when:
+    - The user asks what documents or topics are available
+    - The query is vague and you need to know the document scope before searching
+    - You want to confirm which companies / filing years are present
+
+    Returns:
+        A formatted list of documents with their names, chunk counts, and sections.
+    """
+    log.info("TOOL CALL list_available_documents")
+    if not REGISTRY_PATH.exists():
+        return (
+            "No document registry found yet. "
+            "Documents may still be loading — try search_documents directly."
+        )
+    try:
+        registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        log.error("Failed to read registry: %s", exc)
+        return "Could not read the document registry."
+
+    docs = registry.get("documents", [])
+    if not docs:
+        return "No documents are currently loaded in the system."
+
+    lines = [f"{len(docs)} document(s) are loaded:\n"]
+    for d in docs:
+        name     = d.get("display_name") or d.get("id", "?")
+        doc_id   = d.get("id", "")
+        sections = d.get("sections", [])
+        sec_str  = ", ".join(sections[:6])
+        if len(sections) > 6:
+            sec_str += f" … (+{len(sections) - 6} more)"
+        lines.append(f"• {name}  [{d.get('chunk_count', '?')} chunks]  (doc_id: {doc_id})")
+        if sec_str:
+            lines.append(f"  Sections: {sec_str}")
+
+    updated = registry.get("updated_at", "")
+    if updated:
+        lines.append(f"\nRegistry last updated: {updated[:19].replace('T', ' ')} UTC")
+
+    return "\n".join(lines)
