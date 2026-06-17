@@ -351,3 +351,27 @@
 - Location: `Experiments/eval_suite_runner.py` (`judge_response`)
 - Priority: Low
 - Notes: Run 2 prose/table 100% reflects both `doc_filter` and judge methodology — not isolated. CCC/ADV still use LLM judge fallback. Tag run JSON with judge version for comparable re-scores.
+
+---
+
+## eval_ragas — Multi-LLM-Call Diagnostic Eval (~5–15 min for 43 Q)
+- Concern: Each question runs full `/chat` agent turn (~15–30s) plus context precision (1 call × N cited chunks), faithfulness (1 + up to 6 claim checks), and qualitative LLM judges. Full suite far costlier than hybrid-judge E2E eval.
+- Location: `Experiments/eval_ragas.py`, `Experiments/runs/ragas_eval_1781654954.json`
+- Priority: Medium
+- Notes: Use `--categories` or `--n` for smoke runs. Sequential only. Corpus lookup by chunk ID required for meaningful context metrics (early pilot run had near-zero CR/CP before fix).
+
+---
+
+## eval_reranker — Offline Pipeline + Rerank API per Question
+- Concern: 22 SFP/SFT questions each load hybrid retrieval (FAISS embed on cold start ~15s first query) + gpt-4o-mini rerank (~1.7s). Not parallelized.
+- Location: `Experiments/eval_reranker.py`, `Experiments/runs/reranker_eval_1781652118.json`
+- Priority: Medium
+- Notes: First run shows reranker drops 7/22 answer chunks from top-5. Rerank latency additive to every `search_documents` in chat (~1–2s per call documented in Iteration 13).
+
+---
+
+## LLM Reranker — Answer Chunk Drop Risk at k=10→5
+- Concern: Reranker selects 5 of 10 candidates using 200-char previews; numeric answers at rank 5–10 are discarded. Isolation eval: recall drops **32 pp** (72.7%→40.9%) on SFP/SFT with production settings.
+- Location: `src/retrieval/llm_reranker.py`, `app/backend/rag_tool.py` (`RETRIEVAL_K=10`, `RERANK_K=5`)
+- Priority: High
+- Notes: Conflicts with agent E2E 100% SFP/SFT — agent may succeed without answer chunk in cited top-5, or multiple chunks contain partial info. Tuning rerank_k or prompt is highest-impact retrieval fix after cross-company synthesis.

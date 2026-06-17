@@ -1,0 +1,396 @@
+{
+  "retrieval_k": 10,
+  "rerank_k": 5,
+  "n": 22,
+  "recall_pre": 0.7272727272727273,
+  "recall_post": 0.4090909090909091,
+  "mrr_pre": 0.4420995670995671,
+  "mrr_post": 0.23106060606060605,
+  "avg_rank_before": 3.3125,
+  "avg_rank_after": 2.4444444444444446,
+  "drops": 7,
+  "promotions": 1,
+  "per_question": [
+    {
+      "id": "SFP-001",
+      "category": "single_fact_prose",
+      "question": "What were Apple's total net sales for fiscal year 2025?",
+      "doc_filter": "aapl-",
+      "expected_nums": [
+        416161.0
+      ],
+      "recall_pre": false,
+      "recall_post": false,
+      "rank_before": null,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 15.74,
+      "rerank_s": 1.82
+    },
+    {
+      "id": "SFP-002",
+      "category": "single_fact_prose",
+      "question": "What was Apple's net income for fiscal year 2025?",
+      "doc_filter": "aapl-",
+      "expected_nums": [
+        112010.0
+      ],
+      "recall_pre": true,
+      "recall_post": false,
+      "rank_before": 5,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": true,
+      "retrieval_s": 0.19,
+      "rerank_s": 1.73
+    },
+    {
+      "id": "SFP-003",
+      "category": "single_fact_prose",
+      "question": "What was Apple's diluted earnings per share for fiscal year 2025?",
+      "doc_filter": "aapl-",
+      "expected_nums": [
+        7.46
+      ],
+      "recall_pre": true,
+      "recall_post": true,
+      "rank_before": 1,
+      "rank_after": 1,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.2,
+      "rerank_s": 1.36
+    },
+    {
+      "id": "SFP-004",
+      "category": "single_fact_prose",
+      "question": "What were Caterpillar's total sales and revenues for fiscal year 2025?",
+      "doc_filter": "cat-",
+      "expected_nums": [
+        67589.0
+      ],
+      "recall_pre": true,
+      "recall_post": true,
+      "rank_before": 1,
+      "rank_after": 2,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.4,
+      "rerank_s": 1.62
+    },
+    {
+      "id": "SFP-005",
+      "category": "single_fact_prose",
+      "question": "What was Caterpillar's diluted earnings per share for fiscal year 2025",
+      "doc_filter": "cat-",
+      "expected_nums": [
+        18.81
+      ],
+      "recall_pre": true,
+      "recall_post": true,
+      "rank_before": 1,
+      "rank_after": 1,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.25,
+      "rerank_s": 1.42
+    },
+    {
+      "id": "SFP-006",
+      "category": "single_fact_prose",
+      "question": "What was JPMorgan Chase's total net revenue for fiscal year 2025?",
+      "doc_filter": "jpm-",
+      "expected_nums": [
+        182447.0
+      ],
+      "recall_pre": true,
+      "recall_post": true,
+      "rank_before": 1,
+      "rank_after": 3,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.2,
+      "rerank_s": 1.49
+    },
+    {
+      "id": "SFP-007",
+      "category": "single_fact_prose",
+      "question": "What was JPMorgan Chase's net income for fiscal year 2025?",
+      "doc_filter": "jpm-",
+      "expected_nums": [
+        57048.0
+      ],
+      "recall_pre": true,
+      "recall_post": true,
+      "rank_before": 1,
+      "rank_after": 4,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.25,
+      "rerank_s": 1.76
+    },
+    {
+      "id": "SFP-008",
+      "category": "single_fact_prose",
+      "question": "What were Coca-Cola's net operating revenues for fiscal year 2025?",
+      "doc_filter": "ko-",
+      "expected_nums": [
+        47941.0
+      ],
+      "recall_pre": true,
+      "recall_post": false,
+      "rank_before": 2,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": true,
+      "retrieval_s": 0.25,
+      "rerank_s": 1.73
+    },
+    {
+      "id": "SFP-009",
+      "category": "single_fact_prose",
+      "question": "What was the net income attributable to shareowners of The Coca-Cola C",
+      "doc_filter": "ko-",
+      "expected_nums": [
+        13107.0
+      ],
+      "recall_pre": false,
+      "recall_post": false,
+      "rank_before": null,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.21,
+      "rerank_s": 1.47
+    },
+    {
+      "id": "SFP-010",
+      "category": "single_fact_prose",
+      "question": "What were Walmart's total net sales for the fiscal year ended January ",
+      "doc_filter": "wmt-",
+      "expected_nums": [
+        706413.0
+      ],
+      "recall_pre": false,
+      "recall_post": false,
+      "rank_before": null,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.22,
+      "rerank_s": 1.86
+    },
+    {
+      "id": "SFP-011",
+      "category": "single_fact_prose",
+      "question": "What was the net income attributable to Walmart for the fiscal year en",
+      "doc_filter": "wmt-",
+      "expected_nums": [
+        21893.0
+      ],
+      "recall_pre": true,
+      "recall_post": false,
+      "rank_before": 7,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": true,
+      "retrieval_s": 0.17,
+      "rerank_s": 1.57
+    },
+    {
+      "id": "SFP-012",
+      "category": "single_fact_prose",
+      "question": "What was Apple's gross margin for fiscal year 2025, and how does it co",
+      "doc_filter": "aapl-",
+      "expected_nums": [
+        14518.0,
+        180683.0,
+        195201.0
+      ],
+      "recall_pre": true,
+      "recall_post": false,
+      "rank_before": 6,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": true,
+      "retrieval_s": 0.25,
+      "rerank_s": 1.62
+    },
+    {
+      "id": "SFT-001",
+      "category": "single_fact_table",
+      "question": "What were Apple's iPhone net sales for fiscal year 2025?",
+      "doc_filter": "aapl-",
+      "expected_nums": [
+        201183.0,
+        209586.0
+      ],
+      "recall_pre": false,
+      "recall_post": false,
+      "rank_before": null,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.16,
+      "rerank_s": 1.68
+    },
+    {
+      "id": "SFT-002",
+      "category": "single_fact_table",
+      "question": "What were Apple's Services net sales for fiscal year 2025?",
+      "doc_filter": "aapl-",
+      "expected_nums": [
+        96169.0,
+        109158.0
+      ],
+      "recall_pre": false,
+      "recall_post": false,
+      "rank_before": null,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.2,
+      "rerank_s": 2.09
+    },
+    {
+      "id": "SFT-003",
+      "category": "single_fact_table",
+      "question": "What was Apple's research and development expense for fiscal year 2025",
+      "doc_filter": "aapl-",
+      "expected_nums": [
+        34550.0
+      ],
+      "recall_pre": false,
+      "recall_post": false,
+      "rank_before": null,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.21,
+      "rerank_s": 4.05
+    },
+    {
+      "id": "SFT-004",
+      "category": "single_fact_table",
+      "question": "What were Apple's Wearables, Home and Accessories net sales for FY2025",
+      "doc_filter": "aapl-",
+      "expected_nums": [
+        35686.0,
+        37005.0
+      ],
+      "recall_pre": true,
+      "recall_post": false,
+      "rank_before": 10,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": true,
+      "retrieval_s": 0.22,
+      "rerank_s": 1.69
+    },
+    {
+      "id": "SFT-005",
+      "category": "single_fact_table",
+      "question": "What was Caterpillar's Power & Energy segment revenue for fiscal year ",
+      "doc_filter": "cat-",
+      "expected_nums": [
+        28854.0,
+        32201.0
+      ],
+      "recall_pre": true,
+      "recall_post": true,
+      "rank_before": 1,
+      "rank_after": 1,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.21,
+      "rerank_s": 1.41
+    },
+    {
+      "id": "SFT-006",
+      "category": "single_fact_table",
+      "question": "What was Caterpillar's Construction Industries segment revenue for fis",
+      "doc_filter": "cat-",
+      "expected_nums": [
+        25060.0,
+        25455.0
+      ],
+      "recall_pre": true,
+      "recall_post": true,
+      "rank_before": 5,
+      "rank_after": 4,
+      "promoted": true,
+      "dropped": false,
+      "retrieval_s": 0.17,
+      "rerank_s": 1.6
+    },
+    {
+      "id": "SFT-007",
+      "category": "single_fact_table",
+      "question": "What was JPMorgan Chase's noninterest revenue for fiscal year 2025?",
+      "doc_filter": "jpm-",
+      "expected_nums": [
+        87004.0
+      ],
+      "recall_pre": true,
+      "recall_post": true,
+      "rank_before": 1,
+      "rank_after": 4,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.28,
+      "rerank_s": 1.36
+    },
+    {
+      "id": "SFT-008",
+      "category": "single_fact_table",
+      "question": "What was JPMorgan Chase's net interest income for fiscal year 2025?",
+      "doc_filter": "jpm-",
+      "expected_nums": [
+        95443.0
+      ],
+      "recall_pre": true,
+      "recall_post": true,
+      "rank_before": 1,
+      "rank_after": 2,
+      "promoted": false,
+      "dropped": false,
+      "retrieval_s": 0.45,
+      "rerank_s": 1.37
+    },
+    {
+      "id": "SFT-009",
+      "category": "single_fact_table",
+      "question": "What were Walmart U.S. segment net sales for the fiscal year ended Jan",
+      "doc_filter": "wmt-",
+      "expected_nums": [
+        482975.0
+      ],
+      "recall_pre": true,
+      "recall_post": false,
+      "rank_before": 6,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": true,
+      "retrieval_s": 0.18,
+      "rerank_s": 1.47
+    },
+    {
+      "id": "SFT-010",
+      "category": "single_fact_table",
+      "question": "What were Walmart International segment net sales for the fiscal year ",
+      "doc_filter": "wmt-",
+      "expected_nums": [
+        130423.0
+      ],
+      "recall_pre": true,
+      "recall_post": false,
+      "rank_before": 4,
+      "rank_after": null,
+      "promoted": false,
+      "dropped": true,
+      "retrieval_s": 0.27,
+      "rerank_s": 2.05
+    }
+  ]
+}

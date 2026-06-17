@@ -493,6 +493,58 @@ Side-by-side inspection outputs for AAPL (`aapl-20250927.html`). Not yet benchma
 
 ---
 
+## Reranker Isolation Eval (2026-06-17)
+
+**Script:** `Experiments/eval_reranker.py`  
+**Setup:** `active_corpus.json`, `faiss_hybrid`, `retrieval_k=10`, `rerank_k=5`, `gpt-4o-mini`. SFP+SFT only (n=22). Auto `doc_filter` from company keywords in question text.
+
+**Results (`reranker_eval_1781652118.json`):**
+
+| Metric | Before rerank (@10) | After rerank (@5) |
+|--------|--------------------:|------------------:|
+| Recall (answer chunk in top-k) | 72.7% | 40.9% |
+| MRR | 0.442 | 0.231 |
+| Avg rank of answer chunk | 3.3 | 2.4 |
+| Drops (in @10, out @5) | — | **7 / 22 (32%)** |
+| Promotions | — | 1 / 22 |
+
+**Observations:**
+- Reranker improves average rank when answer survives cut, but **drops** answer chunks in 7 cases — net recall loss.
+- SFP-001: answer not in top-10 at all (retrieval gap, not rerank).
+- Agent E2E still 100% SFP/SFT on Run `225849` — rerank harm may be masked by agent synthesis or citation of adjacent chunks.
+- Next: A/B `RERANK_K=10` or disable rerank for high-BM25-score queries.
+
+---
+
+## RAGAS-Style Agent Eval (2026-06-17)
+
+**Script:** `Experiments/eval_ragas.py`  
+**Setup:** Live `/chat`, v2 suite, chunk text from `active_corpus.json` by cited `SourceRef.id`.
+
+| Run | File | N | Composite | C-Recall | C-Prec | Faithful | Correct |
+|-----|------|--:|----------:|---------:|-------:|---------:|--------:|
+| Pilot | `1781652528` | 18 | 0.299 | 0.111 | 0.111 | 0.141 | 0.833 |
+| SFP+SFT | `1781653924` | 22 | 0.701 | 0.227 | 0.932 | 0.645 | 1.000 |
+| Full | `1781654954` | 43 | **0.613** | 0.321 | 0.702 | 0.626 | 0.802 |
+
+**Full run by category (`1781654954`):**
+
+| Category | N | C-Recall | C-Prec | Faithful | Correct |
+|----------|--:|---------:|-------:|---------:|--------:|
+| SFP | 12 | 0.25 | 0.98 | 0.67 | 1.00 |
+| SFT | 10 | 0.10 | 0.80 | 0.55 | 0.90 |
+| CCC | 8 | 0.50 | 0.78 | 0.38 | 0.56 |
+| OOC | 8 | 0.35 | 0.08 | 0.91 | 0.88 |
+| ADV | 5 | 0.60 | 0.70 | 0.62 | 0.40 |
+
+**Observations:**
+- Pilot run had broken context lookup (near-zero CR/CP) — fixed by `_load_corpus()` indexing chunk IDs.
+- Low context recall despite high answer correctness: metric uses **cited** chunks only, not full retrieved set.
+- OOC context precision near zero expected (agent should refuse, not retrieve relevant corpus chunks).
+- CCC faithfulness 0.38 aligns with cross-company synthesis weakness (43.75% E2E baseline).
+
+---
+
 ## How to Add a New Experiment
 
 1. Build corpus: `python src/ingestion/build_corpus.py --strategy <name> --chunk-size N --overlap M`

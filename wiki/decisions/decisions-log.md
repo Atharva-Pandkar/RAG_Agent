@@ -477,3 +477,26 @@ Single chronological record of architectural and technical decisions. Append new
   3. **CCC/ADV / partial cases:** fall through to LLM judge
 - Alternatives Considered: Stronger judge model only; human eval; retrieval-only metrics for facts.
 - Impact: Run 2 prose/table hit 100% (partly judge methodology, partly doc_filter). **Not directly comparable** to Run 1 (224259) or v1 LLM-only judge runs. Reduces judge API cost for factual categories.
+
+---
+
+## RAGAS-Style Eval Without the ragas Library
+- Date: 2026-06-17
+- Context: Agent E2E eval (`eval_suite_runner.py`) gives a single pass/fail score per question but does not decompose retrieval quality vs generation grounding. The `ragas` Python package adds heavy deps; team wanted standard RAG dimensions on the live `/chat` path using the v2 suite.
+- Decision: Add `Experiments/eval_ragas.py` — custom implementation of four metrics:
+  1. **Context Recall** — numeric ±2.5% match in cited chunk text, or LLM check for qualitative
+  2. **Context Precision** — per-cited-chunk LLM relevance score (mean over chunks)
+  3. **Faithfulness** — decompose answer into atomic claims; LLM-verify each against cited context
+  4. **Answer Correctness** — numeric/refusal regex (same as hybrid judge) or LLM for CCC/ADV
+  Loads full chunk text from `active_corpus.json` by `SourceRef.id`. Defaults to v2 suite; sequential `/chat` calls.
+- Alternatives Considered: Install `ragas` + LangChain integration; extend offline `run_eval.py` only; log retrieved (not cited) chunks in API response.
+- Impact: Full 43-Q run (`ragas_eval_1781654954`): composite **0.613**; answer correctness **0.802** but context recall **0.321** (see open issue — cited-only context). ~3–6 extra gpt-4o-mini calls per question → expensive; good for diagnosis not CI.
+
+---
+
+## Reranker Isolation Eval (Offline Retrieval Benchmark)
+- Date: 2026-06-17
+- Context: Production chat uses LLM rerank (10→5) but agent E2E scores conflate reranker with agent reasoning. Needed to measure whether reranker promotes or drops answer-bearing chunks on SFP/SFT questions.
+- Decision: Add `Experiments/eval_reranker.py` — bypasses agent; calls `RagPipeline.retrieve(k=10, filter_doc=…)` then `llm_rerank(return_k=5)`. Detects doc prefix from question keywords (mirrors prod). Metrics: Recall@10/5, MRR, promotions, drops (answer chunk in top-10 but not top-5).
+- Alternatives Considered: Log rerank ranks in `rag_tool.py` at runtime; ms-marco cross-encoder A/B (already rejected in offline grid); increase `RERANK_K` without measurement.
+- Impact: First run (`reranker_eval_1781652118`, n=22): Recall **72.7% → 40.9%** after rerank; **7 drops**, 1 promotion. Reranker currently **hurts** numeric fact retrieval — candidate for `RERANK_K` increase, rerank prompt tuning, or bypass for high-confidence BM25 hits.

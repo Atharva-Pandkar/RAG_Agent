@@ -463,3 +463,27 @@
 - Location: `Experiments/eval_suite_runner.py`, `requirements.txt`
 - Description: Runner imports `aiohttp` and uses `openai` + `python-dotenv` but is not listed in root or app requirements. Fresh env may fail on `import aiohttp`.
 - Suggested Fix: Add `aiohttp` to root requirements or document in experiment log setup steps.
+
+---
+
+## LLM Reranker Drops Answer Chunks (Recall 72.7% → 40.9%)
+- Severity: High
+- Location: `src/retrieval/llm_reranker.py`, `app/backend/rag_tool.py`, `Experiments/eval_reranker.py`, `Experiments/runs/reranker_eval_1781652118.json`
+- Description: Isolation eval on 22 SFP/SFT questions with `doc_filter`: answer chunk found in top-10 for 72.7% of questions but only 40.9% after rerank to top-5. **7 questions** had answer in top-10 then dropped from top-5 (e.g. SFP-002 rank 5→out). Agent E2E still scores 100% on SFP/SFT — agent may answer from partially relevant context or rerank drops compensated by other chunks.
+- Suggested Fix: Increase `RERANK_K`; tune rerank prompt to preserve numeric/table chunks; skip rerank when BM25 top-1 has high score; A/B with rerank disabled on single-fact path.
+
+---
+
+## RAGAS Context Recall Underestimates (Cited Sources Only)
+- Severity: Medium
+- Location: `Experiments/eval_ragas.py`, `app/backend/main.py`, `Experiments/runs/ragas_eval_1781654954.json`
+- Description: `eval_ragas` loads context from `SourceRef.id` (chunks the agent cited), not all chunks retrieved by `search_documents`. Full run: answer correctness **0.802** but context recall **0.321** — agent often answers correctly while citing chunks that don't contain the gold number in isolation (or cites subset of retrieved set). SFP context recall 0.25 despite answer correctness 1.0.
+- Suggested Fix: Return retrieved chunk IDs/text in `/chat` API for eval; or run context recall against full reranked top-5 from tool logs; document metric as "citation recall" not "retrieval recall".
+
+---
+
+## eval_ragas High LLM Call Volume Per Question
+- Severity: Medium
+- Location: `Experiments/eval_ragas.py`
+- Description: Each question triggers 1 agent turn plus context precision (1 LLM call per cited chunk), faithfulness (1 claim extraction + up to 6 claim checks), and optional LLM for qualitative categories. Full 43-Q run is substantially more expensive than `eval_suite_runner.py`.
+- Suggested Fix: Cache LLM judge results; `--categories` filter for targeted runs; skip faithfulness on SFP/SFT numeric-only questions.

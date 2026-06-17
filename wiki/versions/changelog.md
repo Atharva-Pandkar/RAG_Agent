@@ -317,3 +317,21 @@ Project-level record of what was added, changed, or removed each iteration.
 
 ### Removed
 - Test upload doc `tmpedd_eodk` from active corpus and registry
+
+---
+
+## Iteration 16 — 2026-06-17
+
+### Added
+- `Experiments/eval_ragas.py` — RAGAS-style four-metric eval (context recall/precision, faithfulness, answer correctness) on live `/chat` + v2 suite
+- `Experiments/eval_reranker.py` — offline reranker isolation benchmark (Recall@10→5, MRR, drop rate) on SFP/SFT questions
+- `Experiments/runs/ragas_eval_1781652528.json` — RAGAS pilot (n=18, composite 0.299; pre-corpus-lookup fix)
+- `Experiments/runs/ragas_eval_1781653924.json` — RAGAS SFP+SFT only (n=22, composite 0.701)
+- `Experiments/runs/ragas_eval_1781654954.json` — RAGAS full v2 suite (n=43, composite 0.613)
+- `Experiments/runs/reranker_eval_1781652118.json` — reranker isolation (n=22, recall 72.7%→40.9%)
+
+### Changed
+- Eval tooling expanded beyond binary agent judge — stratified RAG quality dimensions now measurable on production stack
+
+### Removed
+- (none)

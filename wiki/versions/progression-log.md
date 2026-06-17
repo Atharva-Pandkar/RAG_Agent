@@ -115,17 +115,19 @@ High-level milestone tracker across project phases. Updated at the end of each i
 | Document-scoped retrieval | Done | `doc_filter` on search + retrievers |
 | v2 agent eval baseline | Done | Run `225849` — 79.1% overall |
 | BM25 cross-doc filter (chatbot) | Done | Addresses long-standing open issue |
+| RAGAS-style diagnostic eval | Done | `eval_ragas.py` — 4-metric decomposition on live agent |
+| Reranker isolation benchmark | Done | `eval_reranker.py` — recall drop 72.7%→40.9% flagged |
 
 ---
 
-## Next Up (Iteration 16 candidates)
-1. Improve cross-company synthesis (43.75% on baseline — weakest category)
-2. Rebuild xbrl + merged + active corpus with investee warnings
-3. Pass `section` through faiss_hybrid RRF results
-4. Sync `eval_ooc_quick.py` to v2 suite path
-5. Add `DELETE /documents/{id}` API
-6. Registry-driven mismatch guard (replace hardcoded keyword list)
-7. Restore optional EDGAR URLs for seeded 10-K docs
-8. Update `app/README.md` — doc_filter, eval v2 baseline, hybrid judge
-9. Pin `aiohttp`, `unstructured`, full RAG deps in requirements
-10. Optional `filter_doc` in offline `run_eval.py` harness
+## Next Up (Iteration 17 candidates)
+1. Fix or tune LLM reranker (7/22 answer-chunk drops; consider `RERANK_K` increase or bypass)
+2. Improve cross-company synthesis (43.75% E2E; RAGAS faithfulness 0.38 on CCC)
+3. Rebuild xbrl + merged + active corpus with investee warnings
+4. Pass `section` through faiss_hybrid RRF results
+5. Expose retrieved (not just cited) chunks in API for accurate RAGAS context recall
+6. Sync `eval_ooc_quick.py` to v2 suite path
+7. Add `DELETE /documents/{id}` API
+8. Registry-driven mismatch guard (replace hardcoded keyword list)
+9. Update `app/README.md` — doc_filter, eval tooling, reranker findings
+10. Pin `aiohttp`, `unstructured`, full RAG deps in requirements
